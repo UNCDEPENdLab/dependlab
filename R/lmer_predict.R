@@ -22,15 +22,25 @@
 #'
 #' This function was adapted from code initially developed by Doug Bates.
 #' This is currently part of the predict method of lmer: https://github.com/bbolker/mixedmodels-misc/blob/master/glmmFAQ.rmd
-#' 
-#' @return A data.frame containing model-predicted values for each predictor, along with standard errors (se),
-#'     95\% CIs (ci_lo and ci_hi), and 95\% prediction intervals (pred_lo and pred_hi)
 #'
+#' @importFrom Hmisc capitalize
+#' @importFrom lme4 lmer glmer
+#' @return A data.frame containing model-predicted values for each predictor, along with standard errors (se),
+#'     95\% CIs (ci_lo and ci_hi), and 95\% prediction intervals (pred_lo and pred_hi).
+#'
+#' @examples
+#'   data(rat.brain)
+#'   rat.brain$treatment <- factor(rat.brain$treatment)
+#'   rat.brain$region <- factor(rat.brain$region)
+#'   m <- lmer(activate ~ region * treatment + (1 | animal), data=rat.brain)
+#'   pred_vals <- lmer_predict(m)
+#'   
+#'
+#' 
 #' @author Michael Hallquist
 #' @export
 
-lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n.cont=20, cont.pts=NULL, fixat0=NULL,
-    yoked=NULL) { 
+lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n.cont=20, cont.pts=NULL, fixat0=NULL, yoked=NULL) { 
   #print cell means for lmer by expanding level combinations and multiplying against fixed effects  
   predNames <- attr(terms(lmerObj), "term.labels")
   
@@ -107,8 +117,7 @@ lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n
   #this does not handle the fact that there are many invalid rows in predData though
   
   predData[[dvname]] <- as.vector(mm %*% fixef(lmerObj))
-  
-  pvar1 <- diag(mm %*% tcrossprod(vcov(lmerObj),mm))
+  pvar1 <- diag(mm %*% tcrossprod(as.matrix(vcov(lmerObj)),mm)) #for mysterious reasons, need to cast dpoMatrix from vcov to matrix type
   tvar1 <- pvar1+VarCorr(lmerObj)[[1]][1] #assumes that the first element in VarCorr is subject
   
   #confidence and prediction intervals

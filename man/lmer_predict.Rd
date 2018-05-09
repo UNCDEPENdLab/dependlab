@@ -28,7 +28,7 @@ and +1SD. For 5, you get -2 SD, -1 SD, Mean, +1 SD, +2 SD. Useful for visualizin
 }
 \value{
 A data.frame containing model-predicted values for each predictor, along with standard errors (se),
-    95\% CIs (ci_lo and ci_hi), and 95\% prediction intervals (pred_lo and pred_hi)
+    95\% CIs (ci_lo and ci_hi), and 95\% prediction intervals (pred_lo and pred_hi).
 }
 \description{
 By default, lmer_predict will compute estimates of the outcome variable for every combination of predictors
@@ -39,6 +39,16 @@ it computes estimates at each level.
 \details{
 This function was adapted from code initially developed by Doug Bates.
 This is currently part of the predict method of lmer: https://github.com/bbolker/mixedmodels-misc/blob/master/glmmFAQ.rmd
+}
+\examples{
+  data(rat.brain)
+  rat.brain$treatment <- factor(rat.brain$treatment)
+  rat.brain$region <- factor(rat.brain$region)
+  m <- lmer(activate ~ region * treatment + (1 | animal), data=rat.brain)
+  pred_vals <- lmer_predict(m)
+  
+
+
 }
 \author{
 Michael Hallquist
