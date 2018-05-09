@@ -42,12 +42,10 @@ This is currently part of the predict method of lmer: https://github.com/bbolker
 }
 \examples{
   data(rat.brain)
-  rat.brain$treatment <- factor(rat.brain$treatment)
-  rat.brain$region <- factor(rat.brain$region)
   m <- lmer(activate ~ region * treatment + (1 | animal), data=rat.brain)
   pred_vals <- lmer_predict(m)
-  
-
+  ggplot(pred_vals, aes(x=region, y=activate, ymin=activate-se, ymax=activate+se, color=treatment)) +
+    geom_pointrange()
 
 }
 \author{

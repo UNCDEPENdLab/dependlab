@@ -14,10 +14,11 @@
 #'
 #' @author Michael Hallquist
 #' @return A list of correlations where each element is a vector of a target variable with all withvvars
+#' @importFrom forecast auto.arima Arima
+#' @importFrom Hmisc rcorr
 #' @export 
 
 cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, partial=NULL, absrmin=NULL, digits=3, prewhiten=FALSE, orderbyr=FALSE) {
-  require(forecast)
   
   if (!is.null(omit)) { 
     dnames <- which(names(df) %in% omit)
