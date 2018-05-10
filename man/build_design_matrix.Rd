@@ -2,37 +2,53 @@
 % Please edit documentation in R/build_design_matrix.R
 \name{build_design_matrix}
 \alias{build_design_matrix}
-\title{Create fmri design matrix for AFNI, FSL, or internal convolved design.}
+\title{Creates an fmri design matrix, including timing files for for AFNI or FSL.
+The function outputs a list containing}
 \usage{
 build_design_matrix(events = NULL, signals = NULL, normalizations = NULL,
-  center_values = FALSE, baselineCoefOrder = -1L,
-  baselineParameterization = "Legendre", runVolumes = NULL,
-  dropVolumes = 0L, runsToOutput = NULL, plot = TRUE,
-  writeTimingFiles = NULL, output_directory = "run_timing", tr = 1,
+  center_values = FALSE, baseline_coef_order = -1L,
+  baseline_parameterization = "Legendre", run_volumes = NULL,
+  dropVolumes = 0L, runs_to_output = NULL, plot = TRUE,
+  write_timing_files = NULL, output_directory = "run_timing", tr = 1,
   convolve = TRUE, convolve_wi_run = TRUE, add_derivs = FALSE,
   parmax1 = FALSE, high_pass = NULL, itipost = 12,
   nuisance_regressors = NULL)
 }
 \arguments{
-\item{events}{BDM expects a single data frame that includes a column for the event type (e.g. outcome vs. cue), run number (1:n), trial number (nested within run, 1:x), onset, duration of event}
+\item{events}{a data.frame that includes a column for the event type (e.g. outcome vs. cue),
+run number (1:n), trial number (nested within run, 1:x), onset, duration of event}
 
-\item{signals}{BDM expects a list of list. The first level of lists reflects each signal (e.g. pe vs values). In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data frame with run number (1:n), trial (1:x), and signal.}
+\item{signals}{expects a list of list. The first level of lists reflects each signal (e.g. pe vs values).
+In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data.frame
+with run number (1:n), trial (1:x), and signal.}
 
-\item{normalizations}{expects a list that specifies normalization for each run. If not specified, will set to none for each run}
+\item{normalizations}{a character vector specifies HRF normalization method for each signal.
+If not specified, will set to "none" for each signal. Other options are:
+- "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec)
+  height of HRF is modulated by duration of event. identical to dmUBLOCK(0)
+- "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus
+  regardless of duration: identical to dmUBLOCK(1)}
 
-\item{center_values}{Specified whether to center parameteric regressors}
+\item{center_values}{Whether to center parameteric regressors. TRUE/FALSE (default is FALSE)}
 
-\item{baselineCoefOrder}{If set >= 0, then accounting for polynomial trends wihin run in the data (e.g. baselineCoefOrder = 1 includes both an intercept and a linear trend as regressors)}
+\item{baseline_coef_order}{Default -1 (no baseline). If >= 0, then design will include polynomial trends
+within each run (e.g. baseline_coef_order = 1 includes both an intercept and a linear trend as regressors)}
 
-\item{baselineParameterization}{Defaults to legendre. If not default, then assumes polynomials are orthogonal to design matrix (not recommended)}
+\item{baseline_parameterization}{Defaults to "Legendre". This adds Legendre polynomials up to baseline_coef_order (e.g., 2).
+The alternative is "orthogonal_polynomials", which uses \code{fmri.design} from the \code{fmri} package
+to add polynomial regressors that are orthgonal to substantive design factors.}
 
-\item{runVolumes}{Expects a vector of number of Volumes per run, a list of Nifti files to read in (and then BDM calculates number of volumes), or estimates number of runs manually (by computing the (max onset + duration + itipost)/tr within each run)}
+\item{run_volumes}{Expects a vector of number of Volumes per run, a list of Nifti files to read in (and then BDM calculates number of volumes), or estimates number of runs manually (by computing the (max onset + duration + itipost)/tr within each run)}
 
 \item{dropVolumes}{By default, assumes all Volumes should be retained. If specified, then expects number of specific volumes that need to be dropped}
 
-\item{plot}{By default, will plot the design matrix in the plot window of your R session. If false, will still provide you the ggplot object in the output structure from BDM}
+\item{runs_to_output}{A numeric vector of runs to be output. By default, all runs are preserved.
+This is used to model only a subset such as c(1, 2, 6).}
 
-\item{writeTimingFiles}{By default, won't write timing files. Accepts a character vector that specifies whether writing AFNI, FSl or preconvolved timing files}
+\item{plot}{By default (TRUE), build_design_matrix will plot the design matrix in the plot window of your R session.
+If FALSE, the plot is not displayed, but the ggplot object is still provided in the $design_plot field.}
+
+\item{write_timing_files}{By default, won't write timing files. Accepts a character vector that specifies whether writing AFNI, FSl or preconvolved timing files}
 
 \item{output_directory}{Where to output the timing files. Note that by default will output the data files to a folder called "run_timing" in the current working directory. If such a folder does not exist, it will make a folder in your current directory.}
 
@@ -48,9 +64,9 @@ build_design_matrix(events = NULL, signals = NULL, normalizations = NULL,
 
 \item{high_pass}{By default, null. Specifies the high pass filter, if desired, to account for scanner drift and other low frequency oscillations in signal that are not attributable to brain activity}
 
-\item{itipost}{By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying runVolumes and expecting function to use events information to calculate runVolumes}
+\item{itipost}{By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and expecting function to use events information to calculate run_volumes}
 
-\item{nuisance_regressors}{By default, null. If nuisance regressors specified, either expects list of character strings for different .txt files for the nuisance regressors OR it expects a list of data frames (1 df per run). These values are tacked onto design.convolve (and not convolved with HRF), so each regressor should be length of the number of runVolumes within that run.}
+\item{nuisance_regressors}{By default, \code{NULL}. If nuisance regressors specified, either expects list of character strings for different .txt files for the nuisance regressors OR it expects a list of data frames (1 df per run). These values are tacked onto design.convolve (and not convolved with HRF), so each regressor should be length of the number of run_volumes within that run.}
 }
 \value{
 A list of important information regarding the design matrix.
@@ -63,10 +79,12 @@ A list of important information regarding the design matrix.
        The seventh element is the ggplot object that is the output from the visualizeDesignMatrix call.
 }
 \description{
-Create fmri design matrix for AFNI, FSL, or internal convolved design.
+Creates an fmri design matrix, including timing files for for AFNI or FSL.
+The function outputs a list containing
 }
 \details{
-This function was adapted from the fitclock package (https://github.com/PennStateDEPENdLab/fitclock.git) to incorporate a broader array of data when building design matrices for fMRI analysis.
+This function was adapted from the fitclock package (https://github.com/PennStateDEPENdLab/fitclock.git) to
+  allow for more general creation of design matrices for fMRI analyses.
 }
 \examples{
 {
@@ -80,6 +98,11 @@ nuisrun1 <- data.frame(csf = rnorm(100), wm = rnorm(100))
 nuisrun2 <- data.frame(csf = rnorm(121), wm = rnorm(121))
 d <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none")) #convolved design matrix
 dnocon <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), convolve = FALSE) #pre-convolved design matrix
-dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(nuisrun1, nuisrun2), baselineCoefOrder = 2) #convolved design matrix with polort 2 and nuisance regressors
+dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(nuisrun1, nuisrun2), baseline_coef_order = 2) #convolved design matrix with polort 2 and nuisance regressors
 }
+}
+\author{
+Michael Hallquist
+
+Alison Schreiber
 }

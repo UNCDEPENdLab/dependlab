@@ -2,16 +2,11 @@
 % Please edit documentation in R/fmri_utility_fx.R
 \name{runmean}
 \alias{runmean}
-\title{compute a moving average smooth over a time series (here, a vector of RTs)
- 
-used to fit smoothed RTs (\code{clock_model} object).
-Function is an adapted version of \code{runmean} from the \code{caTools} package.}
+\title{compute a moving average smooth over a time series (here, a vector of RTs)}
 \usage{
 runmean(x, k = 5)
 }
 \description{
-compute a moving average smooth over a time series (here, a vector of RTs)
- 
 used to fit smoothed RTs (\code{clock_model} object).
 Function is an adapted version of \code{runmean} from the \code{caTools} package.
 }

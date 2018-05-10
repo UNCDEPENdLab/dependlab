@@ -2,7 +2,7 @@
 % Please edit documentation in R/fmri_utility_fx.R
 \name{hrf_convolve_normalize}
 \alias{hrf_convolve_normalize}
-\title{convolve a regressor with a normalized HRF with peak amplitude = 1.0}
+\title{This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0}
 \usage{
 hrf_convolve_normalize(scans, times, durations, values, rt = 1,
   normeach = FALSE, rm_zeros = TRUE, center_values = TRUE,
@@ -10,7 +10,10 @@ hrf_convolve_normalize(scans, times, durations, values, rt = 1,
   b1 = 0.9, b2 = 0.9, cc = 0.35)
 }
 \description{
-extends fmri.stimulus by allowing for two normalization approaches (building on AFNI dmUBLOCK):
-  1) pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
-  2) pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
+It extends \code{fmri.stimulus} by allowing for two normalization approaches (building on AFNI dmUBLOCK):
+  1) "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
+  2) "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
+}
+\author{
+Michael Hallquist
 }

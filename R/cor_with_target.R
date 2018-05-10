@@ -1,4 +1,3 @@
-#correlate one set of variables (target) with another set (withvars)
 #' This function correlates a set of target variables (target) with a set of other variables (withvars).
 #' The general goal is to avoid sifting through gargantuan correlation matrices when only some cells are of interest a priori.
 #'
@@ -16,25 +15,25 @@
 #' @return A list of correlations where each element is a vector of a target variable with all withvvars
 #' @importFrom forecast auto.arima Arima
 #' @importFrom Hmisc rcorr
-#' @export 
+#' @export
 
 cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, partial=NULL, absrmin=NULL, digits=3, prewhiten=FALSE, orderbyr=FALSE) {
-  
-  if (!is.null(omit)) { 
+
+  if (!is.null(omit)) {
     dnames <- which(names(df) %in% omit)
     df <- df[,-1*dnames]
   }
-  
+
   if (is.null(withvars)) {
     withvars <- names(df)[which(!names(df) %in% target)]
   }
-  
+
   if (!is.null(partial)) {
     df <- as.data.frame(lapply(df, function(col) {
               residuals(lm(col ~ as.matrix(df[,partial])))
             }))
   }
-  
+
   res <- sapply(target, function(tv) {
         cvec <- sapply(withvars, function(wv) {
               #prewhiten?
@@ -47,37 +46,37 @@ cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, par
                 x <- df[,wv]
                 y <- df[,tv]
               }
-              
+
               tryCatch(rc <- Hmisc::rcorr(x, y), error=function(e) { print(e); browser() } )
               list(r=round(rc$r[1,2], 3), p=round(rc$P[1,2], 3))
-            } 
+            }
         )
-        
-        if (!is.null(pmin)) { 
+
+        if (!is.null(pmin)) {
           sigr <- which(unlist(cvec["p",]) <= pmin)
-          if (length(sigr) == 0L) { cvec <- c() 
+          if (length(sigr) == 0L) { cvec <- c()
           } else { cvec <- cvec[,sigr, drop=FALSE] }
         }
-        
+
         if (!is.null(absrmin)) {
           goodr <- which(abs(unlist(cvec["r",])) >= absrmin)
-          if (length(goodr) == 0L) { cvec <- c() 
+          if (length(goodr) == 0L) { cvec <- c()
           } else { cvec <- cvec[,goodr, drop=FALSE] }
         }
-        
+
         #be sure that we never include the correlation of the variable with itself
         selfmatch <- dimnames(cvec)[[2]] == tv
         cvec <- cvec[,!selfmatch, drop=FALSE]
-        
+
         #reorder by correlation size if requested
         if (orderbyr == TRUE) {
           cvec <- cvec[,order(unlist(cvec[1,]), decreasing=TRUE)]
         }
-        
+
         return(cvec)
-        
+
         #print(cvec)
       }, simplify=FALSE)
-  
+
   return(res)
 }

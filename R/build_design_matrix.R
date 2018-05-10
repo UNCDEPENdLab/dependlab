@@ -1,15 +1,30 @@
-#' Create fmri design matrix for AFNI, FSL, or internal convolved design.
-#' @param events BDM expects a single data frame that includes a column for the event type (e.g. outcome vs. cue), run number (1:n), trial number (nested within run, 1:x), onset, duration of event
-#' @param signals BDM expects a list of list. The first level of lists reflects each signal (e.g. pe vs values). In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data frame with run number (1:n), trial (1:x), and signal.
-#' @param normalizations expects a list that specifies normalization for each run. If not specified, will set to none for each run
-#' @param center_values Specified whether to center parameteric regressors
-#' @param baselineCoefOrder If set >= 0, then accounting for polynomial trends wihin run in the data (e.g. baselineCoefOrder = 1 includes both an intercept and a linear trend as regressors)
-#' @param baselineParameterization Defaults to legendre. If not default, then assumes polynomials are orthogonal to design matrix (not recommended)
-#' @param runVolumes Expects a vector of number of Volumes per run, a list of Nifti files to read in (and then BDM calculates number of volumes), or estimates number of runs manually (by computing the (max onset + duration + itipost)/tr within each run)
+#' Creates an fmri design matrix, including timing files for for AFNI or FSL.
+#' The function outputs a list containing
+#'
+#' @param events a data.frame that includes a column for the event type (e.g. outcome vs. cue),
+#'           run number (1:n), trial number (nested within run, 1:x), onset, duration of event
+#' @param signals expects a list of list. The first level of lists reflects each signal (e.g. pe vs values).
+#'           In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data.frame
+#'           with run number (1:n), trial (1:x), and signal.
+#' @param normalizations a character vector specifies HRF normalization method for each signal.
+#'           If not specified, will set to "none" for each signal. Other options are:
+#'           - "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec)
+#'             height of HRF is modulated by duration of event. identical to dmUBLOCK(0)
+#'           - "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus
+#'             regardless of duration: identical to dmUBLOCK(1)
+#' @param center_values Whether to center parameteric regressors. TRUE/FALSE (default is FALSE)
+#' @param baseline_coef_order Default -1 (no baseline). If >= 0, then design will include polynomial trends
+#'    within each run (e.g. baseline_coef_order = 1 includes both an intercept and a linear trend as regressors)
+#' @param baseline_parameterization Defaults to "Legendre". This adds Legendre polynomials up to baseline_coef_order (e.g., 2).
+#'           The alternative is "orthogonal_polynomials", which uses \code{fmri.design} from the \code{fmri} package
+#'           to add polynomial regressors that are orthgonal to substantive design factors.
+#' @param run_volumes Expects a vector of number of Volumes per run, a list of Nifti files to read in (and then BDM calculates number of volumes), or estimates number of runs manually (by computing the (max onset + duration + itipost)/tr within each run)
 #' @param dropVolumes By default, assumes all Volumes should be retained. If specified, then expects number of specific volumes that need to be dropped
-#' @param runsToOutput
-#' @param plot By default, will plot the design matrix in the plot window of your R session. If false, will still provide you the ggplot object in the output structure from BDM
-#' @param writeTimingFiles By default, won't write timing files. Accepts a character vector that specifies whether writing AFNI, FSl or preconvolved timing files
+#' @param runs_to_output A numeric vector of runs to be output. By default, all runs are preserved.
+#'           This is used to model only a subset such as c(1, 2, 6).
+#' @param plot By default (TRUE), build_design_matrix will plot the design matrix in the plot window of your R session.
+#'           If FALSE, the plot is not displayed, but the ggplot object is still provided in the $design_plot field.
+#' @param write_timing_files By default, won't write timing files. Accepts a character vector that specifies whether writing AFNI, FSl or preconvolved timing files
 #' @param output_directory Where to output the timing files. Note that by default will output the data files to a folder called "run_timing" in the current working directory. If such a folder does not exist, it will make a folder in your current directory.
 #' @param tr By default set to 1 second. Can specify TR to be what the tr is during your study (in seconds)
 #' @param convolve By default, true. If true, will convolve signals with HRF to get predicted BOLD response for that regressor for each voxel
@@ -17,11 +32,13 @@
 #' @param add_derivs By default, false. If true, will add temporal derivatives for column after convolution
 #' @param parmax1  By default, false. If true, rescales a convolved regressor to max=1.0 after convolution (normalize scaling across runs and subjects)
 #' @param high_pass By default, null. Specifies the high pass filter, if desired, to account for scanner drift and other low frequency oscillations in signal that are not attributable to brain activity
-#' @param itipost By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying runVolumes and expecting function to use events information to calculate runVolumes
-#' @param nuisance_regressors By default, null. If nuisance regressors specified, either expects list of character strings for different .txt files for the nuisance regressors OR it expects a list of data frames (1 df per run). These values are tacked onto design.convolve (and not convolved with HRF), so each regressor should be length of the number of runVolumes within that run.
+#' @param itipost By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and expecting function to use events information to calculate run_volumes
+#' @param nuisance_regressors By default, \code{NULL}. If nuisance regressors specified, either expects list of character strings for different .txt files for the nuisance regressors OR it expects a list of data frames (1 df per run). These values are tacked onto design.convolve (and not convolved with HRF), so each regressor should be length of the number of run_volumes within that run.
+
 #' @details
 #'
-#' This function was adapted from the fitclock package (https://github.com/PennStateDEPENdLab/fitclock.git) to incorporate a broader array of data when building design matrices for fMRI analysis.
+#' This function was adapted from the fitclock package (https://github.com/PennStateDEPENdLab/fitclock.git) to
+#'   allow for more general creation of design matrices for fMRI analyses.
 #'
 #' @return A list of important information regarding the design matrix.
 #'        The first element is the pre-convolved design matrix with just the specified events and signals set up as signal*run list with a matrix in each element of the list. Within each matrix, the onset, duration and value of the signal is specified.
@@ -31,13 +48,18 @@
 #'        The fifth element is a list with an element for each signal. Within each signal, a vector containing a list of all the onset times concatonated together across runs
 #'        The sixth element is vector that specifies the number of Volumes analyzed per run
 #'        The seventh element is the ggplot object that is the output from the visualizeDesignMatrix call.
+#'
 #' @importFrom data.table as.data.table
 #' @importFrom plyr round_any
 #' @importFrom dplyr filter select slice bind_rows
 #' @importFrom orthopolynom legendre.polynomials polynomial.values
 #' @importFrom oro.nifti readNIfTI
 #' @importFrom ggplot2 ggplot
-#' @import fmri_utility_fx
+#' @importFrom fmri fmri.design
+#' @importFrom car vif
+#'
+#' @author Michael Hallquist
+#' @author Alison Schreiber
 #' @examples {
 #' set.seed(480929)
 #' events <- dplyr::bind_rows(data.frame(event="cue", rbind(data.frame(run=1,trial=1:50,onset=cumsum(rpois(50, lambda = 2)),duration=rep(2, 50), custom_dur=abs(rnorm(50))),
@@ -49,7 +71,7 @@
 #' nuisrun2 <- data.frame(csf = rnorm(121), wm = rnorm(121))
 #' d <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none")) #convolved design matrix
 #' dnocon <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), convolve = FALSE) #pre-convolved design matrix
-#' dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(nuisrun1, nuisrun2), baselineCoefOrder = 2) #convolved design matrix with polort 2 and nuisance regressors
+#' dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(nuisrun1, nuisrun2), baseline_coef_order = 2) #convolved design matrix with polort 2 and nuisance regressors
 #' }
 #' @export
 
@@ -99,7 +121,7 @@
 # #Values is a data frame with run number (1:n), trial (1:x), and signal.
 # #Additionally will also accept a third element to the list which can specify custom durations
 # #Also BDM expects either a character vector of the function nifit for each run OR it expects a numerical vector for the volumes to be analyzed in each run
-# #If you don't supply the runVolumes, character string it will infer the number of volumes based off of the last onset within the run and will add 12 ITIs to that by default (very risk; do not recommend!)
+# #If you don't supply the run_volumes, character string it will infer the number of volumes based off of the last onset within the run and will add 12 ITIs to that by default (very risk; do not recommend!)
 #
 # #Test Case
 #
@@ -111,7 +133,7 @@
 # dnoconout <- dnocon$design.convolve$run1
 # dnoconout$time <- 1:nrow(dcon)
 # ggplot(dnoconout, aes(x = time, y = pe)) + geom_line(size = 0.8)
-# dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(df1, df2), writeTimingFiles = c("AFNI", "FSL", "convolved"), baselineCoefOrder = 2)
+# dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(df1, df2), write_timing_files = c("AFNI", "FSL", "convolved"), baseline_coef_order = 2)
 # dnuisrun1 <- dnuis$design.convolve$run1
 # dnuisrun1$time <- 1:nrow(dnuisrun1)
 # ggplot(dnuisrun1, aes(x = time, y = wm)) + geom_line(size = 0.8)
@@ -121,13 +143,13 @@ build_design_matrix=function(
   signals = NULL,
   normalizations=NULL, #normalization of HRF
   center_values=FALSE, #whether to center parametric regressors prior to convolution
-  baselineCoefOrder=-1L,
-  baselineParameterization="Legendre",
-  runVolumes=NULL, #vector of total fMRI volumes for each run (used for convolved regressors)
+  baseline_coef_order=-1L,
+  baseline_parameterization="Legendre",
+  run_volumes=NULL, #vector of total fMRI volumes for each run (used for convolved regressors)
   dropVolumes=0L, #vector of how many volumes to drop from the beginning of a given run
-  runsToOutput=NULL,
+  runs_to_output=NULL,
   plot=TRUE,
-  writeTimingFiles=NULL,
+  write_timing_files=NULL,
   output_directory="run_timing",
   tr=1.0, #TR of scan in seconds
   convolve=TRUE, #whether to convolve the regressors with the HRF
@@ -137,11 +159,12 @@ build_design_matrix=function(
   high_pass=NULL, #whether to apply a high-pass filter to the design matrix (e.g., to match fmri preprocessing)
   itipost = 12,
   nuisance_regressors = NULL #allow for nuisance regression text file to be implemented. need separate file for each
-  ) {
+) {
 
-
-   signals_aligned <- lapply(signals, function(s) {
-    if (is.null(s$event)) { stop("Signal does not have event attribute") }
+  #merge the trial-indexed signals with the time-indexed events
+  #basically: put the events onto the time grid of the run based on the "event" element of the list
+  signals_aligned <- lapply(signals, function(s) {
+    if (is.null(s$event)) { stop("Signal does not have event element") }
     df_events <- dplyr::filter(events, event==s$event)
     df_signal <- dplyr::filter(s$values)
     s_aligned <- df_events %>% dplyr::left_join(df_signal, by=c("run", "trial"))
@@ -167,65 +190,65 @@ build_design_matrix=function(
 
   #define numruns based off of dmat
   nruns = dim(dmat)[[1]]
-  if (is.null(runVolumes)) {
+  if (is.null(run_volumes)) {
     #determine the last fMRI volume to be analyzed
-    runVolumes <- rep(0, nruns)
+    run_volumes <- rep(0, nruns)
     for(i in 1:nruns) {
       for (j in 1:length(signals_aligned)) {
-        #signals_aligned[[i]][[j]]
+        currentdf <- signals_aligned[[i]][[j]] #ith run, jth signal
 
-        currentdf <- signals_aligned[[i]][[j]]
+        #estimate the last moment
         highesttime <- ceiling(max(currentdf$onset + currentdf$duration + itipost)/tr)
-        if (highesttime > runVolumes[i]) { runVolumes[i] <- highesttime } #update runVolumes for ith run only if this signal has later event
+        if (highesttime > run_volumes[i]) { run_volumes[i] <- highesttime } #update run_volumes for ith run only if this signal has later event
 
         #position = length(currentdf[[1]])
-        #runVolumes <- c(runVolumes, (ceiling(currentdf$onset[[position]]+ currentdf$duration[[position]] + itipost)/tr))
+        #run_volumes <- c(run_volumes, (ceiling(currentdf$onset[[position]]+ currentdf$duration[[position]] + itipost)/tr))
         #maxevt_persignal = ceiling()
-        }
+      }
     }
     message("Assuming that last fMRI volume was 12 seconds after the onset of the last ITI.")
-    message(paste0("Resulting lengths: ", paste(runVolumes, collapse=", ")))
+    message(paste0("Resulting lengths: ", paste(run_volumes, collapse=", ")))
 
-    }else if(is.character(runVolumes)) {
-      runVolumes <- c()
-      for( i in 1:length(runVolumes)) {
-        currentNifti <- runVolumes[[i]]
-        out <- readNIfTI(currentNifti, read_data = FALSE)
-        runVolume <- dim(out@.Data)[[4]] # grabs the 4th dimension of the matrix, which is the number of Volumes
-        runVolumes <- c(runVolumes, runVolume)
-      }
-    } else {
-      runVolumes = runVolumes
+  } else if(is.character(run_volumes)) {
+    run_volumes <- c()
+    for( i in 1:length(run_volumes)) {
+      currentNifti <- run_volumes[[i]]
+      out <- readNIfTI(currentNifti, read_data = FALSE)
+      runVolume <- dim(out@.Data)[4] # grabs the 4th dimension of the matrix, which is the number of Volumes
+      run_volumes <- c(run_volumes, runVolume)
     }
-    if (is.character(nuisance_regressors)) {
+  } else {
+    run_volumes = run_volumes
+  }
+  if (is.character(nuisance_regressors)) {
     nuisance_regressors_df <- data.frame()
     for(i in 1:length(nuisance_regressors)) {
       nuisance_regressor_currun <- read.table(nuisance_regressors[[i]])
       nuisance_regressors_currun$run <- i
-      runVolume = runVolumes[[i]]
+      runVolume = run_volumes[[i]]
       print(runVolume)
       nuisance_regressors_currun <- dplyr::slice(nuisance_regressor_currun, 1:runVolume) %>% as.data.frame()
       nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressor_currun)}
-    } else if (!is.null(nuisance_regressors)) {
-      #assuming that a list of dataframes for each run of the data
-      #all that need to do is concatonate the data frames after filtering any obs that are above runVolumes
-      nuisance_regressors_df <- data.frame()
-      for(i in 1:length(nuisance_regressors)) {
-        nuisance_regressors_currun <- nuisance_regressors[[i]]
-        nuisance_regressors_currun$run <- i
-        runVolume = runVolumes[[i]]
-        message(paste0("Current runVolumes:", runVolumes[[i]]))
-        if(length(nuisance_regressors_currun[[1]]) < runVolume) {message("Warning: Nuisance Regressors have fewer observations than runVolumes")}
-        nuisance_regressors_currun <- dplyr::slice(nuisance_regressors_currun, 1:runVolume) %>% as.data.frame()
-        nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressors_currun)}
-      } else {
-      nuisance_regressors <- NULL
-    }
+  } else if (!is.null(nuisance_regressors)) {
+    #assuming that a list of dataframes for each run of the data
+    #all that need to do is concatonate the data frames after filtering any obs that are above run_volumes
+    nuisance_regressors_df <- data.frame()
+    for(i in 1:length(nuisance_regressors)) {
+      nuisance_regressors_currun <- nuisance_regressors[[i]]
+      nuisance_regressors_currun$run <- i
+      runVolume = run_volumes[[i]]
+      message(paste0("Current run_volumes:", run_volumes[[i]]))
+      if(length(nuisance_regressors_currun[[1]]) < runVolume) {message("Warning: Nuisance Regressors have fewer observations than run_volumes")}
+      nuisance_regressors_currun <- dplyr::slice(nuisance_regressors_currun, 1:runVolume) %>% as.data.frame()
+      nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressors_currun)}
+  } else {
+    nuisance_regressors <- NULL
+  }
 
-  if(is.null(runsToOutput)) {runsToOutput = c(1:length(unique(signals_aligned[[1]])))}
+  if(is.null(runs_to_output)) {runs_to_output = c(1:length(unique(signals_aligned[[1]])))}
   timeOffset = rep(0, length(unique(signals_aligned[[1]])))
   dimnames(dmat)[[2L]] <- names(signals_aligned)
-  if(!is.null(dropVolumes)) {dmat <- dmat[runsToOutput,,drop=FALSE] }
+  if(!is.null(dropVolumes)) {dmat <- dmat[runs_to_output,,drop=FALSE] }
   #add in regressors befor convolution?
   #returns a 2-d list of runs x regressors. Needs to stay as list since runs vary in length, so aggregate is not rectangular
   #each element in the 2-d list is a 2-d matrix: trials x (onset, duration, value)
@@ -259,7 +282,7 @@ build_design_matrix=function(
   }
 
   #concatenate regressors across runs by adding timing from MR files.
-  runtiming <- cumsum(runVolumes)*tr #timing in seconds of the start of successive runs
+  runtiming <- cumsum(run_volumes)*tr #timing in seconds of the start of successive runs
 
   #for visualization of events, return concatenated onsets (some code redundancy below)
   #note that we want to add the run timing from the r-1 run to timing for run r.
@@ -282,7 +305,7 @@ build_design_matrix=function(
     dmat.convolve <- lapply(1:dim(dmat)[1L], function(i) {
       run.convolve <- lapply(1:dim(dmat)[2L], function(j) {
         reg <- dmat[[i,j]] #regressor j for a given run i
-        convolve_regressor(reg, runVolumes[i], normalizations[j], high_pass=high_pass)
+        convolve_regressor(reg, run_volumes[i], normalizations[j], high_pass=high_pass)
       })
 
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with ntrials rows and nregressors cols (convolved)
@@ -303,10 +326,10 @@ build_design_matrix=function(
       }))
 
       #convolve concatenated events with hrf
-      all.convolve <- convolve_regressor(concattiming, sum(runVolumes), normalizations[reg], high_pass=high_pass)
+      all.convolve <- convolve_regressor(concattiming, sum(run_volumes), normalizations[reg], high_pass=high_pass)
 
       #now, to be consistent with code below (and elsewhere), split back into runs
-      splitreg <- split(all.convolve, do.call(c, sapply(1:length(runVolumes), function(x) { rep(x, runVolumes[x]) })))
+      splitreg <- split(all.convolve, do.call(c, sapply(1:length(run_volumes), function(x) { rep(x, run_volumes[x]) })))
 
       return(splitreg)
 
@@ -346,13 +369,13 @@ build_design_matrix=function(
 
 
   #dmat.convolve should now be a 1-d runs list where each element is a data.frame of convolved regressors.
-  names(dmat.convolve) <- paste0("run", runsToOutput)
+  names(dmat.convolve) <- paste0("run", runs_to_output)
 
   #Write timing files to disk for analysis by AFNI, FSL, etc.
-  if (!is.null(writeTimingFiles)) {
+  if (!is.null(write_timing_files)) {
     dir.create(output_directory, recursive=TRUE, showWarnings=FALSE)
 
-    if ("convolved" %in% writeTimingFiles) {
+    if ("convolved" %in% write_timing_files) {
       #write convolved regressors
       #AFNI amplitude modulation forces a mean and deviation from the mean regressor for each effect
       #as a result, if two parametric influences occur at a given time, it leads to perfect collinearity.
@@ -375,7 +398,7 @@ build_design_matrix=function(
 
     }
 
-    if ("FSL" %in% writeTimingFiles) {
+    if ("FSL" %in% write_timing_files) {
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
           regout <- dmat[[i,reg]]
@@ -387,13 +410,13 @@ build_design_matrix=function(
             if (sd(regout[,"value"]) > 0) { regout[,"value"] <- regout[,"value"] - mean(regout[,"value"]) }
           }
 
-          fname <- paste0("run", runsToOutput[i], "_", dimnames(dmat)[[2L]][reg], "_FSL3col.txt")
+          fname <- paste0("run", runs_to_output[i], "_", dimnames(dmat)[[2L]][reg], "_FSL3col.txt")
           write.table(regout, file=file.path(output_directory, fname), sep="\t", eol="\n", col.names=FALSE, row.names=FALSE)
         }
       }
     }
 
-    if ("AFNI" %in% writeTimingFiles) {
+    if ("AFNI" %in% write_timing_files) {
       #use dmBLOCK-style regressors: time*modulation:duration. One line per run
 
       #need to unify multiple values that share onset time
@@ -405,8 +428,6 @@ build_design_matrix=function(
       regdurations <- apply(dmat, 2, function(reg) {
         unname(do.call(c, lapply(reg, function(run) { run[,"duration"]})))
       })
-
-
 
       #magical code from here: http://stackoverflow.com/questions/22993637/efficient-r-code-for-finding-indices-associated-with-unique-values-in-vector
       first_onset_duration <- paste(regonsets[1,], regdurations[1,]) #use combination of onset and duration to determine unique dmBLOCK regressors
@@ -442,6 +463,7 @@ build_design_matrix=function(
 
     }
   }
+
   if(!is.null(nuisance_regressors)) {
     for(i in 1:length(dmat.convolve)) {
       nuisance_regressors_currun <- dplyr::filter(nuisance_regressors_df, run == i) %>% dplyr::select(-run)
@@ -451,6 +473,8 @@ build_design_matrix=function(
     #dmat_changed <- lapply(dmat, function(x) {cbind(x, nuisance_regressors_df_split[[x]])})
     #dmat.convolve <- cbind(dmat.convolve, nuisance_regressors_df)
   }
+
+  #compute collinearity diagnostics on the unconvolved signals
   collinearityDiag.raw <- apply(dmat, 1, function(run) {
     #custom regressors are not guaranteed to have ntrials as the dimension. Remove them from raw diagnostics since they're not on the same trial grid
     #rlengths <- sapply(run, length)
@@ -479,7 +503,8 @@ build_design_matrix=function(
     }
   })
 
-  collinearityDiag.convolve <- lapply(dmat.convolve, function(run) { #apply(dmat.convolve, 1, function(run) {
+  #compute collinearity diagnostics on the convolved signals
+  collinearityDiag.convolve <- lapply(dmat.convolve, function(run) {
     corvals <- cor(run, use="pairwise.complete.obs")
     vifMat <- data.frame(cbind(dummy=rnorm(nrow(run)), run)) #add dummy constant for vif
     vifForm <- as.formula(paste("dummy ~ 1 +", paste(names(run), collapse=" + ")))
@@ -489,33 +514,38 @@ build_design_matrix=function(
   })
 
   #add baseline terms to convolved design matrices
-  if (baselineCoefOrder > -1L) {
+  if (baseline_coef_order > -1L) {
     dmat.convolve <- lapply(dmat.convolve, function(r) {
       n <- names(r)
-      if (baselineParameterization == "Legendre") {
+      if (baseline_parameterization == "Legendre") {
         #consistent with AFNI approach, use Legendre polynomials, which are centered at zero to allow for appropriate baseline
-        unnormalized.p.list <- legendre.polynomials( baselineCoefOrder, normalized=FALSE )
+        unnormalized.p.list <- legendre.polynomials( baseline_coef_order, normalized=FALSE )
         #evaluate polynomial between -1 and 1, which is where its desirable centered behavior exists.
         #although the functions are centered at 0, evaluating them on a given grid may lead to slight deviations from mean=0. Thus, center perfectly.
         baseline <- polynomial.values(polynomials=unnormalized.p.list, x=seq(-1,1, length.out=nrow(r)))
         baseline[2:length(baseline)] <- lapply(baseline[2:length(baseline)], function(v) { v - mean(v) }) #don't center constant!
 
-        names(baseline) <- paste0("base", 0:baselineCoefOrder)
+        names(baseline) <- paste0("base", 0:baseline_coef_order)
         d <- cbind(r, baseline)
-      } else {
+      } else if (baseline_parameterization == "orthogonal_polynomials") {
         #compute polynomials that are orthogonal to design effects
         #this may be somewhat dubious. for example, a linear trend in a task regressor would be preserved because it is given preference over baseline
-        d <- data.frame(fmri.design(r, order=baselineCoefOrder))
-        names(d) <- c(n, paste0("base", 0:baselineCoefOrder))
+        d <- data.frame(fmri.design(r, order=baseline_coef_order))
+        names(d) <- c(n, paste0("base", 0:baseline_coef_order))
+      } else {
+        stop("Don't know how to handle baseline_parameterization:", baseline_parameterization)
       }
       d
     })
 
   }
-  obj <- list(design=dmat, design.convolve=dmat.convolve, collin.raw=collinearityDiag.raw, collin.convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, runVolumes=runVolumes)
+  obj <- list(design=dmat, design.convolve=dmat.convolve, collin.raw=collinearityDiag.raw,
+              collin.convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_volumes=run_volumes)
   out <- visualizeDesignMatrix(concatDesignRuns(obj))
-  if (plot == TRUE) {plot(out)}
-  return(list(design=dmat, design.convolve=dmat.convolve, collin.raw=collinearityDiag.raw, collin.convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, runVolumes=runVolumes, visualizeDesignMatrixOut = out))
+
+  if (plot == TRUE) { plot(out) }
+  return(list(design=dmat, design.convolve=dmat.convolve, collin.raw=collinearityDiag.raw,
+              collin.convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_volumes=run_volumes, design_plot = out))
 
 }
 

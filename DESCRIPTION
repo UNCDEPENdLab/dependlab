@@ -12,3 +12,18 @@ Encoding: UTF-8
 LazyLoad: yes
 LazyData: yes
 RoxygenNote: 6.0.1
+Imports:
+  car,
+  data.table,
+  dplyr,
+  fmri,
+  forecast,
+  ggplot2,
+  lme4,
+  oro.nifti,
+  orthopolynom,
+  plyr,
+  reshape2,
+  signal,
+  Hmisc
+  

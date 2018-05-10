@@ -2,7 +2,7 @@
 % Please edit documentation in R/fmri_utility_fx.R
 \name{fmri.stimulus}
 \alias{fmri.stimulus}
-\title{convolve a regressor with a hemodynamic response function for fMRI analysis.}
+\title{Convolve a regressor with a hemodynamic response function for fMRI analysis.}
 \usage{
 fmri.stimulus(scans = 1, onsets = c(1), durations = c(1), values = c(1),
   center_values = FALSE, rm_zeros = TRUE, convolve = TRUE, rt = 3,
@@ -10,8 +10,10 @@ fmri.stimulus(scans = 1, onsets = c(1), durations = c(1), values = c(1),
   cc = 0.35, parmax1 = FALSE)
 }
 \description{
-extended from fmri package to allow for continuous-valued regressor,
+Extended from \code{fmri} package to allow for continuous-valued regressor,
 which is passed using the values parameter.
-also support mean centering of parametric regressor prior to convolution 
+}
+\details{
+The function also supports mean centering of parametric regressor prior to convolution
 to dissociate it from stimulus occurrence (when event regressor also in model)
 }
