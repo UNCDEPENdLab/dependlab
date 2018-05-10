@@ -5,14 +5,12 @@
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.
 The function outputs a list containing}
 \usage{
-build_design_matrix(events = NULL, signals = NULL, normalizations = NULL,
-  center_values = FALSE, baseline_coef_order = -1L,
-  baseline_parameterization = "Legendre", run_volumes = NULL,
-  dropVolumes = 0L, runs_to_output = NULL, plot = TRUE,
-  write_timing_files = NULL, output_directory = "run_timing", tr = 1,
-  convolve = TRUE, convolve_wi_run = TRUE, add_derivs = FALSE,
-  parmax1 = FALSE, high_pass = NULL, itipost = 12,
-  nuisance_regressors = NULL)
+build_design_matrix(events = NULL, signals = NULL, center_values = FALSE,
+  baseline_coef_order = -1L, baseline_parameterization = "Legendre",
+  run_volumes = NULL, drop_volumes = 0L, runs_to_output = NULL,
+  plot = TRUE, write_timing_files = NULL, output_directory = "run_timing",
+  tr = 1, convolve = TRUE, convolve_wi_run = TRUE, high_pass = NULL,
+  iti_post = 12, nuisance_regressors = NULL)
 }
 \arguments{
 \item{events}{a data.frame that includes a column for the event type (e.g. outcome vs. cue),
@@ -21,13 +19,6 @@ run number (1:n), trial number (nested within run, 1:x), onset, duration of even
 \item{signals}{expects a list of list. The first level of lists reflects each signal (e.g. pe vs values).
 In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data.frame
 with run number (1:n), trial (1:x), and signal.}
-
-\item{normalizations}{a character vector specifies HRF normalization method for each signal.
-If not specified, will set to "none" for each signal. Other options are:
-- "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec)
-  height of HRF is modulated by duration of event. identical to dmUBLOCK(0)
-- "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus
-  regardless of duration: identical to dmUBLOCK(1)}
 
 \item{center_values}{Whether to center parameteric regressors. TRUE/FALSE (default is FALSE)}
 
@@ -38,9 +29,18 @@ within each run (e.g. baseline_coef_order = 1 includes both an intercept and a l
 The alternative is "orthogonal_polynomials", which uses \code{fmri.design} from the \code{fmri} package
 to add polynomial regressors that are orthgonal to substantive design factors.}
 
-\item{run_volumes}{Expects a vector of number of Volumes per run, a list of Nifti files to read in (and then BDM calculates number of volumes), or estimates number of runs manually (by computing the (max onset + duration + itipost)/tr within each run)}
+\item{run_volumes}{Expects a numeric vector containing the number of volumes per run. If just a single number is passed,
+the function assumes all runs have this number of volumes. This parameter sets
+the corresponding lengths of convolved regressors so that they match the MR data. Alternatively,
+you can pass a character vector of relevant NIfTI filenames, one per run, and build_design_matrix will
+calculate the number of volumes based on the 4th dimension (time) of the fMRI data. Finally, if you
+do not pass in this argument, build_design_matrix will take a guess that the run should end 12 seconds
+(or whatever you specifiy for \code{iti_post}) after the last event ends:
+max(onset + duration + iti_post)/tr within each run.}
 
-\item{dropVolumes}{By default, assumes all Volumes should be retained. If specified, then expects number of specific volumes that need to be dropped}
+\item{drop_volumes}{By default, all volumes are retained. If specified, this number of volumes will be removed from the
+\emph{beginning} of each convolved regressor. This is useful if you have dropped the first n volumes of your
+MR data, for example to handle problems with steady state magnetization.}
 
 \item{runs_to_output}{A numeric vector of runs to be output. By default, all runs are preserved.
 This is used to model only a subset such as c(1, 2, 6).}
@@ -48,58 +48,193 @@ This is used to model only a subset such as c(1, 2, 6).}
 \item{plot}{By default (TRUE), build_design_matrix will plot the design matrix in the plot window of your R session.
 If FALSE, the plot is not displayed, but the ggplot object is still provided in the $design_plot field.}
 
-\item{write_timing_files}{By default, won't write timing files. Accepts a character vector that specifies whether writing AFNI, FSl or preconvolved timing files}
+\item{write_timing_files}{When NULL (the default), the function does not write timing files to disk.
+This argument accepts a character vector that specifies whether to write "AFNI", "FSL",
+or "convolved" timing files to disk (in \code{output_directory}). AFNI files follow the
+dmBLOCK convention of TIME*PARAMETER:DURATION for each event. FSL files follow the three-column
+format of onset, duration, value. And convolved files represent a given signal convolved with the
+HRF such that the 1-column output is in volumes (i.e., one row per volume).}
 
-\item{output_directory}{Where to output the timing files. Note that by default will output the data files to a folder called "run_timing" in the current working directory. If such a folder does not exist, it will make a folder in your current directory.}
+\item{output_directory}{Where to output the timing files. By default, the function will output the timing files
+to a folder called "run_timing" in the current working directory. If such a folder does not exist,
+it will make a folder in your R session's current working directory.}
 
-\item{tr}{By default set to 1 second. Can specify TR to be what the tr is during your study (in seconds)}
+\item{tr}{The repetition time of your fMRI sequence in seconds. By default, 1 second.
+This is important to specify correctly to get temporal filtering correct.}
 
-\item{convolve}{By default, true. If true, will convolve signals with HRF to get predicted BOLD response for that regressor for each voxel}
+\item{convolve}{By default, TRUE. If TRUE, the function will convolve signals with HRF to get predicted
+BOLD response for that each regressor. If FALSE, the $design.convolve field will contain the
+unconvolved regressors that are nevertheless on the time grid of the fMRI data. For example,
+an RT-convolved boxcar will be evident as a series of 1s for every volume within the RT.
+This can be useful for diagnosing problems with the design and verifying the accuracy of
+event timing before convolution is applied.}
 
-\item{convolve_wi_run}{By default, true. If true, mean centers parameteric regressors within each run.}
+\item{convolve_wi_run}{By default, TRUE If true, convolution -- and any corresponding mean centering and
+ normalization of the heights of parametric signals -- is applied to each run separately.
+If FALSE, the events across runs are concatenated before convolution is applied
+(i.e., treating it as one long time series).}
 
-\item{add_derivs}{By default, false. If true, will add temporal derivatives for column after convolution}
+\item{high_pass}{By default, \code{NULL}. If desired, pass in a number in Hz that specifies the high pass filter cutoff.
+In this case a FIR-based high-pass filter will be applied to remove any low-frequency fluctuations
+in the design signals after convolution. This can be useful and necessary if the MRI have been filtered,
+but the regressors have not. It is important that the frequency content of both MR and design signals matches.
+Some programs, including FEAT, ensure that equivalent filtering is applied to bot the Y and X sides of this
+equation, but you should be clear whether your program does so, too. If it doesn't, probably best to use this
+argument to filter things yourself. For example, 3dDeconvolve only handles filtering via a set of drift (polort)
+regressors. If you have used another tools such as fslmaths -bptf to filter the data, the polort will not necessarily
+result in the same removal of drift from regressors as was applied to the MR data.}
 
-\item{parmax1}{By default, false. If true, rescales a convolved regressor to max=1.0 after convolution (normalize scaling across runs and subjects)}
+\item{iti_post}{By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and
+expecting function to use events information to calculate run_volumes. Wouldn't recommend this, just a default here.}
 
-\item{high_pass}{By default, null. Specifies the high pass filter, if desired, to account for scanner drift and other low frequency oscillations in signal that are not attributable to brain activity}
-
-\item{itipost}{By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and expecting function to use events information to calculate run_volumes}
-
-\item{nuisance_regressors}{By default, \code{NULL}. If nuisance regressors specified, either expects list of character strings for different .txt files for the nuisance regressors OR it expects a list of data frames (1 df per run). These values are tacked onto design.convolve (and not convolved with HRF), so each regressor should be length of the number of run_volumes within that run.}
+\item{nuisance_regressors}{By default, \code{NULL}. If nuisance regressors specified, either expects list of
+character strings for different .txt files for the nuisance regressors OR it expects a
+list of data.frames (1 df per run). These values are tacked onto design.convolve
+(and not convolved with HRF), so each regressor should be length of the number of
+run_volumes within that run. If you pass in a list of .txt files containing nuisance regressors,
+these will be read into R, truncated to run_volumes, and column-wise concatenated with
+substative regressors.}
 }
 \value{
-A list of important information regarding the design matrix.
-       The first element is the pre-convolved design matrix with just the specified events and signals set up as signal*run list with a matrix in each element of the list. Within each matrix, the onset, duration and value of the signal is specified.
-       The second element is the convolved design matrices for each run. Thus, each element in the list refers to the run. Within each design matrix, there's a column for each regressor (manually specified and additional regressors--e.g. nuisance regressors, polynomial regressors). Each row reflects the predicted value for each volume.
-       The third element is a list with information about collinearity of pre-convolved regressors. At the highest level of the list, each element specifies the run. At the second level of the list, the first elemnt specifies the correlation between the regressors and the second elemnt provides the VIF associated with each regressor
-       The fourth element is a list with information about collinearity of convolved regressors (including both particular signals, nuisance regressors, polynomial regressors). Follows the same structure as above
-       The fifth element is a list with an element for each signal. Within each signal, a vector containing a list of all the onset times concatonated together across runs
-       The sixth element is vector that specifies the number of Volumes analyzed per run
-       The seventh element is the ggplot object that is the output from the visualizeDesignMatrix call.
+A list of containing different aspects of the design matrix:
+\itemize{
+       \item \code{$design} A runs x signals list containing events before convolution.
+         Each element is a 2-D matrix containing, minimally, "trial", onset", "duration", and "value" columns.
+         Onsets and durations are specified in seconds, consistent with FSL's 3-column format.
+         Within each matrix, the onset, duration and value of the signal is specified.
+       \item \code{$design.convolve} The convolved design matrices for each run. Each element in the list contains
+         a run. Within each design matrix, each column contains a regressor, encompassing substantive regressors,
+         nuisance signals, and polynomial baseline regressors, if specified. Each row reflects the predicted value for each volume.
+       \item \code{$collin.raw} A list containing information about the collinearity of regressors before convolution.
+         At the highest level of the list, each element contains a run. At the second level of the list,
+         the first element contains the correlation matrix of the regressors and the second element provides
+         the variance inflation factor (VIF) associated with each regressor. Example: \code{design$collin.raw$run1$vif}
+       \item \code{$collin.convolve} A list containing information about collinearity of the convolved regressors,
+         including substantive signals, nuisance regressors, and polynomial regressors. Follows the same structure as \code{$collin.raw}.
+       \item \code{$concat_onsets} A list containing concatenated event onset times for each signal. Each signal is an element of the list containing
+         a vector of all onset times across runs. That is, the total time of run1 is added to onsets of run2 to support a combined analysis of all
+         runs, which is common in AFNI (e.g., using -concat or multiple files to -input).
+       \item \code{$run_volumes} A vector containing the total number of volumes modeled for each run.
+       \item \code{$design_plot} A ggplot object showing the design matrix. This is generated by visualizeDesignMatrix.
+}
 }
 \description{
 Creates an fmri design matrix, including timing files for for AFNI or FSL.
 The function outputs a list containing
 }
 \details{
+The basic logic of the inputs to build_design_matrix is that task-related fMRI designs are organized around a set of events that occur in time and
+have a specific duration. Furthermore, for a given event, it could be a 0/1 non-occurrence versus occurrence representation, \emph{or} the event could
+be associated with a specific parametric value such as working memory load, reward prediction error, or expected value. These parametric effects
+are aligned in time with an event, but there may be multiple predictions for a given event. For example, we may align a 0/1 regressor and a
+reward prediction error the outcome phase of a task.
+
+Thus, the function abstracts timing-related information into \code{events} and signals, whether parametric or binary, into the \code{signals}.
+
+The \code{events} argument expects a \code{data.frame} that has, minimally, the following structure:
+
+\preformatted{
+ > print(events)
+     event run trial onset duration
+       cue   1     1     4        2
+       cue   1     2     7        2
+   outcome   1     1     6      0.5
+   outcome   1     2   9.5      0.5
+       cue   2     1   1.2        2
+       cue   2     2    12        2
+   outcome   2     1     6      0.5
+   outcome   2     2   9.5      0.5
+}
+
+Note that you can tack on other columns to \code{events} if it useful to you. Furthermore, if you want to test different
+durations (e.g., RT-convolved versus fixed duration versus instantaneous), you can add these as additional columns
+(e.g., \code{duration_1s}, \code{duration_instant}, etc.). To make use of these in the design, specify the column name
+in events in the \code{$duration} element of a given signal in the \code{signals} list. If you do not specify the
+\code{$duration} element in \code{signals}, \code{build_design_matrix} will assume that the relevant duration is stored
+in the \code{$duration} column of \code{events}.
+
+The \code{signals} argument expects a list where each element is a given signal that should be aligned with an event and that
+has some height (e.g., 0/1 or a parametric value) prior to convolution. The signals list should be named by signal and each element should
+be a list itself, such as the following:
+
+\preformatted{
+  signals <- list(
+    cue=list(event="cue", duration=0, value=1, normalization="none")
+  )
+}
+
+The \code{event} element specifies the mapping between a given signal and the corresponding timing in the \code{events} \code{data.frame}.
+In essence, this is used to merge the event and signal data together. Here, we specify that the cue signal is aligned in time with the cue event.
+
+The \code{duration} element can be:
+\enumerate{
+  \item A single number, in which case this fixed duration is used for all events
+  \item A name of the column to be used in the \code{events} \code{data.frame} (e.g., "duration_rtshift")
+  \item Omitted altogether, in which case \code{build_design_matrix} will default to the "duration" column of \code{events}.
+}
+
+The \code{value} element can be a single number (e.g., 1) in which case this height is used for all corresponding occurrences of a given event.
+Most commonly, a fixed value is useful for modeling a 'taskness' regressor, which captures a 0/1 representation of whether an event is occurring
+at a given moment in time. In conventional task-reated fMRI, this task indicator representation is then convolved with the HRF to model expected BOLD
+activity due to the occurrence of an event. Alternatively, \code{value} can be a data.frame containing \code{$run}, \code{$trial}, and \code{$value}
+columns that specify the height of the regressor at each trial. This specification is more useful for a parametric regressor, as in model-based fMRI.
+Here is an example:
+
+\preformatted{
+  signals <- list(
+    pe=list(event="outcome", normalization="none", convmax_1=TRUE,
+    value=data.frame(
+      run=rep(1,5),
+      trial=1:5,
+      value=c(0, 10.2, -11.1, 6, 2.4, 1.5)
+    )
+  )
+}
+
+Here, the parametrically varying prediction error signal will be aligned at the "outcome" event, have a duration copied from the
+\code{$duration} column of \code{events}, and will have parametrically varying heights (e.g., 10.2 at trial 2) prior to convolution.
+Note that the value \code{data.frame} need not have an entry for every trial in the run. For example, if a given signal is only relevant
+or only occurs for some "outcome" events, the trial column might be something like \code{c(2, 6, 10)}, indicating that the parametric
+modulator is only modeled at those trials. This is achieved by joining \code{events} with the relevant signal using \code{trial} as a key.
+
+The \code{$normalization} element handles the normalization of the HRF for each regressor. This can be:
+\enumerate{
+  \item durmax_1: pre-convolution, normalize the HRF max to 1.0 for long events (15+ sec) such that
+            height of HRF is modulated by duration of event but maxes at 1. This is identical to dmUBLOCK(0).
+  \item evtmax_1: pre-convolution, normalize the HRF max to 1.0 for each stimulus
+            regardless of duration. This is identical to dmUBLOCK(1).
+  \item none: No normalization of the HRF is performed prior to convolution.
+}
+
+The optional \code{$convmax_1} element handles rescaling the \emph{convolved} regressor to a maximum height of 1.0.
+  If TRUE for a given signal, the convolved regressor will be divided by its max, leading to a max of 1.0 across
+  both runs (assuming \code{convolve_wi_run} is \code{TRUE}) and subjects. This may be useful for scaling the regression
+  coefficients in voxelwise regression across subjects. For example, if the parametric signal captures similar dynamics
+  within subjects over the experiment, but the scaling varies substantially between subjects, \code{convmax_1} can
+  help to place the betas on an equivalent scale across subjects (assuming the MR data are also scaled similarly
+  between subjects).
+
+Finally, the optional \code{add_deriv} element determines whether the temporal derivative of a regressor is added to
+  the design matrix after convolution. Following FSL, the derivatives are computed by a first-order difference and are
+  then residualized for other regressors in the matrix. That is, the derivatives are orthogonalized with respect to
+  substantive regressors. By default, derivatives are not added, but if \code{TRUE} for a given signal, this will be added
+  to the convolved design matrix.
+
 This function was adapted from the fitclock package (https://github.com/PennStateDEPENdLab/fitclock.git) to
   allow for more general creation of design matrices for fMRI analyses.
 }
 \examples{
-{
-set.seed(480929)
-events <- dplyr::bind_rows(data.frame(event="cue", rbind(data.frame(run=1,trial=1:50,onset=cumsum(rpois(50, lambda = 2)),duration=rep(2, 50), custom_dur=abs(rnorm(50))),
- data.frame(run=2,trial=1:50,onset=cumsum(rpois(50, lambda = 2)),duration=rep(2, 50), custom_dur=abs(rnorm(50))))),
- data.frame(event="outcome",rbind(data.frame(run=1,trial=1:50,onset=cumsum(rpois(50, lambda = 2)),duration=rep(2, 50)),
-            data.frame(run=2,trial=1:50,onset=cumsum(rpois(50, lambda = 2)),duration=rep(2, 50)))))
- signals <- list(ev=list(values=rbind(data.frame(run=1, trial=1:50, signal=rnorm(50)), data.frame(run=2, trial=1:50, signal=rnorm(50))), event="cue", duration="custom_dur"),pe=list(values=rbind(data.frame(run=1, trial=1:50, signal=rnorm(50)), data.frame(run=2, trial=1:50, signal=rnorm(50))), event="outcome", duration=1))
-nuisrun1 <- data.frame(csf = rnorm(100), wm = rnorm(100))
-nuisrun2 <- data.frame(csf = rnorm(121), wm = rnorm(121))
-d <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none")) #convolved design matrix
-dnocon <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), convolve = FALSE) #pre-convolved design matrix
-dnuis <- build_design_matrix(events = events, signals = signals, normalizations = c("none", "none"), nuisance_regressors = list(nuisrun1, nuisrun2), baseline_coef_order = 2) #convolved design matrix with polort 2 and nuisance regressors
-}
+
+  data(example_events)
+  data(example_signals)
+  data(example_nuisrun1)
+  data(example_nuisrun2)
+
+  d <- build_design_matrix(events = example_events, signals = example_signals) #convolved design matrix
+  dnocon <- build_design_matrix(events = example_events, signals = example_signals, convolve = FALSE) #pre-convolved design matrix
+  dnuis <- build_design_matrix(events = example_events, signals = example_signals, #convolved design matrix with polort 2 and nuisance regressors
+    nuisance_regressors = list(example_nuisrun1, example_nuisrun2), baseline_coef_order = 2)
+
 }
 \author{
 Michael Hallquist

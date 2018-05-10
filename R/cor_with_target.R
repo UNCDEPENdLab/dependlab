@@ -3,7 +3,8 @@
 #'
 #' @param df The data.frame containing data to be correlated
 #' @param omit A vector of variables that should not be included in the \code{withvars}.
-#' @param withvars A vector of variables to correlate with the target. If omitted, all variables are included
+#' @param target A vector of variable names that are correlated with \code{withvars}.
+#' @param withvars A vector of variable names, each of which is correlates with each \code{target}. If omitted, all variables are included.
 #' @param pmin The highest correlation p-value that should be included in the output (e.g., to omit non-sig correlations)
 #' @param partial A character vector of variable names to partial out of the target correlations
 #' @param absrmin The minimum absolute r value to print

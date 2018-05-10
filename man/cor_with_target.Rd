@@ -14,7 +14,9 @@ cor_with_target(df, omit = NULL, target, withvars = NULL, pmin = NULL,
 
 \item{omit}{A vector of variables that should not be included in the \code{withvars}.}
 
-\item{withvars}{A vector of variables to correlate with the target. If omitted, all variables are included}
+\item{target}{A vector of variable names that are correlated with \code{withvars}.}
+
+\item{withvars}{A vector of variable names, each of which is correlates with each \code{target}. If omitted, all variables are included.}
 
 \item{pmin}{The highest correlation p-value that should be included in the output (e.g., to omit non-sig correlations)}
 

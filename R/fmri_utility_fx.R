@@ -1,13 +1,28 @@
 #' This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0
 #'
 #' It extends \code{fmri.stimulus} by allowing for two normalization approaches (building on AFNI dmUBLOCK):
-#'   1) "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
-#'   2) "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
+#'   1) "evtmax_1": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
+#'   2) "durmax_1": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
 #'
+#' @param scans The number of volumes (scans) to be output in the convolved regressor
+#' @param times A vector of times (in seconds) specifying event onsets
+#' @param durations A vector of durations (in seconds) for each event
+#' @param values A vector of parametric values used as regressor heights prior to convolution
+#' @param rt The repetition time (sometimes called TR) in seconds
+#' @param normeach Whether to normalize the HRF to 1.0 for each event separately. If TRUE, equivalent to dmUBLOCK(1).
+#'          If FALSE, the HRF is normed overall, equivalent to dmUBLOCK(0).
+#' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
+#'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
+#' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
+#' @param a1 The a1 parameter of the double gamma
+#' @param a2 The a2 parameter of the double gamma
+#' @param b1 The b1 parameter of the double gamma
+#' @param b2 The b2 parameter of the double gamma
+#' @param cc The cc parameter of the double gamma
 #' @author Michael Hallquist
 #' @export
 hrf_convolve_normalize <- function(scans, times, durations, values, rt=1.0, normeach=FALSE, rm_zeros=TRUE,
-                                   center_values=TRUE, parmax1=FALSE, demean_convolved=FALSE,
+                                   center_values=TRUE, convmax_1=FALSE, demean_convolved=FALSE,
                                    a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
 
   #this is my hacky way to figure out the peak value
@@ -62,12 +77,12 @@ hrf_convolve_normalize <- function(scans, times, durations, values, rt=1.0, norm
   # the range of the regressor across runs and subjects such that the betas for the regressor are on
   # similar scales, just with a change of gain... experimenting with this currently given SCEPTIC DAUC
   # regressors which tend to be highly skewed, potentially driven by behavioral parameter scaling challenges.
-  # Note that this interacts with the normeach setting such that for normeach=FALSE (durmax_1.0), the height
+  # Note that this interacts with the normeach setting such that for normeach=FALSE (durmax_1), the height
   # of 1.0 will reflect a combination of the parameter and the duration. The interpretation is somewhat
-  # cleaner under normeach=TRUE (evtmax_1.0) since the HRF has height of 1.0 for each stimulus, and then
+  # cleaner under normeach=TRUE (evtmax_1) since the HRF has height of 1.0 for each stimulus, and then
   # rescaling to max 1.0 after convolution with the parametric value will change the relative heights of
   #the stimuli solely according to the parameter.
-  if (parmax1) {
+  if (convmax_1) {
     tc_conv <- tc_conv/max(tc_conv)
   }
 
@@ -85,10 +100,29 @@ hrf_convolve_normalize <- function(scans, times, durations, values, rt=1.0, norm
 #' The function also supports mean centering of parametric regressor prior to convolution
 #' to dissociate it from stimulus occurrence (when event regressor also in model)
 #'
+#' @param scans The number of volumes (scans) to be output in the convolved regressor
+#' @param onsets A vector of times (in seconds) specifying event onsets
+#' @param durations A vector of durations (in seconds) for each event
+#' @param values A vector of parametric values used as regressor heights prior to convolution
+#' @param center_values Whether to demean values vector before convolution
+#' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
+#'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
+#' @param convolve Whether to convolve the regressor with the HRF. If FALSE, a time series of events, durations, and heights is returned.
+#' @param rt The repetition time (sometimes called TR) in seconds
+#' @param times A vector of times (in seconds) specifying event onsets
+#' @param demean Whether to demean the regressor after convolution
+#' @param a1 The a1 parameter of the double gamma
+#' @param a2 The a2 parameter of the double gamma
+#' @param b1 The b1 parameter of the double gamma
+#' @param b2 The b2 parameter of the double gamma
+#' @param cc The cc parameter of the double gamma
+#' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
+#'
 #' @export
 fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
-                       rt=3, times=NULL, demean=TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, parmax1=FALSE) {
+                       rt=3, times=NULL, demean=TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1=FALSE) {
 
+  #double gamma function
   mygamma <- function(x, a1, a2, b1, b2, c) {
     d1 <- a1 * b1
     d2 <- a2 * b2
@@ -104,9 +138,9 @@ fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center
   if (rm_zeros) {
     zeros <- which(values==0.0)
     if (length(zeros) > 0L) {
-      times <- times[-1.0*zeros]
-      values <- values[-1.0*zeros]
-      durations <- durations[-1.0*zeros]
+      times <- times[-1*zeros]
+      values <- values[-1*zeros]
+      durations <- durations[-1*zeros]
     }
   }
 
@@ -163,7 +197,7 @@ fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center
 
   #rescale regressor to maximum height of 1.0 for scaling similarity across instances (see hrf_convolve_normalize for details)
   #only applicable to convolve regressors
-  if (parmax1 && convolve) { hrf <- hrf/max(hrf) }
+  if (convmax_1 && convolve) { hrf <- hrf/max(hrf) }
 
   if (!convolve) {
     #just return the box car without convolving by HRF
@@ -256,4 +290,66 @@ fir1Bandpass <- function(x, TR=2.0, low=.009, high=.08, n=250, plotFilter=FALSE,
   else xfilt <- filter(fir1Coef, x)
 
   return(xfilt[1:origLen])
+}
+
+
+#' Concatenate design matrices for each run to form a single design with unique baselines per run (ala AFNI)
+#'
+#' @importFrom dplyr bind_rows
+#' @export
+concatDesignRuns <- function(d) {
+
+  d_allruns <- do.call(bind_rows, lapply(1:length(d$design.convolve), function(r) {
+    thisrun <- d$design.convolve[[r]]
+    basecols <- grepl("base", names(thisrun))
+    ##note that this will rename repeated names into something like ev and ev.1, which is good
+    names(thisrun) <- gsub("base", paste0("run", r, "base"), names(thisrun))
+    thisrun
+  }))
+
+  d_allruns[which(is.na(d_allruns), arr.ind=TRUE)] <- 0
+
+
+  d_allruns <- as.matrix(d_allruns) #needed for lm
+  d_allruns
+}
+
+
+#' Visualize design matrix, including event onset times and run boundaries
+#'
+#' @importFrom ggplot2 ggplot aes geom_line theme_bw facet_grid geom_vline ggsave
+#' @importFrom tidyr gather
+#' @export
+visualizeDesignMatrix <- function(d, outfile=NULL, runboundaries=NULL, events=NULL, includeBaseline=FALSE) {
+
+  if (!includeBaseline) {
+    d <- d[,!grepl("(run[0-9]+)*base", colnames(d))]
+  } else {
+    d <- d[,!grepl("(run[0-9]+)*base0", colnames(d))] #always remove constant
+  }
+
+  print(round(cor(d), 3))
+  d <- as.data.frame(d)
+  d$volume <- 1:nrow(d)
+  #d.m <- melt(d, id.vars="volume")
+  d.m <- d %>% gather(key="variable", value="value", -volume)
+  g <- ggplot(d.m, aes(x=volume, y=value)) + geom_line(size=1.2) + theme_bw(base_size=15) + facet_grid(variable ~ ., scales="free_y")
+
+  colors <- c("black", "blue", "red", "orange") #just a hack for color scheme right now
+
+  if (!is.null(runboundaries)) {
+    g <- g + geom_vline(xintercept=runboundaries, color=colors[1L])
+  }
+
+  if (!is.null(events)) {
+    for (i in 1:length(events)) {
+      g <- g + geom_vline(xintercept=events[[i]], color=colors[i+1])
+    }
+  }
+
+  if (!is.null(outfile)) {
+    ggsave(filename=outfile, plot=g, width=21, height=9)
+  }
+
+  return(invisible(g))
 }

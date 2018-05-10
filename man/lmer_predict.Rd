@@ -42,6 +42,7 @@ This is currently part of the predict method of lmer: https://github.com/bbolker
 }
 \examples{
   data(rat.brain)
+  library(lme4); library(ggplot2)
   m <- lmer(activate ~ region * treatment + (1 | animal), data=rat.brain)
   pred_vals <- lmer_predict(m)
   ggplot(pred_vals, aes(x=region, y=activate, ymin=activate-se, ymax=activate+se, color=treatment)) +

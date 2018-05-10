@@ -6,7 +6,9 @@ Date: 2018-05-03
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
-Description: Handy functions
+Description: This packages contains handy functions developed by the DEPENd lab.
+  At the moment, the largest contribution is build_design_matrix, which provides
+  tools for building fMRI design matrices and examining their structure.
 License: GPL-3
 Encoding: UTF-8
 LazyLoad: yes
@@ -23,7 +25,7 @@ Imports:
   oro.nifti,
   orthopolynom,
   plyr,
-  reshape2,
   signal,
-  Hmisc
-  
+  Hmisc,
+  tidyr
+

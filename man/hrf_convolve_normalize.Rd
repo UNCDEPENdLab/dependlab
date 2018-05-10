@@ -6,13 +6,42 @@
 \usage{
 hrf_convolve_normalize(scans, times, durations, values, rt = 1,
   normeach = FALSE, rm_zeros = TRUE, center_values = TRUE,
-  parmax1 = FALSE, demean_convolved = FALSE, a1 = 6, a2 = 12,
+  convmax_1 = FALSE, demean_convolved = FALSE, a1 = 6, a2 = 12,
   b1 = 0.9, b2 = 0.9, cc = 0.35)
+}
+\arguments{
+\item{scans}{The number of volumes (scans) to be output in the convolved regressor}
+
+\item{times}{A vector of times (in seconds) specifying event onsets}
+
+\item{durations}{A vector of durations (in seconds) for each event}
+
+\item{values}{A vector of parametric values used as regressor heights prior to convolution}
+
+\item{rt}{The repetition time (sometimes called TR) in seconds}
+
+\item{normeach}{Whether to normalize the HRF to 1.0 for each event separately. If TRUE, equivalent to dmUBLOCK(1).
+If FALSE, the HRF is normed overall, equivalent to dmUBLOCK(0).}
+
+\item{rm_zeros}{Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
+values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.}
+
+\item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
+
+\item{a1}{The a1 parameter of the double gamma}
+
+\item{a2}{The a2 parameter of the double gamma}
+
+\item{b1}{The b1 parameter of the double gamma}
+
+\item{b2}{The b2 parameter of the double gamma}
+
+\item{cc}{The cc parameter of the double gamma}
 }
 \description{
 It extends \code{fmri.stimulus} by allowing for two normalization approaches (building on AFNI dmUBLOCK):
-  1) "evtmax_1.0": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
-  2) "durmax_1.0": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
+  1) "evtmax_1": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
+  2) "durmax_1": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
 }
 \author{
 Michael Hallquist
