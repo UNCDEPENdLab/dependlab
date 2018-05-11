@@ -3,7 +3,9 @@
 \name{build_design_matrix}
 \alias{build_design_matrix}
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.
-The function outputs a list containing}
+The function outputs a list containing key aspects of the fMRI desing, including
+the unconvolved and convolved regressors, collinearity diagnostics, the number of volumes
+modeled in each run, and a plot of the design.}
 \usage{
 build_design_matrix(events = NULL, signals = NULL, center_values = FALSE,
   baseline_coef_order = -1L, baseline_parameterization = "Legendre",
@@ -17,15 +19,15 @@ build_design_matrix(events = NULL, signals = NULL, center_values = FALSE,
 run number (1:n), trial number (nested within run, 1:x), onset, duration of event}
 
 \item{signals}{expects a list of list. The first level of lists reflects each signal (e.g. pe vs values).
-In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a data.frame
+In the second level, BDM expects values and event (e.g. cue vs outcome). Values is a \code{data.frame}
 with run number (1:n), trial (1:x), and signal.}
 
-\item{center_values}{Whether to center parameteric regressors. TRUE/FALSE (default is FALSE)}
+\item{center_values}{Whether to center parameteric regressors. \code{TRUE/FALSE} (default is \code{FALSE})}
 
 \item{baseline_coef_order}{Default -1 (no baseline). If >= 0, then design will include polynomial trends
 within each run (e.g. baseline_coef_order = 1 includes both an intercept and a linear trend as regressors)}
 
-\item{baseline_parameterization}{Defaults to "Legendre". This adds Legendre polynomials up to baseline_coef_order (e.g., 2).
+\item{baseline_parameterization}{Defaults to "Legendre". This adds Legendre polynomials up to \code{baseline_coef_order} (e.g., 2).
 The alternative is "orthogonal_polynomials", which uses \code{fmri.design} from the \code{fmri} package
 to add polynomial regressors that are orthgonal to substantive design factors.}
 
@@ -43,10 +45,10 @@ max(onset + duration + iti_post)/tr within each run.}
 MR data, for example to handle problems with steady state magnetization.}
 
 \item{runs_to_output}{A numeric vector of runs to be output. By default, all runs are preserved.
-This is used to model only a subset such as c(1, 2, 6).}
+This is used to model only a subset such as \code{c(1, 2, 6)}.}
 
-\item{plot}{By default (TRUE), build_design_matrix will plot the design matrix in the plot window of your R session.
-If FALSE, the plot is not displayed, but the ggplot object is still provided in the $design_plot field.}
+\item{plot}{By default (TRUE), \code{build_design_matrix} will plot the design matrix in the plot window of your R session.
+If \code{FALSE}, the plot is not displayed, but the ggplot object is still provided in the $design_plot field.}
 
 \item{write_timing_files}{When NULL (the default), the function does not write timing files to disk.
 This argument accepts a character vector that specifies whether to write "AFNI", "FSL",
@@ -98,29 +100,31 @@ substative regressors.}
 \value{
 A list of containing different aspects of the design matrix:
 \itemize{
-       \item \code{$design} A runs x signals list containing events before convolution.
+       \item \code{$design}: A runs x signals list containing events before convolution.
          Each element is a 2-D matrix containing, minimally, "trial", onset", "duration", and "value" columns.
          Onsets and durations are specified in seconds, consistent with FSL's 3-column format.
          Within each matrix, the onset, duration and value of the signal is specified.
-       \item \code{$design.convolve} The convolved design matrices for each run. Each element in the list contains
+       \item \code{$design.convolve}: The convolved design matrices for each run. Each element in the list contains
          a run. Within each design matrix, each column contains a regressor, encompassing substantive regressors,
          nuisance signals, and polynomial baseline regressors, if specified. Each row reflects the predicted value for each volume.
-       \item \code{$collin.raw} A list containing information about the collinearity of regressors before convolution.
+       \item \code{$collin.raw}: A list containing information about the collinearity of regressors before convolution.
          At the highest level of the list, each element contains a run. At the second level of the list,
          the first element contains the correlation matrix of the regressors and the second element provides
          the variance inflation factor (VIF) associated with each regressor. Example: \code{design$collin.raw$run1$vif}
-       \item \code{$collin.convolve} A list containing information about collinearity of the convolved regressors,
+       \item \code{$collin.convolve}: A list containing information about collinearity of the convolved regressors,
          including substantive signals, nuisance regressors, and polynomial regressors. Follows the same structure as \code{$collin.raw}.
-       \item \code{$concat_onsets} A list containing concatenated event onset times for each signal. Each signal is an element of the list containing
+       \item \code{$concat_onsets}: A list containing concatenated event onset times for each signal. Each signal is an element of the list containing
          a vector of all onset times across runs. That is, the total time of run1 is added to onsets of run2 to support a combined analysis of all
          runs, which is common in AFNI (e.g., using -concat or multiple files to -input).
-       \item \code{$run_volumes} A vector containing the total number of volumes modeled for each run.
-       \item \code{$design_plot} A ggplot object showing the design matrix. This is generated by visualizeDesignMatrix.
+       \item \code{$run_volumes}: A vector containing the total number of volumes modeled for each run.
+       \item \code{$design_plot}: A ggplot object showing the design matrix. This is generated by \code{visualize_design_matrix}.
 }
 }
 \description{
 Creates an fmri design matrix, including timing files for for AFNI or FSL.
-The function outputs a list containing
+The function outputs a list containing key aspects of the fMRI desing, including
+the unconvolved and convolved regressors, collinearity diagnostics, the number of volumes
+modeled in each run, and a plot of the design.
 }
 \details{
 The basic logic of the inputs to build_design_matrix is that task-related fMRI designs are organized around a set of events that occur in time and
@@ -230,10 +234,31 @@ This function was adapted from the fitclock package (https://github.com/PennStat
   data(example_nuisrun1)
   data(example_nuisrun2)
 
-  d <- build_design_matrix(events = example_events, signals = example_signals) #convolved design matrix
-  dnocon <- build_design_matrix(events = example_events, signals = example_signals, convolve = FALSE) #pre-convolved design matrix
-  dnuis <- build_design_matrix(events = example_events, signals = example_signals, #convolved design matrix with polort 2 and nuisance regressors
+  #convolved design matrix
+  d <- build_design_matrix(events = example_events, signals = example_signals)
+
+  #unconvolved design matrix
+  dnocon <- build_design_matrix(events = example_events, signals = example_signals, convolve = FALSE)
+
+  #design matrix with 0,1,2 polynomial baseline regressors and a set of nuisance regressors
+  #this does not contain a 'taskness' regressor for cue or outcome
+  dnuis <- build_design_matrix(events = example_events, signals = example_signals,
     nuisance_regressors = list(example_nuisrun1, example_nuisrun2), baseline_coef_order = 2)
+
+  #tweak the design to add temporal derivatives for both ev and pe
+  example_signals$pe$add_deriv <- TRUE
+  example_signals$ev$add_deriv <- TRUE
+
+  #also use the evtmax_1 normalization method for both parametric signals
+  example_signals$pe$normalization <- "evtmax_1"
+  example_signals$ev$normalization <- "evtmax_1"
+
+  #finally, add a taskness regressor for cue and outcome
+  example_signals[["cue_evt"]] <- list(value=1, event="cue", normalization="none")
+  example_signals[["outcome_evt"]] <- list(value=1, event="outcome", normalization="none")
+
+  d_modified <- build_design_matrix(events = example_events, signals = example_signals,
+    baseline_coef_order=2)
 
 }
 \author{

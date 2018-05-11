@@ -14,6 +14,7 @@
 #' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
 #'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
 #' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
+#' @param demean_convolved Whether to demean the regressor after convolution (default: \code{TRUE})
 #' @param a1 The a1 parameter of the double gamma
 #' @param a2 The a2 parameter of the double gamma
 #' @param b1 The b1 parameter of the double gamma
@@ -234,9 +235,11 @@ runmean <- function(x, k=5) {
   return(y)
 }
 
-#' detrend time series up to quadratic trend. Used by fir1Bandpass prior to filtering
+#' Detrend a time series up to quadratic trend. Used by fir1Bandpass prior to filtering
 #'
-#' @keywords internal
+#' @param x A time series to be detrended
+#' @param order The polynomial order used for detrending. 0=demean; 1=linear; 2=quadratic
+#' @export
 detrendts <- function(x, order=0) {
   #order 0=demean; order 1=linear; order 2=quadratic
   lin <- 1:length(x)
@@ -252,7 +255,13 @@ detrendts <- function(x, order=0) {
     stop("order not supported:", order)
 }
 
-#' function to FIR-1 bandpass filter a signal. Can low- or high-pass filter by specifying 0 for low or >= Nyquist for high.
+#' Apply a FIR-1 bandpass filter a signal. Can low- or high-pass filter by specifying 0 for low or >= Nyquist for high.
+#'
+#' @param x The time series to be filtered
+#' @param TR The sampling frequency in seconds
+#' @param low The lower filter cutoff in Hz. Fluctuations below this frequency will be filtered out
+#' @param high The upper filter cutoff in Hz. Fluctuations above this frequency will be filtered out
+#' @param n The order of the filter coefficients. Should probably leave this alone in general
 #'
 #' @keywords internal
 #' @importFrom signal fir1 filtfilt freqz
@@ -295,9 +304,11 @@ fir1Bandpass <- function(x, TR=2.0, low=.009, high=.08, n=250, plotFilter=FALSE,
 
 #' Concatenate design matrices for each run to form a single design with unique baselines per run (ala AFNI)
 #'
+#' @param d A design matrix object created by \code{build_design_matrix}. The $design.convolve element will be used for concatenation.
 #' @importFrom dplyr bind_rows
 #' @export
-concatDesignRuns <- function(d) {
+concat_design_runs <- function(d) {
+  if (!is.list(d) || is.null(d$design.convolve)) { stop("Cannot identify $design.convolve element of object") }
 
   d_allruns <- do.call(bind_rows, lapply(1:length(d$design.convolve), function(r) {
     thisrun <- d$design.convolve[[r]]
@@ -309,20 +320,47 @@ concatDesignRuns <- function(d) {
 
   d_allruns[which(is.na(d_allruns), arr.ind=TRUE)] <- 0
 
-
   d_allruns <- as.matrix(d_allruns) #needed for lm
+  attr(d_allruns, "run_names") <- names(d$design.convolve) #keep the run names around for tracking
+  if (length(d$design.convolve) > 1L) {
+    run_boundaries <- c(1, cumsum(sapply(d$design.convolve[1:length(d$design.convolve) - 1], nrow) + 1)) #keep the run names around for tracking
+    names(run_boundaries) <- names(d$design.convolve)
+  } else {
+    run_boundaries <- 1 #just first volume
+    names(run_boundaries) <- names(d$design.convolve)[1]
+  }
+
+  attr(d_allruns, "run_boundaries") <- run_boundaries
   d_allruns
 }
 
 
 #' Visualize design matrix, including event onset times and run boundaries
 #'
-#' @importFrom ggplot2 ggplot aes geom_line theme_bw facet_grid geom_vline ggsave
+#' @param d a concatenated design matrix created by \code{build_design_matrix} and passed to \code{concat_design_runs}
+#' @param outfile a filename used to export the design matrix using \code{ggsave}
+#' @param run_boundaries a named vector of positions in the time series where a run boundary occurs (used for plotting)
+#' @param events a named list of vectors containing the times of each event
+#' @param include_baseline whether to display the baseline regressors in the design.
+#' @importFrom ggplot2 ggplot aes geom_line theme_bw facet_grid geom_vline ggsave scale_color_brewer scale_color_discrete guides guide_legend
 #' @importFrom tidyr gather
 #' @export
-visualizeDesignMatrix <- function(d, outfile=NULL, runboundaries=NULL, events=NULL, includeBaseline=FALSE) {
+visualize_design_matrix <- function(d, outfile=NULL, run_boundaries=NULL, events=NULL, include_baseline=FALSE) {
 
-  if (!includeBaseline) {
+  #this needs to come before removal of baseline because attributes are dropped at subset
+  if (is.null(run_boundaries) && !is.null(attr(d, "run_boundaries"))) {
+    #check whether run_boundaries are attached to the convolved design as an attribute and use this
+    run_boundaries <- attr(d, "run_boundaries")
+    run_names <- attr(d, "run_names")
+  } else {
+    if (is.null(names(run_boundaries))) {
+      run_names <- paste0("run", 1:length(run_boundaries))
+    } else {
+      run_names <- names(run_boundaries)
+    }
+  }
+
+  if (!include_baseline) {
     d <- d[,!grepl("(run[0-9]+)*base", colnames(d))]
   } else {
     d <- d[,!grepl("(run[0-9]+)*base0", colnames(d))] #always remove constant
@@ -331,19 +369,22 @@ visualizeDesignMatrix <- function(d, outfile=NULL, runboundaries=NULL, events=NU
   print(round(cor(d), 3))
   d <- as.data.frame(d)
   d$volume <- 1:nrow(d)
-  #d.m <- melt(d, id.vars="volume")
   d.m <- d %>% gather(key="variable", value="value", -volume)
   g <- ggplot(d.m, aes(x=volume, y=value)) + geom_line(size=1.2) + theme_bw(base_size=15) + facet_grid(variable ~ ., scales="free_y")
 
-  colors <- c("black", "blue", "red", "orange") #just a hack for color scheme right now
-
-  if (!is.null(runboundaries)) {
-    g <- g + geom_vline(xintercept=runboundaries, color=colors[1L])
+  if (!is.null(run_boundaries)) {
+    rundf <- data.frame(run=run_names, boundary=run_boundaries)
+    g <- g + geom_vline(data=rundf, aes(xintercept=boundary, color=run), size=1.3) + scale_color_discrete("Run") + #scale_color_brewer("Run", palette="Blues")
+      #theme(legend.key = element_rect(size = 2), legend.key.size = unit(1.5, 'lines'))
+      guides(color=guide_legend(keywidth=0.3, keyheight=1.5, default.unit="lines")) #not beautifully spaced, but come back to this later...
   }
+
+  colors <- c("black", "blue", "red", "orange") #just a hack for color scheme right now
 
   if (!is.null(events)) {
     for (i in 1:length(events)) {
-      g <- g + geom_vline(xintercept=events[[i]], color=colors[i+1])
+      eventdf <- data.frame(name=names(events)[i], positions=events[[i]])
+      g <- g + geom_vline(data=eventdf, aes(xintercept=events, color=name)) + scale_color_brewer("Event", palette="Greens")
     }
   }
 

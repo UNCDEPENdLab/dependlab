@@ -2,11 +2,15 @@
 % Please edit documentation in R/fmri_utility_fx.R
 \name{detrendts}
 \alias{detrendts}
-\title{detrend time series up to quadratic trend. Used by fir1Bandpass prior to filtering}
+\title{Detrend a time series up to quadratic trend. Used by fir1Bandpass prior to filtering}
 \usage{
 detrendts(x, order = 0)
 }
-\description{
-detrend time series up to quadratic trend. Used by fir1Bandpass prior to filtering
+\arguments{
+\item{x}{A time series to be detrended}
+
+\item{order}{The polynomial order used for detrending. 0=demean; 1=linear; 2=quadratic}
 }
-\keyword{internal}
+\description{
+Detrend a time series up to quadratic trend. Used by fir1Bandpass prior to filtering
+}

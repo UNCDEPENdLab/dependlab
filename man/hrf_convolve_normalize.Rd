@@ -28,6 +28,8 @@ values prior to convolution, and retaining zeros will lead them to be non-zero a
 
 \item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
 
+\item{demean_convolved}{Whether to demean the regressor after convolution (default: \code{TRUE})}
+
 \item{a1}{The a1 parameter of the double gamma}
 
 \item{a2}{The a2 parameter of the double gamma}
