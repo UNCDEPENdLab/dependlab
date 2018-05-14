@@ -39,7 +39,6 @@
 #'
 #' @author Michael Hallquist
 #' @export
-
 lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n.cont=20, cont.pts=NULL, fixat0=NULL, yoked=NULL) {
   #print cell means for lmer by expanding level combinations and multiplying against fixed effects
   predNames <- attr(terms(lmerObj), "term.labels")
@@ -56,7 +55,6 @@ lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n
     yoked.tf <- as.numeric(predNames %in% sapply(yoked, "[[", "source"))
     predNames <- predNames[rev(order(yoked.tf))]
   }
-
 
   predData <- list()
   #divide into categorical and continuous predictors, determine which continuous predictors to discretize
