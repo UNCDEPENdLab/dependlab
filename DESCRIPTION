@@ -27,5 +27,7 @@ Imports:
   plyr,
   signal,
   Hmisc,
-  tidyr
+  tidyr,
+  reshape2,
+  scales
 
