@@ -4,7 +4,7 @@
 \alias{hrf_convolve_normalize}
 \title{This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0}
 \usage{
-hrf_convolve_normalize(scans, times, durations, values, rt = 1,
+hrf_convolve_normalize(scans, times, durations, values, tr = 1,
   normeach = FALSE, rm_zeros = TRUE, center_values = TRUE,
   convmax_1 = FALSE, demean_convolved = FALSE, a1 = 6, a2 = 12,
   b1 = 0.9, b2 = 0.9, cc = 0.35)
@@ -18,13 +18,15 @@ hrf_convolve_normalize(scans, times, durations, values, rt = 1,
 
 \item{values}{A vector of parametric values used as regressor heights prior to convolution}
 
-\item{rt}{The repetition time (sometimes called TR) in seconds}
+\item{tr}{The repetition time in seconds}
 
 \item{normeach}{Whether to normalize the HRF to 1.0 for each event separately. If TRUE, equivalent to dmUBLOCK(1).
 If FALSE, the HRF is normed overall, equivalent to dmUBLOCK(0).}
 
 \item{rm_zeros}{Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
 values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.}
+
+\item{center_values}{Whether to demean values vector before convolution. Default \code{TRUE}.}
 
 \item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
 
@@ -48,3 +50,4 @@ It extends \code{fmri.stimulus} by allowing for two normalization approaches (bu
 \author{
 Michael Hallquist
 }
+\keyword{internal}

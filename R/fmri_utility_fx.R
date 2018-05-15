@@ -56,7 +56,7 @@ convolve_regressor <- function(reg, vols, drop_volumes=0, convolve=TRUE, normali
 
 #' Function to convert dmat (runs x regressor list) to a time-oriented representation.
 #' This yields a list of runs where each element is data.frame of volumes x regressors
-#' @author Michael Hallquist
+#'
 #' @param dmat A runs x regressors 2-d list where each element is a matrix containing
 #'          onset, duration, and value for a signal
 #' @param convolve If \code{TRUE} (default), convolve the time-oriented signals with an HRF
@@ -74,7 +74,7 @@ convolve_regressor <- function(reg, vols, drop_volumes=0, convolve=TRUE, normali
 #'            \item tr The repetition time (sometimes called TR) in seconds
 #'          }
 #'
-#'
+#' @author Michael Hallquist
 #' @keywords internal
 place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 
@@ -166,6 +166,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #'          If FALSE, the HRF is normed overall, equivalent to dmUBLOCK(0).
 #' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
 #'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
+#' @param center_values Whether to demean values vector before convolution. Default \code{TRUE}.
 #' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
 #' @param demean_convolved Whether to demean the regressor after convolution (default: \code{TRUE})
 #' @param a1 The a1 parameter of the double gamma
@@ -174,7 +175,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #' @param b2 The b2 parameter of the double gamma
 #' @param cc The cc parameter of the double gamma
 #' @author Michael Hallquist
-#' @export
+#' @keywords internal
 hrf_convolve_normalize <- function(scans, times, durations, values, tr=1.0, normeach=FALSE, rm_zeros=TRUE,
                                    center_values=TRUE, convmax_1=FALSE, demean_convolved=FALSE,
                                    a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {

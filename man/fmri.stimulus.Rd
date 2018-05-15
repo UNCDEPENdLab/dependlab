@@ -5,7 +5,7 @@
 \title{Convolve a regressor with a hemodynamic response function for fMRI analysis.}
 \usage{
 fmri.stimulus(scans = 1, onsets = c(1), durations = c(1), values = c(1),
-  center_values = FALSE, rm_zeros = TRUE, convolve = TRUE, rt = 3,
+  center_values = FALSE, rm_zeros = TRUE, convolve = TRUE, tr = 3,
   times = NULL, demean = TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9,
   cc = 0.35, convmax_1 = FALSE)
 }
@@ -25,7 +25,7 @@ values prior to convolution, and retaining zeros will lead them to be non-zero a
 
 \item{convolve}{Whether to convolve the regressor with the HRF. If FALSE, a time series of events, durations, and heights is returned.}
 
-\item{rt}{The repetition time (sometimes called TR) in seconds}
+\item{tr}{The repetition time (sometimes called TR) in seconds}
 
 \item{times}{A vector of times (in seconds) specifying event onsets}
 

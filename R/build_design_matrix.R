@@ -40,12 +40,6 @@
 #' @param output_directory Where to output the timing files. By default, the function will output the timing files
 #'           to a folder called "run_timing" in the current working directory. If such a folder does not exist,
 #'           it will make a folder in your R session's current working directory.
-#' @param convolve If \code{TRUE} (the default), the function will convolve signals with HRF to get predicted
-#'           BOLD response for that each regressor. If \code{FALSE}, the $design_convolved field will contain the
-#'           unconvolved regressors that are nevertheless on the time grid of the fMRI data. For example,
-#'           an RT-convolved boxcar will be evident as a series of 1s for every volume within the RT.
-#'           This can be useful for diagnosing problems with the design and verifying the accuracy of
-#'           event timing before convolution is applied.
 #' @param convolve_wi_run If \code{TRUE} (the default), convolution -- and any corresponding mean centering and
 #'           normalization of the heights of parametric signals -- is applied to each run separately.
 #'          If FALSE, the events across runs are concatenated before convolution is applied
@@ -206,7 +200,7 @@
 #' @importFrom ggplot2 ggplot
 #' @importFrom fmri fmri.design
 #' @importFrom car vif
-#' @importFrom stats as.formula cor lm residuals
+#' @importFrom stats as.formula cor lm residuals rnorm
 #' @importFrom utils read.table write.table
 #'
 #' @author Michael Hallquist
@@ -308,7 +302,8 @@ build_design_matrix=function(
     }
 
     #transform to make dmat happy (runs x regressors 2-d list)
-    retdf <- s_aligned %>% select(trial, onset, duration, value)
+    #dplyr::select will tolerate quoted names, which avoids R CMD CHECK complaints
+    retdf <- s_aligned %>% dplyr::select("trial", "onset", "duration", "value")
     retsplit <- split(retdf, s_aligned$run)
     names(retsplit) <- paste0("run", names(retsplit))
     return(retsplit)

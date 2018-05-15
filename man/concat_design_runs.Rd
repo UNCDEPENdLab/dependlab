@@ -4,10 +4,12 @@
 \alias{concat_design_runs}
 \title{Concatenate design matrices for each run to form a single design with unique baselines per run (ala AFNI)}
 \usage{
-concat_design_runs(d)
+concat_design_runs(d, convolved = TRUE)
 }
 \arguments{
-\item{d}{A design matrix object created by \code{build_design_matrix}. The $design.convolve element will be used for concatenation.}
+\item{d}{A design matrix object created by \code{build_design_matrix}. The $design_convolved element will be used for concatenation.}
+
+\item{convolved}{If \code{TRUE} (the default), concatenate the convolved design matrix. If \code{FALSE}, use the unconvolved.}
 }
 \description{
 Concatenate design matrices for each run to form a single design with unique baselines per run (ala AFNI)
