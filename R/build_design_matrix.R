@@ -351,7 +351,7 @@ build_design_matrix=function(
         currentdf <- signals_aligned[[j]][[i]] #jth signal, ith run (signals_aligned has signals at top level)
 
         #estimate the last moment
-        highesttime <- ceiling(max(currentdf$onset + currentdf$duration + iti_post)/tr)
+        highesttime <- ceiling(max(currentdf$onset + currentdf$duration + iti_post, na.rm=TRUE)/tr)
         if (highesttime > run_volumes[i]) { run_volumes[i] <- highesttime } #update run_volumes for ith run only if this signal has later event
       }
     }
