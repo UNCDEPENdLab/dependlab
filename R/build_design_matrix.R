@@ -360,13 +360,14 @@ build_design_matrix=function(
     message(paste0("Resulting volumes: ", paste(run_volumes, collapse=", ")))
 
   } else if (is.character(run_volumes)) {
-    run_volumes <- c()
+    run_volumes_list <- c()
     for( i in 1:length(run_volumes)) {
       currentNifti <- run_volumes[i]
       out <- readNIfTI(currentNifti, read_data = FALSE)
       rv <- dim(out@.Data)[4] # grabs the 4th dimension of the matrix, which is the number of Volumes
-      run_volumes <- c(run_volumes, rv)
+      run_volumes_list <- c(run_volumes_list, rv)
     }
+    run_volumes <- run_volumes_list
   } else if (is.numeric(run_volumes)) {
     #replicate volumes for each run if a scalar is passed
     if (length(run_volumes) == 1L) { run_volumes <- rep(run_volumes, nruns) }
