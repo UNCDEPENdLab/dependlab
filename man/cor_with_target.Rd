@@ -5,9 +5,9 @@
 \title{This function correlates a set of target variables (target) with a set of other variables (withvars).
 The general goal is to avoid sifting through gargantuan correlation matrices when only some cells are of interest a priori.}
 \usage{
-cor_with_target(df, omit = NULL, target, withvars = NULL, pmin = NULL,
-  partial = NULL, absrmin = NULL, digits = 3, prewhiten = FALSE,
-  orderbyr = FALSE)
+cor_with_target(df, omit = NULL, target, withvars = NULL,
+  pmin = NULL, partial = NULL, absrmin = NULL, digits = 3,
+  prewhiten = FALSE, orderbyr = FALSE)
 }
 \arguments{
 \item{df}{The data.frame containing data to be correlated}

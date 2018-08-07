@@ -4,10 +4,10 @@
 \alias{fmri.stimulus}
 \title{Convolve a regressor with a hemodynamic response function for fMRI analysis.}
 \usage{
-fmri.stimulus(scans = 1, onsets = c(1), durations = c(1), values = c(1),
-  center_values = FALSE, rm_zeros = TRUE, convolve = TRUE, tr = 3,
-  times = NULL, demean = TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9,
-  cc = 0.35, convmax_1 = FALSE)
+fmri.stimulus(scans = 1, onsets = c(1), durations = c(1),
+  values = c(1), center_values = FALSE, rm_zeros = TRUE,
+  convolve = TRUE, tr = 3, times = NULL, demean = TRUE, a1 = 6,
+  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1 = FALSE)
 }
 \arguments{
 \item{scans}{The number of volumes (scans) to be output in the convolved regressor}
