@@ -2,8 +2,8 @@
 % Please edit documentation in R/score_ecr.R
 \name{score_ecr}
 \alias{score_ecr}
-\title{Score the experiences in close relationships -- revised (ECR-R) scale
-This is for the 36-item version.}
+\title{Score the experiences in close relationships -- revised (ECR-R) scale (Fraley, Waller, & Brennan, 2000)
+This is for the 36-item version with odd (avoidance) / even (anxiety) item sorting.}
 \usage{
 score_ecr(df, item_prefix = "ECR", max_impute = 0.2,
   drop_items = FALSE, keep_reverse_codes = FALSE, max_value = 7)
@@ -22,8 +22,8 @@ score_ecr(df, item_prefix = "ECR", max_impute = 0.2,
 \item{max_value}{the highest value for the items anchors, used in reverse scoring. Default: 7}
 }
 \description{
-Score the experiences in close relationships -- revised (ECR-R) scale
-This is for the 36-item version.
+Score the experiences in close relationships -- revised (ECR-R) scale (Fraley, Waller, & Brennan, 2000)
+This is for the 36-item version with odd (avoidance) / even (anxiety) item sorting.
 }
 \details{
 Adds two columns, \code{ECR_anxiety} and \code{ECR_avoidance}, to \code{df} containing
@@ -33,6 +33,8 @@ Note: the default ECR scoring uses the mean of the items for the scales.
 
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:36
 will yield the 36 items from the test.
+
+See: \url{http://labs.psychology.illinois.edu/~rcfraley/measures/ecrritems.htm}
 }
 \author{
 Michael Hallquist

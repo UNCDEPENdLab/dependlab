@@ -9,11 +9,13 @@
 #' @param convmax_1 If \code{TRUE}, rescale convolved regressors to a maximum height of 1 to equilibrate scaling
 #'          across runs and subjects.
 #' @param high_pass The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.
+#' @param tr The repetition time (in seconds) for the fMRI scan.
 #'
 #' @author Michael Hallquist
 #' @keywords internal
 convolve_regressor <- function(reg, vols, drop_volumes=0, convolve=TRUE, normalization="none",
-                               center_values=TRUE, convmax_1=FALSE, high_pass=NULL, tr=NULL) {
+                               center_values=TRUE, convmax_1=FALSE, high_pass=NULL, tr=NULL,
+                               hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)) {
   if (is.null(tr) || !is.numeric(tr)) { stop("tr must be a number (in seconds)") }
 
   #check for the possibility that the onset of an event falls after the number of good volumes in the run
@@ -28,15 +30,16 @@ convolve_regressor <- function(reg, vols, drop_volumes=0, convolve=TRUE, normali
   if (convolve && normalization == "evtmax_1") {
     #each event is 1.0-normalized
     x <- hrf_convolve_normalize(scans=vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"],
-                                normeach=TRUE, center_values=center_values, convmax_1=convmax_1, tr=tr)
+                                normeach=TRUE, center_values=center_values, convmax_1=convmax_1, tr=tr, hrf_parameters=hrf_parameters)
   } else if (convolve && normalization == "durmax_1") {
     #peak amplitude of hrf is 1.0 (before multiplying by parametric value) based on stimulus duration (stims > 10s approach 1.0)
     x <- hrf_convolve_normalize(scans=vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"],
-                                normeach=FALSE, center_values=center_values, convmax_1=convmax_1, tr=tr)
+                                normeach=FALSE, center_values=center_values, convmax_1=convmax_1, tr=tr, hrf_parameters=hrf_parameters)
   } else {
     #no normalization or convolution is turned off
     x <- fmri.stimulus(scans=vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"], tr=tr, center_values=center_values,
-                       convolve=convolve, convmax_1=convmax_1)
+                       convolve=convolve, convmax_1=convmax_1, a1=hrf_parameters["a1"], a2=hrf_parameters["a2"],
+                       b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
   }
 
   #apply high-pass filter after convolution if requested
@@ -72,6 +75,7 @@ convolve_regressor <- function(reg, vols, drop_volumes=0, convolve=TRUE, normali
 #'            \item convmax_1 A logical vector (\code{TRUE/FALSE}) denoting whether to rescale max height to 1 after convolution
 #'            \item high_pass The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.
 #'            \item tr The repetition time (sometimes called TR) in seconds
+#'            \item hrf_parameters The parameters for the double-gamma HRF
 #'          }
 #'
 #' @author Michael Hallquist
@@ -85,7 +89,8 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
         reg <- dmat[[i,j]] #regressor j for a given run i
         convolve_regressor(reg=reg, vols=bdm_args$run_volumes[i], drop_volumes = bdm_args$drop_volumes[i], convolve=convolve,
                            normalization=bdm_args$normalizations[j], center_values=bdm_args$center_values,
-                           convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr)
+                           convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr,
+                           hrf_parameters = bdm_args$hrf_parameters)
       })
 
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with ntrials rows and nregressors cols (convolved)
@@ -108,7 +113,8 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
       #convolve concatenated events with hrf
       all.convolve <- convolve_regressor(concattiming, vols=sum(bdm_args$run_volumes), drop_volumes = bdm_args$drop_volumes[i], convolve=convolve,
                                          normalization=bdm_args$normalizations[reg], center_values=bdm_args$center_values,
-                                         convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr)
+                                         convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr,
+                                         hrf_parameters=bdm_args$hrf_parameters)
 
       #now, to be consistent with code below (and elsewhere), split back into runs
       splitreg <- split(all.convolve, do.call(c, sapply(1:length(run_volumes), function(x) { rep(x, run_volumes[x]) })))
@@ -169,22 +175,20 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #' @param center_values Whether to demean values vector before convolution. Default \code{TRUE}.
 #' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
 #' @param demean_convolved Whether to demean the regressor after convolution (default: \code{TRUE})
-#' @param a1 The a1 parameter of the double gamma
-#' @param a2 The a2 parameter of the double gamma
-#' @param b1 The b1 parameter of the double gamma
-#' @param b2 The b2 parameter of the double gamma
-#' @param cc The cc parameter of the double gamma
+#' @param hrf_parameters. A named vector of parameters passed to \code{fmri.stimulus} that control the shape of the double gamma HRF.
+#'          Default: \code{c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)}.
+#'
 #' @author Michael Hallquist
 #' @keywords internal
 hrf_convolve_normalize <- function(scans, times, durations, values, tr=1.0, normeach=FALSE, rm_zeros=TRUE,
                                    center_values=TRUE, convmax_1=FALSE, demean_convolved=FALSE,
-                                   a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+                                   hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)) {
 
   if (!normeach) {
     #this is my hacky way to figure out the peak value for durmax_1 setup
     #obtain an estimate of the peak HRF height of a long event convolved with the HRF at these settings of a1, b1, etc.
     hrf_boxcar <- fmri.stimulus(scans=300/tr, values=1.0, times=100, durations=100, tr=tr, demean=FALSE,  #don't mean center for computing max height
-                                a1=a1, a2=a2, b1=b1, b2=b2, cc=cc)
+                                a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
     hrf_max <- max(hrf_boxcar)
   }
 
@@ -218,7 +222,8 @@ hrf_convolve_normalize <- function(scans, times, durations, values, tr=1.0, norm
   #for each event, convolve it with hrf, normalize, then sum convolved events to get full timecourse
   normedEvents <- sapply(1:length(times), function(i) {
     #obtain unit-convolved duration-modulated regressor to define HRF prior to modulation by parametric regressor
-    stim_conv <- fmri.stimulus(scans=scans, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, a1=a1, a2=a2, b1=b1, b2=b2, cc=cc)
+    stim_conv <- fmri.stimulus(scans=scans, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE,
+                               a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
     if (normeach) {
       if (times[i] + durations[i] > scans*tr) {
         #when the event occurs at the end of the time series and is the only event (i.e., as in evtmax_1), the HRF never reaches its peak. The further it is

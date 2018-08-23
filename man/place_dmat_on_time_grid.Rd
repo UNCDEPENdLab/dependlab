@@ -25,6 +25,7 @@ during the initial argument parsing. See build_design_matrix for details. Should
   \item convmax_1 A logical vector (\code{TRUE/FALSE}) denoting whether to rescale max height to 1 after convolution
   \item high_pass The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.
   \item tr The repetition time (sometimes called TR) in seconds
+  \item hrf_parameters The parameters for the double-gamma HRF
 }}
 }
 \description{

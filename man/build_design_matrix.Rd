@@ -5,7 +5,8 @@
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.}
 \usage{
 build_design_matrix(events = NULL, signals = NULL, tr = NULL,
-  center_values = TRUE, baseline_coef_order = -1L,
+  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9,
+  b2 = 0.9, cc = 0.35), baseline_coef_order = -1L,
   baseline_parameterization = "Legendre", run_volumes = NULL,
   drop_volumes = 0L, runs_to_output = NULL, plot = TRUE,
   write_timing_files = NULL, output_directory = "run_timing",
@@ -26,6 +27,18 @@ This is important to specify correctly to get temporal filtering correct.}
 \item{center_values}{A logical (\code{TRUE/FALSE}) indicating whether to center parameteric regressors prior to
 convolution. This is usually a good idea to remove collinearity between parametric and task indicator
 regressors. The default is \code{TRUE}.}
+
+\item{hrf_parameters}{A named vector of HRF parameters passed to \code{fmri.stimulus} internally.
+          The parameters are a1, a2, b1, b2, cc. Equation is (x/d1)^a1 * exp(-(x - d1)/b1) - c * (x/d2)^a2 * exp(-(x - d2)/b2).
+          Defaults and descriptions are:
+            a1 = 6. Controls the time delay to the peak of the positive response
+            a2 = 12. Controls the time delay to the (negative) peak of the undershoot
+            b1 = 0.9. Controls the dispersion (breadth) of the positive response
+            b2 = 0.9. Controls the dispersion (breadth) of the undershoot
+            cc = 0.35. Controls the relative scaling of the positive response versus the undershoot.
+
+          Note: These defaults come from Glover 1999.
+          Note. FSL double gamma has a1 = 6, a2 = 16, cc = 1/6. Not yet sure about b1 and b2.}
 
 \item{baseline_coef_order}{Default -1 (no baseline). If >= 0, then design will include polynomial trends
 within each run (e.g. baseline_coef_order = 1 includes both an intercept and a linear trend as regressors)}

@@ -6,7 +6,8 @@
 \usage{
 convolve_regressor(reg, vols, drop_volumes = 0, convolve = TRUE,
   normalization = "none", center_values = TRUE, convmax_1 = FALSE,
-  high_pass = NULL, tr = NULL)
+  high_pass = NULL, tr = NULL, hrf_parameters = c(a1 = 6, a2 = 12, b1
+  = 0.9, b2 = 0.9, cc = 0.35))
 }
 \arguments{
 \item{reg}{A matrix for a regressor containing onset, duration, and value on the columns}
@@ -25,6 +26,8 @@ based on the corresponding onsets, durations, and values.}
 across runs and subjects.}
 
 \item{high_pass}{The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.}
+
+\item{tr}{The repetition time (in seconds) for the fMRI scan.}
 }
 \description{
 Helper function used by the summed runs and separate runs convolution steps

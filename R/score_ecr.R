@@ -1,5 +1,5 @@
-#' Score the experiences in close relationships -- revised (ECR-R) scale
-#' This is for the 36-item version.
+#' Score the experiences in close relationships -- revised (ECR-R) scale (Fraley, Waller, & Brennan, 2000)
+#' This is for the 36-item version with odd (avoidance) / even (anxiety) item sorting.
 #' 
 #' @param df a data.frame containing the 36 ECR items to be scored
 #' @param item_prefix a character prefix of the items names in \code{df} to be scored. Default: "ECR"
@@ -17,6 +17,8 @@
 #' 
 #' Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:36
 #' will yield the 36 items from the test.
+#' 
+#' See: \url{http://labs.psychology.illinois.edu/~rcfraley/measures/ecrritems.htm}
 #' 
 #' @export
 #' @author Michael Hallquist
