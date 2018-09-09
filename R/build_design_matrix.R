@@ -509,12 +509,12 @@ build_design_matrix=function(
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
           regout <- dmat[[i,reg]][,c("onset", "duration", "value")]
-          if (center_values && !all(regout[,"value"] == 0.0)) {
+          if (center_values && !all(na.omit(regout[,"value"]) == 0.0)) {
             #remove zero-value events from the regressor
             regout <- regout[regout[,"value"] != 0, ]
 
             #now mean center values (unless there is no variation, such as a task indicator function)
-            if (sd(regout[,"value"]) > 0) { regout[,"value"] <- regout[,"value"] - mean(regout[,"value"]) }
+            if (sd(regout[,"value"], na.rm=TRUE) > 0) { regout[,"value"] <- regout[,"value"] - mean(regout[,"value"], na.rm=TRUE) }
           }
 
           fname <- paste0("run", runs_to_output[i], "_", dimnames(dmat)[[2L]][reg], "_FSL3col.txt")
@@ -610,12 +610,10 @@ build_design_matrix=function(
 
     #check correlations among regressors for trial-wise estimates
     #TODO: This also needs to support uneven numbers of events per regressor. Data.frame fails in this case
-    cmat <- do.call(data.frame, lapply(run, function(regressor) {
-      regressor[,"value"]
-    }))
+    cmat <- do.call(data.frame, lapply(run, function(regressor) { regressor[,"value"] }))
 
     #remove any constant columns (e.g., task indicator regressor for clock) so that VIF computation is sensible
-    zerosd <- sapply(cmat, sd)
+    zerosd <- sapply(cmat, sd, na.rm=TRUE)
     cmat_noconst <- cmat[,zerosd != 0.0, drop=FALSE]
 
     if (ncol(cmat_noconst) == 0L) {
