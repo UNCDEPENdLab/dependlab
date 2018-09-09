@@ -270,15 +270,16 @@ hrf_convolve_normalize <- function(scans, times, durations, values, tr=1.0, norm
 #' to dissociate it from stimulus occurrence (when event regressor also in model)
 #'
 #' @param scans The number of volumes (scans) to be output in the convolved regressor
-#' @param onsets A vector of times (in seconds) specifying event onsets
+#' @param onsets A vector of times (in scans) specifying event onsets
 #' @param durations A vector of durations (in seconds) for each event
 #' @param values A vector of parametric values used as regressor heights prior to convolution
+#' @param times A vector of times (in seconds) specifying event onsets. If times are passed in, the onsets
+#'   argument (which is in scans) is ignored. That is, \code{onsets} and \code{times} are mutually exclusive.
 #' @param center_values Whether to demean values vector before convolution
 #' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
 #'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
 #' @param convolve Whether to convolve the regressor with the HRF. If FALSE, a time series of events, durations, and heights is returned.
 #' @param tr The repetition time (sometimes called TR) in seconds
-#' @param times A vector of times (in seconds) specifying event onsets
 #' @param demean Whether to demean the regressor after convolution
 #' @param a1 The a1 parameter of the double gamma
 #' @param a2 The a2 parameter of the double gamma
@@ -288,8 +289,8 @@ hrf_convolve_normalize <- function(scans, times, durations, values, tr=1.0, norm
 #' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
 #'
 #' @export
-fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
-                       tr=3, times=NULL, demean=TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1=FALSE) {
+fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
+                       tr=2, demean=TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1=FALSE) {
 
   #double gamma function
   mygamma <- function(x, a1, a2, b1, b2, c) {
@@ -313,14 +314,6 @@ fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center
     }
   }
 
-  if (length(times) == 0L) {
-    warning("No non-zero events for regressor to be convolved. Returning all-zero result for fMRI GLM.")
-    return(rep(0, scans))
-  } else if (all(times >= scans*tr)) {
-    #all events fall outside of the modeled time window
-    return(rep(0, scans))
-  }
-
   #handle mean centering of parametric values prior to convolution
   #this is useful when one wishes to dissociate variance due to parametric modulation versus stimulus occurrence
   if (center_values && !all(values==1.0)) {
@@ -328,8 +321,18 @@ fmri.stimulus=function(scans=1, onsets=c(1), durations=c(1), values=c(1), center
   }
 
   if (is.null(times)) {
+    #onsets are specified in terms of scans (i.e., use onsets argument)
     scale <- 1
   } else {
+    #verify that there are events to be modeled in the time vector
+    if (length(times) == 0L) {
+      warning("No non-zero events for regressor to be convolved. Returning all-zero result for fMRI GLM.")
+      return(rep(0, scans))
+    } else if (all(times >= scans*tr)) {
+      #all events fall outside of the modeled time window
+      return(rep(0, scans))
+    }
+
     #upsample time grid by a factor of 100 to get best estimate of hrf at each volume
     scale <- 100
     onsets <- times/tr*scale

@@ -20,6 +20,7 @@
 #'             cc = 0.35. Controls the relative scaling of the positive response versus the undershoot.
 #'
 #'           Note: These defaults come from Glover 1999.
+#'
 #'           Note. FSL double gamma has a1 = 6, a2 = 16, cc = 1/6. Not yet sure about b1 and b2.
 #' @param baseline_coef_order Default -1 (no baseline). If >= 0, then design will include polynomial trends
 #'    within each run (e.g. baseline_coef_order = 1 includes both an intercept and a linear trend as regressors)
