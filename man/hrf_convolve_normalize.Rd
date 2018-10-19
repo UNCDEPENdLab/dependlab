@@ -4,13 +4,13 @@
 \alias{hrf_convolve_normalize}
 \title{This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0}
 \usage{
-hrf_convolve_normalize(scans, times, durations, values, tr = 1,
+hrf_convolve_normalize(n_vols, times, durations, values, tr = 1,
   normeach = FALSE, rm_zeros = TRUE, center_values = TRUE,
-  convmax_1 = FALSE, demean_convolved = FALSE, hrf_parameters = c(a1
-  = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
+  convmax_1 = FALSE, demean_convolved = FALSE, hrf_parameters = c(a1 = 6,
+  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
 }
 \arguments{
-\item{scans}{The number of volumes (scans) to be output in the convolved regressor}
+\item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}
 
 \item{times}{A vector of times (in seconds) specifying event onsets}
 

@@ -5,8 +5,7 @@
 \title{Apply a FIR-1 bandpass filter a signal. Can low- or high-pass filter by specifying 0 for low or >= Nyquist for high.}
 \usage{
 fir1Bandpass(x, TR = 2, low = 0.009, high = 0.08, n = 250,
-  plotFilter = FALSE, forward_reverse = TRUE, padx = 0,
-  detrend = 1)
+  plotFilter = FALSE, forward_reverse = TRUE, padx = 0, detrend = 1)
 }
 \arguments{
 \item{x}{The time series to be filtered}

@@ -5,8 +5,8 @@
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.}
 \usage{
 build_design_matrix(events = NULL, signals = NULL, tr = NULL,
-  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9,
-  b2 = 0.9, cc = 0.35), baseline_coef_order = -1L,
+  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 =
+  0.9, cc = 0.35), baseline_coef_order = -1L,
   baseline_parameterization = "Legendre", run_volumes = NULL,
   drop_volumes = 0L, runs_to_output = NULL, plot = TRUE,
   write_timing_files = NULL, output_directory = "run_timing",
@@ -38,6 +38,7 @@ regressors. The default is \code{TRUE}.}
             cc = 0.35. Controls the relative scaling of the positive response versus the undershoot.
 
           Note: These defaults come from Glover 1999.
+
           Note. FSL double gamma has a1 = 6, a2 = 16, cc = 1/6. Not yet sure about b1 and b2.}
 
 \item{baseline_coef_order}{Default -1 (no baseline). If >= 0, then design will include polynomial trends

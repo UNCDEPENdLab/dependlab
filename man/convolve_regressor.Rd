@@ -4,15 +4,15 @@
 \alias{convolve_regressor}
 \title{Helper function used by the summed runs and separate runs convolution steps}
 \usage{
-convolve_regressor(reg, vols, drop_volumes = 0, convolve = TRUE,
+convolve_regressor(reg, n_vols, drop_volumes = 0, convolve = TRUE,
   normalization = "none", center_values = TRUE, convmax_1 = FALSE,
-  high_pass = NULL, tr = NULL, hrf_parameters = c(a1 = 6, a2 = 12, b1
-  = 0.9, b2 = 0.9, cc = 0.35))
+  high_pass = NULL, tr = NULL, hrf_parameters = c(a1 = 6, a2 = 12, b1 =
+  0.9, b2 = 0.9, cc = 0.35))
 }
 \arguments{
 \item{reg}{A matrix for a regressor containing onset, duration, and value on the columns}
 
-\item{vols}{The number of volumes in the convolved output (before applying \code{drop_volumes})}
+\item{n_vols}{The number of volumes in the convolved output (before applying \code{drop_volumes})}
 
 \item{drop_volumes}{The number of volumes to drop from the beginning of the regressor}
 

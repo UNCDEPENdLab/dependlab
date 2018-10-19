@@ -4,19 +4,22 @@
 \alias{fmri.stimulus}
 \title{Convolve a regressor with a hemodynamic response function for fMRI analysis.}
 \usage{
-fmri.stimulus(scans = 1, onsets = c(1), durations = c(1),
-  values = c(1), center_values = FALSE, rm_zeros = TRUE,
-  convolve = TRUE, tr = 3, times = NULL, demean = TRUE, a1 = 6,
-  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1 = FALSE)
+fmri.stimulus(n_vols = 1, onsets = c(1), durations = c(1),
+  values = c(1), times = NULL, center_values = FALSE, rm_zeros = TRUE,
+  convolve = TRUE, tr = 2, demean = TRUE, a1 = 6, a2 = 12, b1 = 0.9,
+  b2 = 0.9, cc = 0.35, convmax_1 = FALSE)
 }
 \arguments{
-\item{scans}{The number of volumes (scans) to be output in the convolved regressor}
+\item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}
 
-\item{onsets}{A vector of times (in seconds) specifying event onsets}
+\item{onsets}{A vector of times (in scans) specifying event onsets}
 
 \item{durations}{A vector of durations (in seconds) for each event}
 
 \item{values}{A vector of parametric values used as regressor heights prior to convolution}
+
+\item{times}{A vector of times (in seconds) specifying event onsets. If times are passed in, the onsets
+argument (which is in scans) is ignored. That is, \code{onsets} and \code{times} are mutually exclusive.}
 
 \item{center_values}{Whether to demean values vector before convolution}
 
@@ -26,8 +29,6 @@ values prior to convolution, and retaining zeros will lead them to be non-zero a
 \item{convolve}{Whether to convolve the regressor with the HRF. If FALSE, a time series of events, durations, and heights is returned.}
 
 \item{tr}{The repetition time (sometimes called TR) in seconds}
-
-\item{times}{A vector of times (in seconds) specifying event onsets}
 
 \item{demean}{Whether to demean the regressor after convolution}
 
