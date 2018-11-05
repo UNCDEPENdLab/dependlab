@@ -5,8 +5,9 @@
 \title{This function predicts outcome variable from a (g)lmer object across values of the predictors
 It plays well with ggplot2 and is intended to give a visual sense of the model-predicted estimates.}
 \usage{
-lmer_predict(lmerObj, divide = NULL, n.divide = 3, divide.prefix = TRUE,
-  n.cont = 20, cont.pts = NULL, fixat0 = NULL, yoked = NULL)
+lmer_predict(lmerObj, divide = NULL, n.divide = 3,
+  divide.prefix = TRUE, n.cont = 20, cont.pts = NULL,
+  fixat0 = NULL, yoked = NULL)
 }
 \arguments{
 \item{lmerObj}{the fitted (g)lmer object used to make predictions}

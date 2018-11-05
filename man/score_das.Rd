@@ -5,8 +5,8 @@
 \title{Scores the Dyadic Adjustment Scale (Spanier 1976)
 This is for the 32-item version}
 \usage{
-score_das(df, item_prefix = "DAS", max_impute = 0.2, drop_items = FALSE,
-  max_value = 7)
+score_das(df, item_prefix = "DAS", max_impute = 0.2,
+  drop_items = FALSE, max_value = 7)
 }
 \arguments{
 \item{df}{a data.frame containing the 32 DAS items to be scored}

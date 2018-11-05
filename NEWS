@@ -1,0 +1,8 @@
+Version 0.1-1
+  - feature: Added wait_for_job function to wait for qsub job.
+  - feature: Added qsub_file function to submit a qsub job through R.
+  - feature: Added generate_fsf_contrast_syntax function, which generates FSL Feat .fsf syntax for contrasts based on a matrix.
+
+Version 0.1
+  - Initial release, mostly containing build_design_matrix, lmer_predict, and cor_with_target.
+  - Later added score_ecr

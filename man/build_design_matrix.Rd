@@ -5,8 +5,8 @@
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.}
 \usage{
 build_design_matrix(events = NULL, signals = NULL, tr = NULL,
-  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 =
-  0.9, cc = 0.35), baseline_coef_order = -1L,
+  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9,
+  b2 = 0.9, cc = 0.35), baseline_coef_order = -1L,
   baseline_parameterization = "Legendre", run_volumes = NULL,
   drop_volumes = 0L, runs_to_output = NULL, plot = TRUE,
   write_timing_files = NULL, output_directory = "run_timing",
