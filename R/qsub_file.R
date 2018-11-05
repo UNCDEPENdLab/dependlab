@@ -28,7 +28,7 @@
 qsub_file <- function(script, pbs_args=NULL, env_variables=NULL, echo=TRUE, fail_on_error=FALSE) {
   if (!is.null(pbs_args)) { pbs_args <- paste(pbs_args, collapse=" ") }
   if (!is.null(env_variables)) {
-    env_variables <- paste("-v", paste(env_variables, collapse=","))
+    env_variables <- paste("-v", paste(names(env_variables), env_variables, collapse=",", sep="="))
     pbs_args <- paste(pbs_args, env_variables)
   }
   
@@ -44,6 +44,7 @@ qsub_file <- function(script, pbs_args=NULL, env_variables=NULL, echo=TRUE, fail
   joberr <- scan(file=qsubstderr, what="char", sep="\n", quiet=TRUE)
 
   if (jobres != 0) {
+    jobid <- NULL
     if (fail_on_error) {
       stop("qsub submission failed: ", script, ", error: ", joberr, ", errcode: ", jobres)
     } else {

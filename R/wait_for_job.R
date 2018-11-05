@@ -27,8 +27,12 @@ wait_for_job <- function(jobid, sleep_interval=10, max_wait=60 * 60 * 24) {
       stop("Maximum wait time: ", max_wait, " exceeded. Stopping execution of parent script because something is wrong.")
     } else if (job_state == "C") {
       job_complete <- TRUE #drop out of this loop
-    } else if (job_state == "R" || job_state == "Q") {
-      cat("Job still running or queued: ", jobid, "\n")
+    } else if (job_state == "R") {
+      cat("Job still running: ", jobid, "\n")
+      Sys.sleep(sleep_interval) #sleep 10 seconds before checking again
+      wait_total <- wait_total + sleep_interval #track total time waiting
+    } else if (job_state == "Q") {
+      cat("Job still queued: ", jobid, "\n")
       Sys.sleep(sleep_interval) #sleep 10 seconds before checking again
       wait_total <- wait_total + sleep_interval #track total time waiting
     } else {
