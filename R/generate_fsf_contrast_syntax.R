@@ -26,8 +26,14 @@ generate_fsf_contrast_syntax <- function(cmat, include_overall=TRUE) {
   #currently, this only supports contrasts, not F tests
   #cmat is a contrast matrix containing the contrast names in rownames() and coefficients for the EV contrast vector
 
-  fsf_syntax <- c()
-
+  #don't support separation between original (one per column) and 'real' (one per basis element) EVs
+  fsf_syntax <- c(
+    "# Number of contrasts",
+    paste0("set fmri(ncon_orig) ", nrow(cmat)),
+    paste0("set fmri(ncon_real) ", nrow(cmat)),
+    ""
+  )
+  
   if (include_overall) {
     fsf_syntax <- c(fsf_syntax,
       "# Contrast & F-tests mode",

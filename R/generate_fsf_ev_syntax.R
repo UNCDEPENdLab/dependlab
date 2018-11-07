@@ -45,6 +45,14 @@ generate_fsf_ev_syntax <- function(inputs, dmat, group_membership=NULL) {
       ""
     )      
   }
+
+  #number of EVs
+  fsf_syntax <- c(fsf_syntax,
+    "# Number of EVs",
+    paste0("set fmri(evs_orig) ", ncol(dmat)),
+    paste0("set fmri(evs_real) ", ncol(dmat)),
+    "set fmri(evs_vox) 0"
+  )
   
   #loop over EV columns in the design
   for (j in 1:ncol(dmat)) {
