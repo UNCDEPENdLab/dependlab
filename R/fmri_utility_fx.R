@@ -1,63 +1,3 @@
-#' Helper function used by the summed runs and separate runs convolution steps
-#' @param reg A matrix for a regressor containing onset, duration, and value on the columns
-#' @param n_vols The number of volumes in the convolved output (before applying \code{drop_volumes})
-#' @param drop_volumes The number of volumes to drop from the beginning of the regressor
-#' @param convolve If \code{TRUE}, the regressor is convolved with the HRF. If \code{FALSE},
-#'          the regressor values are simply aligned onto the time grid without convolution
-#'          based on the corresponding onsets, durations, and values.
-#' @param normalization The HRF normalization method used: "none", "durmax_1", or "evtmax_1"
-#' @param convmax_1 If \code{TRUE}, rescale convolved regressors to a maximum height of 1 to equilibrate scaling
-#'          across runs and subjects.
-#' @param high_pass The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.
-#' @param tr The repetition time (in seconds) for the fMRI scan.
-#'
-#' @author Michael Hallquist
-#' @keywords internal
-convolve_regressor <- function(reg, n_vols, drop_volumes=0, convolve=TRUE, normalization="none",
-                               center_values=TRUE, convmax_1=FALSE, high_pass=NULL, tr=NULL,
-                               hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)) {
-
-  if (is.null(tr) || !is.numeric(tr)) { stop("tr must be a number (in seconds)") }
-
-  #check for the possibility that the onset of an event falls after the number of good volumes in the run
-  #if so, this should be omitted from the convolution altogether
-  if (any(whichHigh <- (reg[,"onset"]/tr) >= n_vols)) {
-    if (convolve) { message("At least one event onset falls on or after last volume of run. Omitting this from model.") } #just print on convolved execution
-    print(reg[whichHigh,])
-    reg <- reg[!whichHigh,]
-  }
-
-  #see hrf_convolve_normalize for implementation details
-  if (convolve && normalization == "evtmax_1") {
-    #each event is 1.0-normalized
-    x <- hrf_convolve_normalize(n_vols=n_vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"],
-                                normeach=TRUE, center_values=center_values, convmax_1=convmax_1, tr=tr, hrf_parameters=hrf_parameters)
-  } else if (convolve && normalization == "durmax_1") {
-    #peak amplitude of hrf is 1.0 (before multiplying by parametric value) based on stimulus duration (stims > 10s approach 1.0)
-    x <- hrf_convolve_normalize(n_vols=n_vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"],
-                                normeach=FALSE, center_values=center_values, convmax_1=convmax_1, tr=tr, hrf_parameters=hrf_parameters)
-  } else {
-    #no normalization or convolution is turned off
-    x <- fmri.stimulus(n_vols=n_vols, values=reg[,"value"], times=reg[,"onset"], durations=reg[,"duration"], tr=tr, center_values=center_values,
-                       convolve=convolve, convmax_1=convmax_1, a1=hrf_parameters["a1"], a2=hrf_parameters["a2"],
-                       b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
-  }
-
-  #apply high-pass filter after convolution if requested
-  if (!is.null(high_pass)) {
-    x <- fir1Bandpass(x, TR=tr, low=high_pass, high=1/tr/2, plotFilter=FALSE, forward_reverse=TRUE, padx=1, detrend=1)
-  }
-
-  #If requested, drop volumes from the regressor. This should be applied after convolution in case an event happens during the
-  #truncated period, but the resulting BOLD activity has not yet resolved.
-  if (drop_volumes > 0) {
-    x <- x[-1*(1:drop_volumes)]
-  }
-
-  return(x)
-}
-
-
 #' Function to convert dmat (runs x regressor list) to a time-oriented representation.
 #' This yields a list of runs where each element is data.frame of volumes x regressors
 #'
@@ -88,14 +28,17 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
     dmat_convolved <- lapply(1:dim(dmat)[1L], function(i) {
       run.convolve <- lapply(1:dim(dmat)[2L], function(j) {
         reg <- dmat[[i,j]] #regressor j for a given run i
-        convolve_regressor(reg=reg, n_vols=bdm_args$run_volumes[i], drop_volumes = bdm_args$drop_volumes[i], convolve=convolve,
-                           normalization=bdm_args$normalizations[j], center_values=bdm_args$center_values,
-                           convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr,
+        attr(reg, "reg_name") <- dimnames(dmat)[[2L]][j] #tag regressor with a name attribute so that return is named properly
+        convolve_regressor(n_vols=bdm_args$run_volumes[i], reg=reg, tr=bdm_args$tr,
+                           normalization=bdm_args$normalizations[j], rm_zeros = bdm_args$rm_zeros[j],
+                           center_values=bdm_args$center_values, convmax_1=bdm_args$convmax_1[j],
+                           demean_convolved = FALSE, high_pass=bdm_args$high_pass, convolve=convolve,
+                           beta_series=bdm_args$beta_series[j],  drop_volumes = bdm_args$drop_volumes[i],
                            hrf_parameters = bdm_args$hrf_parameters)
       })
 
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with nvols rows and nregressors cols (convolved)
-      names(df) <- dimnames(dmat)[[2L]]
+      #names(df) <- dimnames(dmat)[[2L]]
       return(df)
     })
   } else {
@@ -112,13 +55,15 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
       }))
 
       #convolve concatenated events with hrf
-      all.convolve <- convolve_regressor(concattiming, n_vols=sum(bdm_args$run_volumes), drop_volumes = bdm_args$drop_volumes[i], convolve=convolve,
-                                         normalization=bdm_args$normalizations[reg], center_values=bdm_args$center_values,
-                                         convmax_1=bdm_args$convmax_1[j], high_pass=bdm_args$high_pass, tr=bdm_args$tr,
-                                         hrf_parameters=bdm_args$hrf_parameters)
+      all.convolve <- convolve_regressor(n_vols=sum(bdm_args$run_volumes), reg=concattiming, tr=bdm_args$tr,
+                         normalization=bdm_args$normalizations[reg], rm_zeros = bdm_args$rm_zeros[reg],
+                         center_values=bdm_args$center_values, convmax_1=bdm_args$convmax_1[j],
+                         demean_convolved = FALSE, high_pass=bdm_args$high_pass, convolve=convolve,
+                         beta_series=bdm_args$beta_series[reg],  drop_volumes = 0, #drop_volumes is weird in this case -- would need to chop from each run, right?
+                         hrf_parameters = bdm_args$hrf_parameters)
 
       #now, to be consistent with code below (and elsewhere), split back into runs
-      splitreg <- split(all.convolve, do.call(c, sapply(1:length(run_volumes), function(x) { rep(x, run_volumes[x]) })))
+      splitreg <- split(all.convolve, do.call(c, sapply(1:length(bdm_args$run_volumes), function(x) { rep(x, bdm_args$run_volumes[x]) })))
 
       return(splitreg)
     })
@@ -165,35 +110,65 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #'   2) "durmax_1": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
 #'
 #' @param n_vols The number of volumes (scans) to be output in the convolved regressor
-#' @param times A vector of times (in seconds) specifying event onsets
-#' @param durations A vector of durations (in seconds) for each event
-#' @param values A vector of parametric values used as regressor heights prior to convolution
+#' @param reg A matrix containing the trial, onset, duration, and value for each event
 #' @param tr The repetition time in seconds
-#' @param normeach Whether to normalize the HRF to 1.0 for each event separately. If TRUE, equivalent to dmUBLOCK(1).
-#'          If FALSE, the HRF is normed overall, equivalent to dmUBLOCK(0).
+#' @param normalization The HRF normalization method used: "none", "durmax_1", or "evtmax_1"
 #' @param rm_zeros Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
 #'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
 #' @param center_values Whether to demean values vector before convolution. Default \code{TRUE}.
 #' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
 #' @param demean_convolved Whether to demean the regressor after convolution (default: \code{TRUE})
+#' @param high_pass The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.
+#' @param convolve If \code{TRUE}, the regressor is convolved with the HRF. If \code{FALSE},
+#'          the regressor values are simply aligned onto the time grid without convolution
+#'          based on the corresponding onsets, durations, and values.
+#' @param beta_series If \code{TRUE}, split \code{reg} into separate regressors for each event (row). These can be used
+#'          to estimate separate betas in the GLM for each event.
+#' @param drop_volumes The number of volumes to drop from the beginning of the regressor
 #' @param hrf_parameters. A named vector of parameters passed to \code{fmri.stimulus} that control the shape of the double gamma HRF.
 #'          Default: \code{c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)}.
 #'
 #' @author Michael Hallquist
 #' @keywords internal
-hrf_convolve_normalize <- function(n_vols, times, durations, values, tr=1.0, normeach=FALSE, rm_zeros=TRUE,
+convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zeros=TRUE,
                                    center_values=TRUE, convmax_1=FALSE, demean_convolved=FALSE,
+                                   high_pass=NULL, convolve=TRUE, beta_series=FALSE, drop_volumes=0,
                                    hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)) {
 
-  if (!normeach) {
+  #reg should be a matrix containing, minimally: trial, onset, duration, value
+  stopifnot(is.matrix(reg))
+
+  if (is.null(tr) || !is.numeric(tr)) { stop("tr must be a number (in seconds)") }
+
+  #check for the possibility that the onset of an event falls after the number of good volumes in the run
+  #if so, this should be omitted from the convolution altogether
+  if (any(whichHigh <- (reg[,"onset"]/tr) >= n_vols)) {
+    if (convolve) { message("At least one event onset falls on or after last volume of run. Omitting this from model.") } #just print on convolved execution
+    print(reg[whichHigh,])
+    reg <- reg[!whichHigh,]
+  }
+
+  hrf_max <- NULL #only used for durmax_1 normalization
+
+  normeach <- FALSE #signals evtmax_1 scaling
+  if (!convolve) {    
+    normalize_hrf <- FALSE #irrelevant when we are not convolving
+  } else if (normalization == "evtmax_1") {
+    normalize_hrf <- TRUE
+  } else if (normalization == "durmax_1") {
+    normalize_hrf <- TRUE
+
     #this is my hacky way to figure out the peak value for durmax_1 setup
     #obtain an estimate of the peak HRF height of a long event convolved with the HRF at these settings of a1, b1, etc.
     hrf_boxcar <- fmri.stimulus(n_vols=300/tr, values=1.0, times=100, durations=100, tr=tr, demean=FALSE,  #don't mean center for computing max height
                                 a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
     hrf_max <- max(hrf_boxcar)
-  }
+  } else if (normalization == "none") {
+    normalize_hrf <- FALSE
+  } else { stop("unrecognized normalization: ", normalization) }
 
-  cleaned <- cleanup_regressor(times, durations, values, rm_zeros = rm_zeros)
+  #cleanup NAs and zeros in the regressor before proceeding with placing it onto the time grid
+  cleaned <- cleanup_regressor(reg[,"onset"], reg[,"duration"], reg[,"value"], rm_zeros = rm_zeros)
   times <- cleaned$times; durations <- cleaned$durations; values <- cleaned$values
 
   if (length(times) == 0L) {
@@ -203,32 +178,62 @@ hrf_convolve_normalize <- function(n_vols, times, durations, values, tr=1.0, nor
 
   #handle mean centering of parametric values prior to convolution
   #this is useful when one wishes to dissociate variance due to parametric modulation versus stimulus occurrence
-  if (center_values && !all(values==1.0)) {
+  #don't demean a constant regressor such as an event regressor (all values = 1)
+  if (center_values && sd(values) > 1e-5) {
     values <- values - mean(values, na.rm=TRUE)
   }
 
-  #for each event, convolve it with hrf, normalize, then sum convolved events to get full timecourse
-  normedEvents <- sapply(1:length(times), function(i) {
-    #obtain unit-convolved duration-modulated regressor to define HRF prior to modulation by parametric regressor
-    stim_conv <- fmri.stimulus(n_vols=n_vols, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE,
-                               a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
-    if (normeach) {
-      if (times[i] + durations[i] > n_vols*tr) {
-        #when the event occurs at the end of the time series and is the only event (i.e., as in evtmax_1), the HRF never reaches its peak. The further it is
-        #away from the peak, the stranger the stim_conv/max(stim_conv) scaling will be -- it can lead to odd between-event scaling in the regressor.
-        message("Event occurs at the tail of the run. Omitting from evtmax_1 regressor to avoid strange scaling. Please check that the end of your convolved regressors matches your expectation.")
-        stim_conv <- rep(0, length(stim_conv))
-      } else {
-        stim_conv <- stim_conv/max(stim_conv) #rescale HRF to a max of 1.0 for each event, regardless of duration -- EQUIVALENT TO dmUBLOCK(1)
+  #split regressor into separate events prior to convolution
+  #in the case of evtmax_1 normalization, normalize the HRF for the event to max height of 1 prior to multiplying against the event value/height
+  #in the case of durmax_1 normalization, normalize the HRF to a height of 1 for long events (~15s)
+  #in the case of beta_series, convolve individual effects with HRF individually
+  if (normalize_hrf || beta_series) {
+    #for each event, convolve it with hrf, normalize, then sum convolved events to get full timecourse
+    normedEvents <- sapply(1:length(times), function(i) {
+      #obtain unit-convolved duration-modulated regressor to define HRF prior to modulation by parametric regressor
+      stim_conv <- fmri.stimulus(n_vols=n_vols, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve,
+                                 a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
+
+      if (normeach) {
+        if (times[i] + durations[i] > n_vols*tr) {
+          #when the event occurs at the end of the time series and is the only event (i.e., as in evtmax_1), the HRF never reaches its peak. The further it is
+          #away from the peak, the stranger the stim_conv/max(stim_conv) scaling will be -- it can lead to odd between-event scaling in the regressor.
+          message("Event occurs at the tail of the run. Omitting from evtmax_1 regressor to avoid strange scaling. Please check that the end of your convolved regressors matches your expectation.")
+          stim_conv <- rep(0, length(stim_conv))
+        } else {
+          stim_conv <- stim_conv/max(stim_conv) #rescale HRF to a max of 1.0 for each event, regardless of duration -- EQUIVALENT TO dmUBLOCK(1)
+        }
+      } else if (normalize_hrf == TRUE && normeach == FALSE) {
+        stim_conv <- stim_conv/hrf_max #rescale HRF to a max of 1.0 for long event -- EQUIVALENT TO dmUBLOCK(0)
       }
+
+      stim_conv <- stim_conv*values[i] #for each event, multiply by parametric regressor value
+    })
+
+    if (!beta_series) {
+      tc_conv <- apply(normedEvents, 1, sum) #sum individual HRF regressors for combined time course
     } else {
-      stim_conv <- stim_conv/hrf_max #rescale HRF to a max of 1.0 for long event -- EQUIVALENT TO dmUBLOCK(0)
+      #first remove any constant regressors (likely just from evtmax_1 at end of run)
+      normedEvents <- normedEvents[apply(normedEvents, 2, function(x) { sd(x) > 1e-5 }),]
+
+      #keep beta series representation of a time x regressors matrix
+      tc_conv <- normedEvents
     }
+  } else {
+    #handle unnormalized convolution
+    tc_conv <- fmri.stimulus(n_vols=n_vols, values=values, times=times, durations=durations, tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve,
+                               a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
+  }
 
-    stim_conv <- stim_conv*values[i] #for each event, multiply by parametric regressor value
-  })
+  #if we are not using a beta series, force the regressor to be a 1-column matrix so that apply calls below work
+  if (!beta_series) { tc_conv <- matrix(tc_conv, ncol=1) }
 
-  tc_conv <- apply(normedEvents, 1, sum)
+  #apply high-pass filter after convolution if requested
+  if (!is.null(high_pass)) {
+    tc_conv <- apply(tc_conv, 2, function(col) {
+      fir1Bandpass(col, TR=tr, low=high_pass, high=1/tr/2, plotFilter=FALSE, forward_reverse=TRUE, padx=1, detrend=1)
+    })
+  }
 
   # Allow for the convolved regressor to be rescaled to have a maximum height of 1.0. This normalizes
   # the range of the regressor across runs and subjects such that the betas for the regressor are on
@@ -244,9 +249,24 @@ hrf_convolve_normalize <- function(n_vols, times, durations, values, tr=1.0, nor
   }
 
   #grand mean center convolved regressor
-  if (demean_convolved) { tc_conv <- tc_conv - mean(tc_conv) }
+  if (demean_convolved) {
+    tc_conv <- apply(tc_conv, 2, function(col) { col - mean(col) })
+  }
 
-  tc_conv
+  #If requested, drop volumes from the regressor. This should be applied after convolution in case an event happens during the
+  #truncated period, but the resulting BOLD activity has not yet resolved.
+  if (drop_volumes > 0) {
+    tc_conv <- tc_conv[-1*(1:drop_volumes),,drop=FALSE]
+  }
+
+  #name the matrix columns appropriately
+  if (beta_series) {
+    colnames(tc_conv) <- paste(attr(reg, "reg_name"), sprintf("%03d", 1:ncol(tc_conv)), sep="_b")
+  } else {
+    colnames(tc_conv) <- attr(reg, "reg_name")
+  }
+  return(tc_conv)
+
 }
 
 #' Convolve a regressor with a hemodynamic response function for fMRI analysis.

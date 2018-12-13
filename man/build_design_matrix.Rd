@@ -134,7 +134,7 @@ A list of containing different aspects of the design matrix:
 Creates an fmri design matrix, including timing files for for AFNI or FSL.
 }
 \details{
-The function outputs a list containing key aspects of the fMRI desing, including
+The function outputs a list containing key aspects of the fMRI design, including
 the unconvolved and convolved regressors, collinearity diagnostics, the number of volumes
 modeled in each run, and a plot of the design.
 
@@ -229,6 +229,12 @@ The optional \code{$convmax_1} element handles rescaling the \emph{convolved} re
   help to place the betas on an equivalent scale across subjects (assuming the MR data are also scaled similarly
   between subjects).
 
+The optional \code{$demean_convolved} element handles whether to demean a convolved regressor.
+
+The optional \code{$beta_series} element handles whether to convert a given signal into a set of regressors,
+one per event. This results in a wide design matrix in which the beta series regressors each reflect a single
+convolved event. All other signal arguments apply such as HRF normalization. \code{$beta_series} defaults to FALSE.
+
 Finally, the optional \code{add_deriv} element determines whether the temporal derivative of a regressor is added to
   the design matrix after convolution. Following FSL, the derivatives are computed by a first-order difference and are
   then residualized for other regressors in the matrix. That is, the derivatives are orthogonalized with respect to
@@ -263,8 +269,8 @@ This function was adapted from the fitclock package (https://github.com/PennStat
   example_signals$ev$normalization <- "evtmax_1"
 
   #finally, add a taskness regressor for cue and outcome
-  example_signals[["cue_evt"]] <- list(value=1, event="cue", normalization="none")
-  example_signals[["outcome_evt"]] <- list(value=1, event="outcome", normalization="none")
+  example_signals$cue_evt <- list(value=1, event="cue", normalization="none")
+  example_signals$outcome_evt <- list(value=1, event="outcome", normalization="none")
 
   #include up to quadratic drift terms in the design, drop 3 volumes from the beginning,
   #and write timing files in AFNI, FSL, and convolved formats (to the "run_timing" directory).
@@ -273,6 +279,15 @@ This function was adapted from the fitclock package (https://github.com/PennStat
 
   #show unconvolved design
   plot(visualize_design_matrix(concat_design_runs(d_modified, convolved=FALSE)))
+
+  #beta series approach for cues: 1 regressor per cue event#' 
+  example_signals$cue_evt$beta_series <- TRUE
+  example_signals$ev <- NULL
+  example_signals$pe <- NULL
+  
+  d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
+    baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
+
 
 }
 \author{

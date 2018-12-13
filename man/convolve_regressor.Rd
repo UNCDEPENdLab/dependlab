@@ -2,35 +2,50 @@
 % Please edit documentation in R/fmri_utility_fx.R
 \name{convolve_regressor}
 \alias{convolve_regressor}
-\title{Helper function used by the summed runs and separate runs convolution steps}
+\title{This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0}
 \usage{
-convolve_regressor(reg, n_vols, drop_volumes = 0, convolve = TRUE,
-  normalization = "none", center_values = TRUE, convmax_1 = FALSE,
-  high_pass = NULL, tr = NULL, hrf_parameters = c(a1 = 6, a2 = 12, b1
-  = 0.9, b2 = 0.9, cc = 0.35))
+convolve_regressor(n_vols, reg, tr = 1, normalization = "none",
+  rm_zeros = TRUE, center_values = TRUE, convmax_1 = FALSE,
+  demean_convolved = FALSE, high_pass = NULL, convolve = TRUE,
+  beta_series = FALSE, drop_volumes = 0, hrf_parameters = c(a1 = 6,
+  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
 }
 \arguments{
-\item{reg}{A matrix for a regressor containing onset, duration, and value on the columns}
+\item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}
 
-\item{n_vols}{The number of volumes in the convolved output (before applying \code{drop_volumes})}
+\item{reg}{A matrix containing the trial, onset, duration, and value for each event}
 
-\item{drop_volumes}{The number of volumes to drop from the beginning of the regressor}
+\item{tr}{The repetition time in seconds}
+
+\item{normalization}{The HRF normalization method used: "none", "durmax_1", or "evtmax_1"}
+
+\item{rm_zeros}{Whether to remove zeros from events vector prior to convolution. Generally a good idea since we typically center
+values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.}
+
+\item{center_values}{Whether to demean values vector before convolution. Default \code{TRUE}.}
+
+\item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
+
+\item{demean_convolved}{Whether to demean the regressor after convolution (default: \code{TRUE})}
+
+\item{high_pass}{The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.}
 
 \item{convolve}{If \code{TRUE}, the regressor is convolved with the HRF. If \code{FALSE},
 the regressor values are simply aligned onto the time grid without convolution
 based on the corresponding onsets, durations, and values.}
 
-\item{normalization}{The HRF normalization method used: "none", "durmax_1", or "evtmax_1"}
+\item{beta_series}{If \code{TRUE}, split \code{reg} into separate regressors for each event (row). These can be used
+to estimate separate betas in the GLM for each event.}
 
-\item{convmax_1}{If \code{TRUE}, rescale convolved regressors to a maximum height of 1 to equilibrate scaling
-across runs and subjects.}
+\item{drop_volumes}{The number of volumes to drop from the beginning of the regressor}
 
-\item{high_pass}{The cutoff frequency (in Hz) used for high-pass filtering. If \code{NULL}, no filtering is applied.}
-
-\item{tr}{The repetition time (in seconds) for the fMRI scan.}
+\item{hrf_parameters.}{A named vector of parameters passed to \code{fmri.stimulus} that control the shape of the double gamma HRF.
+Default: \code{c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)}.}
 }
 \description{
-Helper function used by the summed runs and separate runs convolution steps
+It extends \code{fmri.stimulus} by allowing for two normalization approaches (building on AFNI dmUBLOCK):
+  1) "evtmax_1": pre-convolution HRF max=1.0 normalization of each stimulus regardless of duration: identical to dmUBLOCK(1)
+  2) "durmax_1": pre-convolution HRF max=1.0 normalization for long events (15+ sec) -- height of HRF is modulated by duration of event: identical to dmUBLOCK(0)
 }
 \author{
 Michael Hallquist
