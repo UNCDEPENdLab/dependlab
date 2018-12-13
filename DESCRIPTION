@@ -1,8 +1,8 @@
 Package: dependlab
 Type: Package
 Title: Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)
-Version: 0.1.1
-Date: 2018-11-07
+Version: 0.1.2
+Date: 2018-12-12
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
@@ -24,7 +24,6 @@ Imports:
   lme4,
   oro.nifti,
   orthopolynom,
-  plyr,
   signal,
   Hmisc,
   tidyr,

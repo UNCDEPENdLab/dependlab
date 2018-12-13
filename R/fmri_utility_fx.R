@@ -25,6 +25,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 
   if (bdm_args$convolve_wi_run) {
     #create an HRF-convolved version of the list
+    
     dmat_convolved <- lapply(1:dim(dmat)[1L], function(i) {
       run.convolve <- lapply(1:dim(dmat)[2L], function(j) {
         reg <- dmat[[i,j]] #regressor j for a given run i
@@ -36,6 +37,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
                            beta_series=bdm_args$beta_series[j],  drop_volumes = bdm_args$drop_volumes[i],
                            hrf_parameters = bdm_args$hrf_parameters)
       })
+
 
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with nvols rows and nregressors cols (convolved)
       #names(df) <- dimnames(dmat)[[2L]]
@@ -155,6 +157,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
     normalize_hrf <- FALSE #irrelevant when we are not convolving
   } else if (normalization == "evtmax_1") {
     normalize_hrf <- TRUE
+    normeach <- TRUE
   } else if (normalization == "durmax_1") {
     normalize_hrf <- TRUE
 
