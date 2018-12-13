@@ -7,6 +7,7 @@
 #' with a more general FSF template file that has EVs and so on.
 #'
 #' @param cmat A numeric matrix whose rows specify individual contrasts and columns specify coefficients (EVs).
+#' @param ftests A list containing F-tests composed of combinations of EVs. For future development.
 #' @param include_overall Whether to include the overall information about contrasts (e.g., whether to implement
 #'      contrast masking) in the syntax. Defaults to TRUE.
 #'
@@ -22,15 +23,22 @@
 #'
 #' @author Michael Hallquist
 #' @export
-generate_fsf_contrast_syntax <- function(cmat, include_overall=TRUE) {
+generate_fsf_contrast_syntax <- function(cmat, ftests=NULL, include_overall=TRUE) {
   #currently, this only supports contrasts, not F tests
+  #ftests is a placeholder
   #cmat is a contrast matrix containing the contrast names in rownames() and coefficients for the EV contrast vector
 
+  nftests <- ifelse(is.null(ftests), 0, length(ftests))
+  
   #don't support separation between original (one per column) and 'real' (one per basis element) EVs
   fsf_syntax <- c(
     "# Number of contrasts",
     paste0("set fmri(ncon_orig) ", nrow(cmat)),
     paste0("set fmri(ncon_real) ", nrow(cmat)),
+    "",
+    "# Number of F-tests",
+    paste0("set fmri(nftests_orig) ", nftests),
+    paste0("set fmri(nftests_real) ", nftests),
     ""
   )
   

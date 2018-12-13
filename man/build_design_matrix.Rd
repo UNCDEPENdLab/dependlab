@@ -266,7 +266,7 @@ This function was adapted from the fitclock package (https://github.com/PennStat
 
   #also use the evtmax_1 normalization method for both parametric signals
   example_signals$pe$normalization <- "evtmax_1"
-  example_signals$ev$normalization <- "evtmax_1"
+  example_signals$ev$normalization <- "durmax_1"
 
   #finally, add a taskness regressor for cue and outcome
   example_signals$cue_evt <- list(value=1, event="cue", normalization="none")

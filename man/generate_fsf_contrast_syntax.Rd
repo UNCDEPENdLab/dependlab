@@ -5,10 +5,13 @@
 \title{This function generates syntax for FSL Feat .fsf files for the contrasts tab of an fMRI analysis.
 It accepts a numeric contrast matrix whose rownames correspond to the name of the contrast.}
 \usage{
-generate_fsf_contrast_syntax(cmat, include_overall = TRUE)
+generate_fsf_contrast_syntax(cmat, ftests = NULL,
+  include_overall = TRUE)
 }
 \arguments{
 \item{cmat}{A numeric matrix whose rows specify individual contrasts and columns specify coefficients (EVs).}
+
+\item{ftests}{A list containing F-tests composed of combinations of EVs. For future development.}
 
 \item{include_overall}{Whether to include the overall information about contrasts (e.g., whether to implement
 contrast masking) in the syntax. Defaults to TRUE.}
