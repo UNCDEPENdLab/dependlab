@@ -38,7 +38,6 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
                            hrf_parameters = bdm_args$hrf_parameters)
       })
 
-
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with nvols rows and nregressors cols (convolved)
       #names(df) <- dimnames(dmat)[[2L]]
       return(df)
@@ -71,7 +70,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
     })
 
     #now have a list of length(regressors) with length(runs) elements.
-    #need to reshape into a list of data.frames where each data.fram is a run with regressors
+    #need to reshape into a list of data.frames where each data.frame is a run with regressors
     dmat_convolved <- lapply(1:length(dmat_sumruns[[1L]]), function(run) {
       df <- data.frame(lapply(dmat_sumruns, "[[", run))
       names(df) <- dimnames(dmat)[[2L]]
@@ -216,9 +215,14 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
     if (!beta_series) {
       tc_conv <- apply(normedEvents, 1, sum) #sum individual HRF regressors for combined time course
     } else {
-      #first remove any constant regressors (likely just from evtmax_1 at end of run)
-      normedEvents <- normedEvents[apply(normedEvents, 2, function(x) { sd(x) > 1e-5 }),]
-
+      if (convolve) {
+        #first remove any constant regressors (likely just from evtmax_1 at end of run)
+        #NB. This should only be applied to convolved regressors. For unconvolved, brief events are sometimes all zero because of rounding on the time grid
+        varying_cols <- apply(normedEvents, 2, function(x) { sd(x) > 1e-5 })
+        #if (any(sapply(varying_cols, isFALSE))) { browser() }
+        normedEvents <- normedEvents[,varying_cols]
+      }
+      
       #keep beta series representation of a time x regressors matrix
       tc_conv <- normedEvents
     }

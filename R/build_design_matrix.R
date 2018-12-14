@@ -512,6 +512,7 @@ build_design_matrix <- function(
     }
   }
 
+
   #Write timing files to disk for analysis by AFNI, FSL, etc.
   if (!is.null(write_timing_files)) {
     dir.create(output_directory, recursive=TRUE, showWarnings=FALSE)
