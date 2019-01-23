@@ -1,3 +1,4 @@
+
 #' Function to generate ggplot correlation heatmap
 #'
 #' @param df data.frame to plot
@@ -5,6 +6,7 @@
 #' @param alphaSort Whether to sort variables in alphabetic order
 #' @param base_size The base_size argument to the ggplot theme, controlling font sizes
 #' @param tileTextSize The size of text inside the cells of the correlation matrix
+#' @param title optional title added to ggplot
 #'
 #' @importFrom reshape2 melt
 #' @importFrom ggplot2 ggplot geom_tile theme theme_bw scale_fill_gradient2 geom_text coord_cartesian
@@ -20,7 +22,7 @@
 #' 
 #' @export
 #' 
-cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextSize=3.8) {
+cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextSize=3.8, title=NULL) {
   #require(reshape2)
   #require(ggplot2)
   #require(scales)
@@ -52,6 +54,11 @@ cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextS
   p <- p + scale_fill_gradient2(name="Correlation\n", low=muted("blue"), high=muted("red"))
   #p <- p + scale_fill_gradientn(name="Correlation", colours= c("white", "red"), limits=c(0,1))
   
+  if(!is.null(title)){
+	p <- p + ggtitle(title)
+	}  
+
+
   #want matrix to run from upper left to lower right, so need to change limits of axes
   facLevels <- sort(as.character(unique(molten.cormat$V1)))
   
