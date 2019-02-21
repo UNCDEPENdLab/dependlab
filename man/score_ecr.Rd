@@ -6,20 +6,24 @@
 This is for the 36-item version with odd (avoidance) / even (anxiety) item sorting.}
 \usage{
 score_ecr(df, item_prefix = "ECR", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, max_value = 7)
+  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
+  max_value = 7)
 }
 \arguments{
 \item{df}{a data.frame containing the 36 ECR items to be scored}
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "ECR"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..] of missing values per scale. Below this, the mean will be imputed for missing items}
+\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per scale.
+Below this threshold, the person subscale mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
 \item{keep_reverse_codes}{whether to retain the reverse coded items (suffix "r")}
 
-\item{max_value}{the highest value for the items anchors, used in reverse scoring. Default: 7}
+\item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 1}
+
+\item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 7}
 }
 \description{
 Score the experiences in close relationships -- revised (ECR-R) scale (Fraley, Waller, & Brennan, 2000)

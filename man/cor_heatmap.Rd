@@ -5,7 +5,7 @@
 \title{Function to generate ggplot correlation heatmap}
 \usage{
 cor_heatmap(df, cormat = NULL, alphaSort = TRUE, base_size = 14,
-  tileTextSize = 3.8)
+  tileTextSize = 3.8, title = NULL)
 }
 \arguments{
 \item{df}{data.frame to plot}
@@ -17,6 +17,8 @@ cor_heatmap(df, cormat = NULL, alphaSort = TRUE, base_size = 14,
 \item{base_size}{The base_size argument to the ggplot theme, controlling font sizes}
 
 \item{tileTextSize}{The size of text inside the cells of the correlation matrix}
+
+\item{title}{optional title added to ggplot}
 }
 \description{
 Function to generate ggplot correlation heatmap

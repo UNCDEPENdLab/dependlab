@@ -3,10 +3,12 @@
 #' 
 #' @param df a data.frame containing the 36 ECR items to be scored
 #' @param item_prefix a character prefix of the items names in \code{df} to be scored. Default: "ECR"
-#' @param max_impute the proportion of missingness [0..1) or number [1..] of missing values per scale. Below this, the mean will be imputed for missing items
+#' @param max_impute the proportion of missingness [0..1) or number [1..n] of missing values per scale.
+#'           Below this threshold, the person subscale mean will be imputed for missing items.
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
 #' @param keep_reverse_codes whether to retain the reverse coded items (suffix "r")
-#' @param max_value the highest value for the items anchors, used in reverse scoring. Default: 7
+#' @param min_value the minimum value for the item anchors, used in reverse scoring. Default: 1
+#' @param max_value the highest value for the item anchors, used in reverse scoring. Default: 7
 #' 
 #' @details 
 #' 
@@ -26,13 +28,13 @@
 #' @importFrom dplyr select mutate
 #' 
 score_ecr <- function(df, item_prefix="ECR", max_impute=0.2, 
-                      drop_items=FALSE, keep_reverse_codes=FALSE, max_value=7) {
+                      drop_items=FALSE, keep_reverse_codes=FALSE, min_value=1, max_value=7) {
   
   orig_items <- paste0(item_prefix, 1:36) #expect item names
   stopifnot(is.data.frame(df))
   stopifnot(all(orig_items %in% names(df)))
   
-  reverse_keys <- c(2, 22, 3, 5, 11, 15, 17, 19, 25, 27, 29, 31, 33, 35) #numeric values of items to reverse key
+  reverse_keys <- c(2, 3, 5, 11, 15, 17, 19, 22, 25, 27, 29, 31, 33, 35) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items
   
@@ -41,7 +43,7 @@ score_ecr <- function(df, item_prefix="ECR", max_impute=0.2,
   avd_items <- sapply(seq(1, 35, by=2), function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "r", "")) })
   
   #add "r" suffix and apply reverse scoring
-  df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { max_value + 1 - x }) #1-7 scoring by default
+  df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { max_value + min_value - x }) #1-7 scoring by default
   
   #mean impute, if requested (after reverse scoring to get item direction correct)
   if (max_impute > 0) {
