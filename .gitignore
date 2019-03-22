@@ -1,10 +1,11 @@
 # History files
 .Rhistory
 .Rapp.history
-
+NAMESPACE~
 # Session Data files
 .RData
-
+.DS_Store
+R/.DS_Store
 # Example code in package build process
 *-Ex.R
 
