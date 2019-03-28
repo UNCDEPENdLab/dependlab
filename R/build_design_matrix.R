@@ -276,7 +276,7 @@
 #'
 #'
 #' @export
-build_design_matrix_tmp <- function(
+build_design_matrix <- function(
   events = NULL,
   signals = NULL,
   tr=NULL, #TR of scan in seconds
