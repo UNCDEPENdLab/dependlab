@@ -276,7 +276,7 @@
 #'
 #'
 #' @export
-build_design_matrix <- function(
+build_design_matrix_tmp <- function(
   events = NULL,
   signals = NULL,
   tr=NULL, #TR of scan in seconds
@@ -538,7 +538,6 @@ build_design_matrix <- function(
   #also get an unconvolved version on the time grid for diagnostics.
   dmat_convolved <- place_dmat_on_time_grid(dmat, convolve=TRUE, bdm_args)
   dmat_unconvolved <- place_dmat_on_time_grid(dmat, convolve=FALSE, bdm_args)
-
   #dmat_convolved should now be a 1-d runs list where each element is a data.frame of convolved regressors.
   names(dmat_convolved) <- names(dmat_unconvolved) <- paste0("run", runs_to_output)
 
