@@ -11,7 +11,7 @@ build_design_matrix(events = NULL, signals = NULL, tr = NULL,
   drop_volumes = 0L, runs_to_output = NULL, plot = TRUE,
   write_timing_files = NULL, output_directory = "run_timing",
   convolve_wi_run = TRUE, high_pass = NULL, iti_post = 12,
-  nuisance_regressors = NULL)
+  ts_multipliers = NULL, nuisance_regressors = NULL)
 }
 \arguments{
 \item{events}{a data.frame that includes a column for the event type (e.g. outcome vs. cue),
@@ -97,13 +97,22 @@ result in the same removal of drift from regressors as was applied to the MR dat
 \item{iti_post}{By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and
 expecting function to use events information to calculate run_volumes. Wouldn't recommend this, just a default here.}
 
-\item{nuisance_regressors}{By default, \code{NULL}. If nuisance regressors specified, either expects list of
-character strings for different .txt files for the nuisance regressors OR it expects a
+\item{ts_multipliers}{By default, \code{NULL}. If specified, expects either a vector of character strings for different .txt files for
+the time-based regressors OR a list of data.frames (1 df per run). These data.frames contain
+time series regressors (i.e., having the same length as run_volumes) and can be used as multipliers on a stimulus
+signal prior to convolution. This is primarily intended for PPI analysis, where the stimulus regressor is multiplied
+by a time series from a seed/candidate region. To use columns of \code{ts_multiplier}, you include
+a specifier for an element in the signals list: \code{ts_multiplier="vmPFC"} where "vmPFC" is column name in
+\code{ts_multipliers}. If you use a list of character vectors (i.e., read from .txt files), make sure that you have
+headers in the text files that will become the names of the ts_multiplier signals.}
+
+\item{nuisance_regressors}{By default, \code{NULL}. If nuisance regressors specified, either expects character vector for different .txt
+files for the nuisance regressors (1 txt file per run) OR it expects a
 list of data.frames (1 df per run). These values are tacked onto design_convolved
 (and not convolved with HRF), so each regressor should be length of the number of
-run_volumes within that run. If you pass in a list of .txt files containing nuisance regressors,
+run_volumes within that run. If you pass in a vector of .txt files containing nuisance regressors,
 these will be read into R, truncated to run_volumes, and column-wise concatenated with
-substative regressors.}
+substantive regressors.}
 }
 \value{
 A list of containing different aspects of the design matrix:
@@ -280,11 +289,11 @@ This function was adapted from the fitclock package (https://github.com/PennStat
   #show unconvolved design
   plot(visualize_design_matrix(concat_design_runs(d_modified, convolved=FALSE)))
 
-  #beta series approach for cues: 1 regressor per cue event#' 
+  #beta series approach for cues: 1 regressor per cue event#'
   example_signals$cue_evt$beta_series <- TRUE
   example_signals$ev <- NULL
   example_signals$pe <- NULL
-  
+
   d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
     baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
 

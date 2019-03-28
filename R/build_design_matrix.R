@@ -67,13 +67,21 @@
 #'                    result in the same removal of drift from regressors as was applied to the MR data.
 #' @param iti_post By default, 12. Assumes 12 volumes after each run. Only necessary to specify if not supplying run_volumes and
 #'                    expecting function to use events information to calculate run_volumes. Wouldn't recommend this, just a default here.
-#' @param nuisance_regressors By default, \code{NULL}. If nuisance regressors specified, either expects list of
-#'                    character strings for different .txt files for the nuisance regressors OR it expects a
+#' @param ts_multipliers By default, \code{NULL}. If specified, expects either a vector of character strings for different .txt files for
+#'                    the time-based regressors OR a list of data.frames (1 df per run). These data.frames contain
+#'                    time series regressors (i.e., having the same length as run_volumes) and can be used as multipliers on a stimulus
+#'                    signal prior to convolution. This is primarily intended for PPI analysis, where the stimulus regressor is multiplied
+#'                    by a time series from a seed/candidate region. To use columns of \code{ts_multiplier}, you include
+#'                    a specifier for an element in the signals list: \code{ts_multiplier="vmPFC"} where "vmPFC" is column name in
+#'                    \code{ts_multipliers}. If you use a list of character vectors (i.e., read from .txt files), make sure that you have
+#'                    headers in the text files that will become the names of the ts_multiplier signals.
+#' @param nuisance_regressors By default, \code{NULL}. If nuisance regressors specified, either expects character vector for different .txt
+#'                    files for the nuisance regressors (1 txt file per run) OR it expects a
 #'                    list of data.frames (1 df per run). These values are tacked onto design_convolved
 #'                    (and not convolved with HRF), so each regressor should be length of the number of
-#'                    run_volumes within that run. If you pass in a list of .txt files containing nuisance regressors,
+#'                    run_volumes within that run. If you pass in a vector of .txt files containing nuisance regressors,
 #'                    these will be read into R, truncated to run_volumes, and column-wise concatenated with
-#'                    substative regressors.
+#'                    substantive regressors.
 #'
 #' @details
 #'
@@ -258,11 +266,11 @@
 #'   #show unconvolved design
 #'   plot(visualize_design_matrix(concat_design_runs(d_modified, convolved=FALSE)))
 #'
-#'   #beta series approach for cues: 1 regressor per cue event#' 
+#'   #beta series approach for cues: 1 regressor per cue event#'
 #'   example_signals$cue_evt$beta_series <- TRUE
 #'   example_signals$ev <- NULL
 #'   example_signals$pe <- NULL
-#'   
+#'
 #'   d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
 #'     baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
 #'
@@ -285,6 +293,7 @@ build_design_matrix <- function(
   convolve_wi_run=TRUE, #whether to mean center parametric regressors within runs before convolution
   high_pass=NULL, #whether to apply a high-pass filter to the design matrix (e.g., to match fmri preprocessing)
   iti_post = 12,
+  ts_multipliers=NULL, #time series regressors that can be multiplied against signals prior to convolution
   nuisance_regressors = NULL #allow for nuisance regression text file to be implemented. need separate file for each
 ) {
 
@@ -438,12 +447,12 @@ build_design_matrix <- function(
     nuisance_regressors_df <- data.frame()
 
     for (i in 1:length(nuisance_regressors)) {
-      nuisance_regressor_currun <- read.table(nuisance_regressors[i])
+      nuisance_regressors_currun <- read.table(nuisance_regressors[i])
       nuisance_regressors_currun$run <- i
       rv = run_volumes[i]
       print(rv)
-      nuisance_regressors_currun <- dplyr::slice(nuisance_regressor_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
-      nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressor_currun)
+      nuisance_regressors_currun <- dplyr::slice(nuisance_regressors_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
+      nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressors_currun)
     }
   } else if (is.list(nuisance_regressors)) {
     #assuming that a list of data.frames for each run of the data
@@ -462,6 +471,49 @@ build_design_matrix <- function(
   } else {
     nuisance_regressors <- NULL
   }
+
+  #handle time series modulator regressors
+  if (is.character(ts_multipliers)) {
+    ts_multipliers_df <- data.frame()
+
+    #read in each text file
+    for (i in 1:length(ts_multipliers)) {
+      ts_multipliers_currun <- read.table(ts_multipliers[i])
+      ts_multipliers_currun$run <- i
+      rv = run_volumes[i]
+      #message(paste0("Current run_volumes:", rv))
+      ts_multipliers_currun <- dplyr::slice(ts_multipliers_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
+      ts_multipliers_df <- bind_rows(ts_multipliers_df, ts_multipliers_currun)
+    }
+  } else if (is.list(ts_multipliers)) {
+    #assuming that a list of data.frames for each run of the data
+    #all that need to do is concatenate the data frames after filtering any obs that are above run_volumes
+    ts_multipliers_df <- data.frame()
+    for(i in 1:length(ts_multipliers)) {
+      ts_multipliers_currun <- ts_multipliers[[i]]
+      stopifnot(is.data.frame(ts_multipliers_currun))
+      ts_multipliers_currun$run <- i
+      rv = run_volumes[i]
+      #message(paste0("Current run_volumes:", rv))
+      if(nrow(ts_multipliers_currun) < rv) { stop("Ts multiplier regressor have fewer observations than run_volumes") }
+      ts_multipliers_currun <- dplyr::slice(ts_multipliers_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
+      ts_multipliers_df <- bind_rows(ts_multipliers_df, ts_multipliers_currun)
+    }
+  } else {
+    ts_multipliers <- NULL
+  }
+
+  #Add ts_multipliers to signals as needed. Will generate a list in which each element is a run
+  #NB. This doesn't handle runs_to_output appropriately!!
+  bdm_args$ts_multiplier <- lapply(signals, function(s) {
+    if (is.null(s$ts_multiplier)) {
+      return(NULL)
+    } else {
+      #split the relevant column of the ts_multipliers_df for this signal at run boundaries
+      ss <- split(ts_multipliers_df[[s$ts_multiplier]], ts_multipliers_df$run)
+      return(ss)
+    }
+  })
 
   #Build the runs x signals 2-D list
   #Note that we enforce dropped volumes (from beginning of run) below
@@ -543,14 +595,14 @@ build_design_matrix <- function(
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
           regout <- dmat[[i,reg]][,c("onset", "duration", "value")]
-          
+
           #handle beta series outputs
           if (isTRUE(bdm_args$beta_series[reg])) {
             for (k in 1:nrow(regout)) {
               #only write out a 3-column file for a non-zero event (regardless of rm_zeros)
               if (isFALSE(abs(regout[k,"value"]) < 1e-5)) {
                 fname <- paste0("run", runs_to_output[i], "_", dimnames(dmat)[[2L]][reg], "_b", sprintf("%03d", k), "_FSL3col.txt")
-                write.table(regout[k,,drop=FALSE], file=file.path(output_directory, fname), sep="\t", eol="\n", col.names=FALSE, row.names=FALSE)                
+                write.table(regout[k,,drop=FALSE], file=file.path(output_directory, fname), sep="\t", eol="\n", col.names=FALSE, row.names=FALSE)
               }
             }
           } else {
@@ -565,7 +617,7 @@ build_design_matrix <- function(
             fname <- paste0("run", runs_to_output[i], "_", dimnames(dmat)[[2L]][reg], "_FSL3col.txt")
             write.table(regout, file=file.path(output_directory, fname), sep="\t", eol="\n", col.names=FALSE, row.names=FALSE)
 
-          }       
+          }
         }
       }
     }
@@ -576,7 +628,7 @@ build_design_matrix <- function(
 
       #AFNI amplitude modulation forces a mean and deviation from the mean regressor for each effect
       #as a result, if two parametric influences occur at a given time, it leads to perfect collinearity.
-      
+
       #need to unify multiple values that share onset time
       #time*modulation1,modulation2:duration
 
