@@ -25,8 +25,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 
   if (bdm_args$convolve_wi_run) {
     #create an HRF-convolved version of the list
-
-    #i is run, j is regressor
+    
     dmat_convolved <- lapply(1:dim(dmat)[1L], function(i) {
       run.convolve <- lapply(1:dim(dmat)[2L], function(j) {
         reg <- dmat[[i,j]] #regressor j for a given run i
@@ -35,8 +34,8 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
                            normalization=bdm_args$normalizations[j], rm_zeros = bdm_args$rm_zeros[j],
                            center_values=bdm_args$center_values, convmax_1=bdm_args$convmax_1[j],
                            demean_convolved = FALSE, high_pass=bdm_args$high_pass, convolve=convolve,
-                           beta_series=bdm_args$beta_series[j], ts_multiplier=bdm_args$ts_multiplier[[j]][[i]],
-                           drop_volumes = bdm_args$drop_volumes[i], hrf_parameters = bdm_args$hrf_parameters)
+                           beta_series=bdm_args$beta_series[j],  drop_volumes = bdm_args$drop_volumes[i],
+                           hrf_parameters = bdm_args$hrf_parameters)
       })
 
       df <- do.call(data.frame, run.convolve) #pull into a data.frame with nvols rows and nregressors cols (convolved)
@@ -56,16 +55,12 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
         timing
       }))
 
-      #concat runs of the ts_multiplier within the current regressor
-      concat_ts_multiplier <- do.call(c, bdm_args$ts_multiplier[[reg]])
-
       #convolve concatenated events with hrf
       all.convolve <- convolve_regressor(n_vols=sum(bdm_args$run_volumes), reg=concattiming, tr=bdm_args$tr,
                          normalization=bdm_args$normalizations[reg], rm_zeros = bdm_args$rm_zeros[reg],
                          center_values=bdm_args$center_values, convmax_1=bdm_args$convmax_1[j],
                          demean_convolved = FALSE, high_pass=bdm_args$high_pass, convolve=convolve,
-                         beta_series=bdm_args$beta_series[reg], ts_multiplier=concat_ts_multiplier,
-                         drop_volumes = 0, #drop_volumes is weird in this case -- would need to chop from each run, right?
+                         beta_series=bdm_args$beta_series[reg],  drop_volumes = 0, #drop_volumes is weird in this case -- would need to chop from each run, right?
                          hrf_parameters = bdm_args$hrf_parameters)
 
       #now, to be consistent with code below (and elsewhere), split back into runs
@@ -130,7 +125,6 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #'          based on the corresponding onsets, durations, and values.
 #' @param beta_series If \code{TRUE}, split \code{reg} into separate regressors for each event (row). These can be used
 #'          to estimate separate betas in the GLM for each event.
-#' @param ts_multiplier A vector that is n_vols in length that will be multiplied against the stimulus vector before convolution.
 #' @param drop_volumes The number of volumes to drop from the beginning of the regressor
 #' @param hrf_parameters. A named vector of parameters passed to \code{fmri.stimulus} that control the shape of the double gamma HRF.
 #'          Default: \code{c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)}.
@@ -139,7 +133,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 #' @keywords internal
 convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zeros=TRUE,
                                    center_values=TRUE, convmax_1=FALSE, demean_convolved=FALSE,
-                                   high_pass=NULL, convolve=TRUE, beta_series=FALSE, ts_multiplier=NULL, drop_volumes=0,
+                                   high_pass=NULL, convolve=TRUE, beta_series=FALSE, drop_volumes=0,
                                    hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)) {
 
   #reg should be a matrix containing, minimally: trial, onset, duration, value
@@ -158,7 +152,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
   hrf_max <- NULL #only used for durmax_1 normalization
 
   normeach <- FALSE #signals evtmax_1 scaling
-  if (!convolve) {
+  if (!convolve) {    
     normalize_hrf <- FALSE #irrelevant when we are not convolving
   } else if (normalization == "evtmax_1") {
     normalize_hrf <- TRUE
@@ -199,7 +193,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
     #for each event, convolve it with hrf, normalize, then sum convolved events to get full timecourse
     normedEvents <- sapply(1:length(times), function(i) {
       #obtain unit-convolved duration-modulated regressor to define HRF prior to modulation by parametric regressor
-      stim_conv <- fmri.stimulus(n_vols=n_vols, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve, ts_multiplier=ts_multiplier,
+      stim_conv <- fmri.stimulus(n_vols=n_vols, values=1.0, times=times[i], durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve,
                                  a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
 
       if (normeach) {
@@ -228,13 +222,13 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
         #if (any(sapply(varying_cols, isFALSE))) { browser() }
         normedEvents <- normedEvents[,varying_cols]
       }
-
+      
       #keep beta series representation of a time x regressors matrix
       tc_conv <- normedEvents
     }
   } else {
     #handle unnormalized convolution
-    tc_conv <- fmri.stimulus(n_vols=n_vols, values=values, times=times, durations=durations, tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve, ts_multiplier = ts_multiplier,
+    tc_conv <- fmri.stimulus(n_vols=n_vols, values=values, times=times, durations=durations, tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve,
                                a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
   }
 
@@ -301,19 +295,17 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 #'          values prior to convolution, and retaining zeros will lead them to be non-zero after mean centering.
 #' @param convolve Whether to convolve the regressor with the HRF. If FALSE, a time series of events, durations, and heights is returned.
 #' @param tr The repetition time (sometimes called TR) in seconds
-#' @param ts_multiplier A time series of length \code{n_vols} that is multiplied against the stimulus before convolution.
-#' @param demean Whether to demean the regressor after convolution. Default: TRUE
-#' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
+#' @param demean Whether to demean the regressor after convolution
 #' @param a1 The a1 parameter of the double gamma
 #' @param a2 The a2 parameter of the double gamma
 #' @param b1 The b1 parameter of the double gamma
 #' @param b2 The b2 parameter of the double gamma
 #' @param cc The cc parameter of the double gamma
+#' @param convmax_1 Whether to rescale the convolved regressor to a maximum height of 1.
 #'
 #' @export
 fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
-                       tr=2, ts_multiplier=NULL, demean=TRUE, convmax_1=FALSE,
-                       a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+                       tr=2, demean=TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, convmax_1=FALSE) {
 
   #double gamma function
   mygamma <- function(x, a1, a2, b1, b2, c) {
@@ -324,9 +316,6 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
     res <- c1 * exp(-(x-d1)/b1) - c2 * exp(-(x-d2)/b2)
     res
   }
-
-  #verify that ts_multiplier is n_vols in length
-  if (!is.null(ts_multiplier)) { stopifnot(is.vector(ts_multiplier) && length(ts_multiplier) == n_vols) }
 
   if (!is.null(times)) {
     cleaned <- cleanup_regressor(times, durations, values, rm_zeros = rm_zeros)
@@ -361,10 +350,12 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
     durations <- durations/tr*scale
     tr <- tr/scale
     n_vols <- n_vols*scale
+
     if (!is.null(ts_multiplier)) {
       #upsample ts_multiplier using linear interpolation
-      ts_multiplier <- approx(ts_multiplier, n=n_vols*scale)$y
+      ts_multiplier <- approx(ts_multiplier, n=n_vols)$y
     }
+
   }
   numberofonsets <- length(onsets)
 
@@ -404,11 +395,6 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
   #but perhaps we should let the user know when he/she specifies a time vector that extends into
   #unmodeled timepoints
   stimulus <- stimulus[1:n_vols]
-
-  #if we have a time-based modulator of the signal, multiply it against the stimulus vector before convolution
-  if (!is.null(ts_multiplier)) {
-    stimulus <- stimulus * ts_multiplier
-  }
 
   #  zero pad stimulus vector to avoid bounding/edge effects in convolve
   stimulus <- c(rep(0,20*scale),stimulus,rep(0,20*scale))

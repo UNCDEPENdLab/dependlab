@@ -7,8 +7,8 @@
 convolve_regressor(n_vols, reg, tr = 1, normalization = "none",
   rm_zeros = TRUE, center_values = TRUE, convmax_1 = FALSE,
   demean_convolved = FALSE, high_pass = NULL, convolve = TRUE,
-  beta_series = FALSE, ts_multiplier = NULL, drop_volumes = 0,
-  hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
+  beta_series = FALSE, drop_volumes = 0, hrf_parameters = c(a1 = 6,
+  a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
 }
 \arguments{
 \item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}
@@ -36,8 +36,6 @@ based on the corresponding onsets, durations, and values.}
 
 \item{beta_series}{If \code{TRUE}, split \code{reg} into separate regressors for each event (row). These can be used
 to estimate separate betas in the GLM for each event.}
-
-\item{ts_multiplier}{A vector that is n_vols in length that will be multiplied against the stimulus vector before convolution.}
 
 \item{drop_volumes}{The number of volumes to drop from the beginning of the regressor}
 
