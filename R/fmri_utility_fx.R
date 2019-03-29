@@ -363,7 +363,7 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
     n_vols <- n_vols*scale
     if (!is.null(ts_multiplier)) {
       #upsample ts_multiplier using linear interpolation
-      ts_multiplier <- approx(ts_multiplier, n=nvols*scale)$y
+      ts_multiplier <- approx(ts_multiplier, n=n_vols)$y
     }
   }
   numberofonsets <- length(onsets)
