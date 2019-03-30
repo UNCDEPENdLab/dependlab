@@ -310,6 +310,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 #' @param b2 The b2 parameter of the double gamma
 #' @param cc The cc parameter of the double gamma
 #'
+#' @importFrom stats approx
 #' @export
 fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
                        tr=2, ts_multiplier=NULL, demean=TRUE, convmax_1=FALSE,
