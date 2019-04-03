@@ -54,6 +54,8 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
   lm_items <- paste0(item_prefix, c(25, 37, 47, 59, 64, 67, 70, 87))
   no_items <- paste0(item_prefix, c(4, 30, 39, 52, 56, 61, 62, 78))
 
+  all_oct <- c(pa_items, bc_items, de_items, fg_items, hi_items, jk_items, lm_items, no_items)
+  
   #PD scales
   bpd_items <- paste0(item_prefix, c(51, 53, 55, 66, 77, 80, 89, 90)) #Clifton BPD scale
   sensitivity_pd1_items <- paste0(item_prefix, c(1, 35, 36, 42, 51, 55, 60, 78, 79, 81, 86)) #Pilkonis PD1
@@ -61,6 +63,14 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
   aggression_pd3_items <- paste0(item_prefix, c(50, 53, 58, 63, 77, 80, 88)) #Pilkonis PD3
   approval_c1_items <- paste0(item_prefix, c(2, 9, 16, 48, 59, 66, 72, 74, 75)) #need for social approval
   lacksocial_c2_items <- paste0(item_prefix, c(3, 7, 17, 19, 22, 33, 43, 49, 71, 85)) #lack of sociability
+
+  #okay to impute within scale
+  #bpd_items, sensitivity_pd1_items
+  
+  #too overlapping with octants, could lead to compound imputation dilemmas
+  pd_items <- c(ambivalence_pd2_items, aggression_pd3_items , approval_c1_items, lacksocial_c2_items)
+    
+  pd_uniq <- pd_items[!pd_items %in% all_oct]
   
   #NB. There is no reverse scoring for the IIP-90
 
@@ -74,6 +84,14 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
     df <- mean_impute_items(df, jk_items, thresh=max_impute)
     df <- mean_impute_items(df, lm_items, thresh=max_impute)
     df <- mean_impute_items(df, no_items, thresh=max_impute)
+    
+    df <- mean_impute_items(df, bpd_items, thresh=max_impute) #Mostly non-overlapping. Only iip80 overlaps octants
+    df <- mean_impute_items(df, sensitivity_pd1_items, thresh=max_impute) #Mostly non-overlapping. On iip1 and iip78 overlap octants
+    
+    if (any(which_miss <- sapply(df[,pd_uniq], function(col) { any(is.na(col)) }))) {
+      message("Missing data in items that are unique to PD scales, but where other subscale items overlap octants.")
+      message("We will not impute these. Check columns: ", paste(pd_uniq[which_miss], collapse=", "))
+    }
   }
 
   #https://github.com/jennybc/row-oriented-workflows/blob/master/ex09_row-summaries.md
