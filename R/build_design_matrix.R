@@ -489,9 +489,12 @@ build_design_matrix <- function(
     #assuming that a list of data.frames for each run of the data
     #all that need to do is concatenate the data frames after filtering any obs that are above run_volumes
     ts_multipliers_df <- data.frame()
+    
     for(i in 1:length(ts_multipliers)) {
       ts_multipliers_currun <- ts_multipliers[[i]]
       stopifnot(is.data.frame(ts_multipliers_currun))
+      #mean center PPI signals
+      ts_multipliers_currun <- as.data.frame(lapply(ts_multipliers_currun, function(x) { x - mean(x, na.rm=TRUE) } ))
       ts_multipliers_currun$run <- i
       rv = run_volumes[i]
       #message(paste0("Current run_volumes:", rv))
