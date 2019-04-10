@@ -46,7 +46,7 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
   }
   
   
-  reverse_keys <- c(4, 8, 10, 28, 32, 43, 45, 48, 52, 53, 54, 60) #numeric values of items to reverse key
+  reverse_keys <- c(4, 8, 10, 28, 32, 43, 45, 48, 52, 53, 54, 60, 67) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items
   

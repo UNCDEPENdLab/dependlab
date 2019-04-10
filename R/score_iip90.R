@@ -2,7 +2,7 @@
 #'
 #' @param df a data.frame containing the 90 IIP items to be scored
 #' @param item_prefix a character prefix of the items names in \code{df} to be scored. Default: "IIP"
-#' @param max_impute the proportion of missingness [0..1) or number [1..n] of missing values per subscale.
+#' @param max_impute the proportion of missingness [0..1] or number [1..n] of missing values per subscale.
 #'            Below this, the mean will be imputed for missing items.
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
 #' @param keep_octants whether to retain the IIP octant scores. Default: FALSE
@@ -12,8 +12,8 @@
 #' @details
 #'
 #' UPDATE ME!
-#' Adds two columns, \code{ECR_anxiety} and \code{ECR_avoidance}, to \code{df} containing
-#' the anxiety and avoidance scales, respectively.
+#' Adds twenty columns, eight for octant scales, six for pd scales, and six for circumplex scales, to \code{df} containing
+#' the octant, pd, and additional scales, respectively.
 #'
 #' Note: the default ECR scoring uses the mean of the items for the scales.
 #'
@@ -28,8 +28,8 @@
 score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
                       drop_items=FALSE, keep_reverse_codes=FALSE, min_value=0, max_value=4) {
 
-  warning("This function is not complete yet. Just returning original data.frame for now.")
-  return(df)
+  # warning("This function is not complete yet. Just returning original data.frame for now.")
+  # return(df)
 
   orig_items <- paste0(item_prefix, 1:90) #expect item names
   stopifnot(is.data.frame(df))
@@ -94,6 +94,9 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
     }
   }
 
+  pd_scales <- c("IIP_sensitivity_pd1", "IIP_ambivalence_pd2", "IIP_aggression_pd3")
+  c_scales <- c("IIP_approval_c1", "IIP_lacksocial_c2")
+  
   #https://github.com/jennybc/row-oriented-workflows/blob/master/ex09_row-summaries.md
   df <- df %>% mutate(
     IIP_pa = rowMeans(select(., pa_items)),
@@ -108,17 +111,20 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
     IIP_sensitivity_pd1 = rowMeans(select(., sensitivity_pd1_items)),
     IIP_ambivalence_pd2 = rowMeans(select(., ambivalence_pd2_items)),
     IIP_aggression_pd3 = rowMeans(select(., aggression_pd3_items)),
-    IIP_pd = mean(c(IIP_sensitivity_pd1, IIP_ambivalence_pd2, IIP_aggression_pd3)), #overall pd mean
-    IIP_havePD = as.numeric(IIP_pd > 1.1), # Pilkonis 1996 cutoff: IIP_havePD > 1.1
     IIP_approval_c1 = rowMeans(select(., approval_c1_items)), #need for social approval
     IIP_lacksocial_c2 = rowMeans(select(., lacksocial_c2_items)), #lack of sociability
-    IIP_c = mean(c(IIP_approval_c1, IIP_lacksocial_c2)),
     #THESE MAY NEED TO USE apply(., 1, function(row)) type syntax: https://community.rstudio.com/t/calculate-mean-over-a-subset-of-multiple-specific-variables-but-without-stating-variables-names/7686/6
     IIP_agency = .25*(IIP_pa - IIP_hi + .707*(IIP_bc + IIP_no - IIP_fg - IIP_jk)), #agency axis
     IIP_communion = .25*(IIP_lm - IIP_de + .707*(IIP_no + IIP_jk - IIP_bc - IIP_fg)), #communion axis
     IIP_elevation = (IIP_pa + IIP_bc + IIP_de + IIP_fg + IIP_hi + IIP_jk + IIP_lm + IIP_no)/8 #overall severity (mean of octants)
-  )
-
+    ) %>% mutate(  #can't run within same mutate call, since the relevant vars have not been defined yet.
+      IIP_c = rowMeans(select(.,c_scales)),
+      IIP_pd = rowMeans(select(.,pd_scales)) #overall pd mean
+    ) %>% mutate(
+      IIP_havePD = as.numeric(select(.,IIP_pd) > 1.1) # Pilkonis 1996 cutoff: IIP_havePD > 1.1
+    )
+  
+ 
   if (drop_items) { df <- df %>% select(-orig_items) }
 
   return(df)

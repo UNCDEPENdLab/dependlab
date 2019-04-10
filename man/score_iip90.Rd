@@ -13,7 +13,7 @@ score_iip90(df, item_prefix = "IIP", max_impute = 0.2,
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "IIP"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per subscale.
+\item{max_impute}{the proportion of missingness [0..1] or number [1..n] of missing values per subscale.
 Below this, the mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
@@ -29,8 +29,8 @@ Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex versi
 }
 \details{
 UPDATE ME!
-Adds two columns, \code{ECR_anxiety} and \code{ECR_avoidance}, to \code{df} containing
-the anxiety and avoidance scales, respectively.
+Adds twenty columns, eight for octant scales, six for pd scales, and six for circumplex scales, to \code{df} containing
+the octant, pd, and additional scales, respectively.
 
 Note: the default ECR scoring uses the mean of the items for the scales.
 
