@@ -227,6 +227,7 @@
 #' @importFrom car vif
 #' @importFrom stats as.formula cor lm residuals rnorm
 #' @importFrom utils read.table write.table
+#' @importFrom RNifti niftiHeader
 #'
 #' @author Michael Hallquist
 #' @author Alison Schreiber
@@ -236,7 +237,7 @@
 #'   data(example_signals)
 #'
 #'   #basic convolved design matrix
-#'   d <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0)
+#'   d <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE)
 #'
 #'   data(example_nuisrun1) #load demo nuisance signals
 #'   data(example_nuisrun2)
@@ -336,12 +337,16 @@ build_design_matrix <- function(
         s_aligned$duration <- s_aligned[[s$duration]]
       }
     }
-
+    
     #transform to make dmat happy (runs x regressors 2-d list)
     #dplyr::select will tolerate quoted names, which avoids R CMD CHECK complaints
     retdf <- s_aligned %>% dplyr::select("trial", "onset", "duration", "value")
     retsplit <- split(retdf, s_aligned$run)
     names(retsplit) <- paste0("run", names(retsplit))
+
+    #tag the aligned signal with the event element so that we can identify which regressors are aligned to the same event later
+    retsplit <- lapply(retsplit, function(rr) { attr(rr, "event") <- s$event; return(rr) })
+
     return(retsplit)
   })
 
@@ -397,6 +402,7 @@ build_design_matrix <- function(
 
   #define number of runs based off of the length of unique runs in the events data.frame
   nruns <- length(unique(events$run))
+  run_niftis <- NULL
   if (is.null(run_volumes)) {
     #determine the last fMRI volume to be analyzed
     run_volumes <- rep(0, nruns)
@@ -415,11 +421,13 @@ build_design_matrix <- function(
     message(paste0("Resulting volumes: ", paste(run_volumes, collapse=", ")))
 
   } else if (is.character(run_volumes)) {
+    message("Using NIfTI images to determine run lengths")
+    run_niftis <- run_volumes
     run_volumes_list <- c()
     for( i in 1:length(run_volumes)) {
       currentNifti <- run_volumes[i]
-      out <- readNIfTI(currentNifti, read_data = FALSE)
-      rv <- dim(out@.Data)[4] # grabs the 4th dimension of the matrix, which is the number of Volumes
+      out <- niftiHeader(currentNifti)
+      rv <- out$dim[5]
       run_volumes_list <- c(run_volumes_list, rv)
     }
     run_volumes <- run_volumes_list
@@ -522,14 +530,19 @@ build_design_matrix <- function(
   #Note that we enforce dropped volumes (from beginning of run) below
   #This is because fmri.stimulus gives odd behaviors (e.g. constant 1s) if an onset time is negative
   dmat <- do.call(cbind, lapply(1:length(signals_aligned), function(signal) {
-    lapply(signals_aligned[[signal]], function(run) { as.matrix(run) })
+    lapply(signals_aligned[[signal]], function(run) {
+      mm <- as.matrix(run)
+      attr(mm, "event") <- attr(run, "event") #propagate event tag
+      return(mm)
+    })
   }))
 
   #only retain runs to be analyzed
   dmat <- dmat[runs_to_output,,drop=FALSE]
   run_volumes <- run_volumes[runs_to_output] #need to subset this, too, for calculations below to match
   drop_volumes <- drop_volumes[runs_to_output] #need to subset this, too, for calculations below to match
-
+  if (!is.null(run_niftis)) { run_niftis <- run_niftis[runs_to_output] }
+  
   #run_volumes and drop_volumes are used by convolve_regressor to figure out the appropriate regressor length
   bdm_args$run_volumes <- run_volumes #copy into argument list
   bdm_args$drop_volumes <- drop_volumes #copy into argument list
@@ -791,7 +804,7 @@ build_design_matrix <- function(
   names(concat_onsets) <- dimnames(dmat)[[2L]]
 
   to_return <- list(design=dmat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
-                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_volumes=run_volumes)
+                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_niftis=run_niftis, run_volumes=run_volumes)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
 

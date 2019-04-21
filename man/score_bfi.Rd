@@ -36,7 +36,7 @@ Note: the default BFI-2 scoring uses the mean of the items for the scales.
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:60
 will yield the 60 items from the test.
 
-See: \url {http://www.colby.edu/psych/wp-content/uploads/sites/50/2013/08/bfi2-form.pdf}
+See: \url{http://www.colby.edu/psych/wp-content/uploads/sites/50/2013/08/bfi2-form.pdf}
 }
 \author{
 Michael Hallquist

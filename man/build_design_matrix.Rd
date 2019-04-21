@@ -259,7 +259,7 @@ This function was adapted from the fitclock package (https://github.com/PennStat
   data(example_signals)
 
   #basic convolved design matrix
-  d <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0)
+  d <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE)
 
   data(example_nuisrun1) #load demo nuisance signals
   data(example_nuisrun2)
