@@ -1,3 +1,8 @@
+Version 0.1-4
+  - feature: generate_spm_mat function for generating SPM12 GLMs from build_design_matrix
+  - feature: spm_extract_anatomical_rois function for extracting time series (VOIs) from SPM.mat files (for DCM)
+  - bugfix:  adjust run_volumes properly when drop_volumes > 0 and run_volumes is the NIfTIs. Assume that NIfTIs already have dropped volumes
+
 Version 0.1-1
   - feature: Added wait_for_job function to wait for qsub job.
   - feature: Added qsub_file function to submit a qsub job through R.

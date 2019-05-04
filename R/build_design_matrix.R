@@ -267,7 +267,7 @@
 #'   #show unconvolved design
 #'   plot(visualize_design_matrix(concat_design_runs(d_modified, convolved=FALSE)))
 #'
-#'   #beta series approach for cues: 1 regressor per cue event#'
+#'   #beta series approach for cues: 1 regressor per cue event
 #'   example_signals$cue_evt$beta_series <- TRUE
 #'   example_signals$ev <- NULL
 #'   example_signals$pe <- NULL
@@ -421,7 +421,7 @@ build_design_matrix <- function(
     message(paste0("Resulting volumes: ", paste(run_volumes, collapse=", ")))
 
   } else if (is.character(run_volumes)) {
-    message("Using NIfTI images to determine run lengths")
+    message("Using NIfTI images to determine run lengths.")
     run_niftis <- run_volumes
     run_volumes_list <- c()
     for( i in 1:length(run_volumes)) {
@@ -450,6 +450,14 @@ build_design_matrix <- function(
     drop_volumes <- rep(drop_volumes[1L], length(run_volumes))
   }
 
+  #For NIfTI input, assume that the .nii.gz is already truncated. Therefore, the number of volumes detected in the NIfTI
+  #must be adjusted *upward* by drop_volumes so that the drop is carried out properly
+  if (!is.null(run_niftis) && any(drop_volumes > 0)) {
+    message("Assuming that NIfTIs already have drop_volumes removed. Adjusting run_volumes accordingly")
+    run_volumes <- run_volumes + drop_volumes
+    print(data.frame(nifti=run_niftis, detected_volumes=run_volumes_list, run_volumes=run_volumes))
+  }
+
   #handle nuisance regressors
   if (is.character(nuisance_regressors)) {
     nuisance_regressors_df <- data.frame()
@@ -464,7 +472,7 @@ build_design_matrix <- function(
     }
   } else if (is.list(nuisance_regressors)) {
     #assuming that a list of data.frames for each run of the data
-    #all that need to do is concatonate the data frames after filtering any obs that are above run_volumes
+    #all that need to do is concatenate the data frames after filtering any obs that are above run_volumes
     nuisance_regressors_df <- data.frame()
     for(i in 1:length(nuisance_regressors)) {
       nuisance_regressors_currun <- nuisance_regressors[[i]]
@@ -787,27 +795,32 @@ build_design_matrix <- function(
   #concatenate regressors across runs by adding timing from MR files.
   runtiming <- cumsum(run_volumes)*tr #timing in seconds of the start of successive runs
 
-  #Define concatenated onsets of all events (e.g., in an AFNI-style setup)
-  #note that we want to add the run timing from the r-1 run to timing for run r.
-  #example: run 1 is 300 volumes with a TR of 2.0
-  # thus, run 1 has timing 0s .. 298s, and the first volume of run 2 would be 300s
-  concat_onsets <- lapply(1:dim(dmat)[2L], function(reg) {
+  #Define concatenatenation of all events (e.g., in an AFNI-style setup)
+  #Note that we want to add the run timing from the r-1 run to timing for run r.
+  #Example: run 1 is 300 volumes with a TR of 2.0
+  #  Thus, run 1 has timing 0s .. 298s, and the first volume of run 2 would be 300s
+  design_concat <- lapply(1:dim(dmat)[2L], function(reg) {
     thisreg <- dmat[,reg]
-    concat_reg <- do.call(c, lapply(1:length(thisreg), function(run) {
+    concat_reg <- do.call(rbind, lapply(1:length(thisreg), function(run) {
       timing <- thisreg[[run]]
       timing[,"onset"] <- timing[,"onset"] + ifelse(run > 1, runtiming[run-1], 0)
-      timing[timing[,"value"] != 0, "onset"] #remove exact 0 values from "events"
+      return(timing)
     }))
+    attr(concat_reg, "event") <- attr(thisreg[[1]], "event") #propagate event alignment
 
     concat_reg
   })
-  names(concat_onsets) <- dimnames(dmat)[[2L]]
+  names(design_concat) <- dimnames(dmat)[[2L]]
 
-  to_return <- list(design=dmat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
-                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_niftis=run_niftis, run_volumes=run_volumes)
+  #just the onsets for each event
+  concat_onsets <- lapply(design_concat, function(x) { x[,"onset"] })
+  
+  to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
+                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_niftis=run_niftis, run_volumes=run_volumes, tr=tr)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
 
+  class(to_return) <- c("list", "bdm") #tag as bdm object
   if (plot == TRUE) { plot(to_return$design_plot) }
   return(to_return)
 
