@@ -18,13 +18,17 @@
 #'            represent the condition average across all runs (e.g., [ .5, .5 ] for 2 runs). Default: TRUE
 #' @param unit_contrasts Whether to estimate a unit-height contrast for every regressor in the design.
 #'            This essentially includes a diagonal matrix in the contrast specification. Default: FALSE
-#' @param spm_execute_setup Whether to run the GLM setup script in MATLAB, creating SPM.mat. Default: TRUE
+#' @param include_block_contrasts Whether to estimate contrasts for the run-specific intercepts in the design.
+#'            Note that this qualifies \code{condition_contrasts} and \code{unit_contrasts}, but does nothing on its own.
+#' @param effects_of_interest_F Whether to include a single F test contrast with all regressors of interest. Useful
+#'            in adjusting VOIs for nuisance regressors. Default: TRUE
+#' @param spm_execute_setup Whether to run the GLM setup script in MATLAB, creating SPM.mat. Default: FALSE
 #' @param spm_execute_glm Whether to run the GLM after creating SPM.mat. This could take a while! Default: FALSE
 #' @param spm_execute_contrasts Whether to compute contrasts after GLM is complete. Depends on \code{spm_execute_glm}. Default: FALSE
 #' @param concatenate_runs Whether to convert multi-run data into a single concatenated session. This will execute spm_fmri_concatenate
 #'            after the GLM setup is complete. This script computes run-specific whitening and high-pass filters while keeping
 #'            a single concatenated time series. This is useful as a preamble to DCM, which often uses concatenated time series. Default: FALSE
-#' @param generate_qsub Whether to create a qsub PBS script for running MATLAB scripts for design matrix creation and estimation
+#' @param generate_qsub Whether to create a qsub PBS script for running MATLAB scripts for design matrix creation and estimation. Default: TRUE
 #' @param spm_path The path to an spm12 directory. This will be included in MATLAB scripts to ensure that spm is found.
 #'
 #' @importFrom R.matlab readMat
@@ -46,9 +50,10 @@
 generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
                              hpf=100, hrf_derivs="none", nifti_tmpdir=tempdir(),
                              cleanup_tmp=FALSE, condition_contrasts=TRUE,
-                             unit_contrasts=TRUE, spm_execute_setup=TRUE, spm_execute_glm=FALSE,
-                             spm_execute_contrasts=FALSE, concatenate_runs=FALSE, generate_qsub=FALSE,
-                             spm_path="/gpfs/group/mnh5174/default/lab_resources/spm12") {
+                             unit_contrasts=TRUE, effects_of_interest_F=TRUE,
+                             spm_execute_setup=FALSE, spm_execute_glm=FALSE,
+                             spm_execute_contrasts=FALSE, concatenate_runs=FALSE, generate_qsub=TRUE,
+                             execute_qsub=FALSE, spm_path="/gpfs/group/mnh5174/default/lab_resources/spm12") {
 
   #for concatenate runs, need to setup a single SPM mat (one session), run GLM setup, then call spm_fmri_concatenate('SPM.mat', nscans)
   #where the latter is a vector run volumes ($run_volumes in BDM)
@@ -73,6 +78,11 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
   if (spm_execute_contrasts && !spm_execute_glm) {
     message("Because spm_execute_contrasts is TRUE, I will set spm_execute_glm to TRUE, too.")
     spm_execute_glm <- TRUE #running the contrasts depends on first estimating the model
+  }
+
+  if (execute_qsub && !generate_qsub) {
+    message("Because execute_qsub is TRUE, I will set generate_qsub to TRUE, too.")
+    generate_qsub <- TRUE
   }
   
   #extract key ingredients from bdm object  
@@ -137,7 +147,6 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
   } else { stop("don't understand hrf_derivs argument: ", hrf_derivs) }
 
   m_string <- c(
-    spm_preamble,
     paste0("matlabbatch = []; %initialize empty structure"),
     paste0(baseobj, ".dir = {'", output_dir, "'};"),
     "",
@@ -148,7 +157,7 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
     paste0(baseobj, ".timing.fmri_t0 = 1; % alignment within TR"),
     #"% factorial",
     paste0(baseobj, ".fact = struct('name', {}, 'levels', {});"),
-    "% bases",
+    "% basis functions",
     hrf_string,
     "% volterra",
     paste0(baseobj, ".volt = 1;"),
@@ -275,19 +284,24 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
     }
   }
 
-  #Run GLM design setup after filling out run details
-  m_string <- c(m_string,
+  #Generate syntax for executing SPM GLM setup
+  exec_string <- c(
+    spm_preamble,
+    ifelse (file.exists(file.path(output_dir, "SPM.mat")), paste0("delete('", file.path(output_dir, "SPM.mat"), "');"), ""), #remove SPM.mat if it exists
+    paste0("run('", file.path(output_dir, "glm_design_batch.m"), "');"), #source the settings for this GLM
     "% RUN DESIGN MATRIX JOB",
     paste0("spm_jobman('run',matlabbatch);")
   )
 
   if (concatenate_runs) {
-    m_string <- c(m_string, paste0("spm_fmri_concatenate( [ '", output_dir, "' filesep 'SPM.mat'], [ ", paste(bdm$run_volumes, collapse=", "), " ]);"))
+    exec_string <- c(exec_string, paste0("spm_fmri_concatenate( [ '", output_dir, "' filesep 'SPM.mat'], [ ", paste(bdm$run_volumes, collapse=", "), " ]);"))
   }
   
   #write GLM setup to file
-  cat(m_string, file=file.path(output_dir, "setup_glm_design.m"), sep="\n")
-  spm_syntax[["glm_design"]] <- m_string  
+  cat(m_string, file=file.path(output_dir, "glm_design_batch.m"), sep="\n")
+  cat(exec_string, file=file.path(output_dir, "setup_glm_design.m"), sep="\n")
+  spm_syntax[["glm_design"]] <- m_string
+  spm_syntax[["exec_glm_setup"]] <- exec_string
 
   if (spm_execute_setup) {
     system(paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "setup_glm_design.m"), "');exit;\""))
@@ -321,74 +335,15 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
     message("To estimate GLM after design matrix setup, execute this command: ", paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "run_glm.m"), "');exit;\""))
   }
 
-  if (condition_contrasts || unit_contrasts) {
-    if (condition_contrasts) {
-      #get the names of run regressors, then compute averages for conditions
-      mtmp <- tempfile(fileext=".m")
-      mattmp <- tempfile(fileext=".mat")
-      mnames <- c(
-        spm_preamble,
-        paste0("load([ '", output_dir, "' filesep 'SPM.mat']);"),
-        paste0("mnames=SPM.xX.name(:);"),
-        paste0("save('", mattmp, "', 'mnames');")
-      )
-      cat(mnames, file=mtmp)
-      system(paste0("module load matlab/R2017b; matlab -nodisplay -r \"run('", mtmp, "');exit;\""))
-
-      mnames <- unlist(readMat(mattmp)$mnames)
-
-      reg_names <- sub("Sn\\(\\d+\\)\\s+", "", mnames, perl=TRUE)
-      reg_split <- split(mnames, reg_names)
-
-      #don't estimate the run intercept contrast
-      if (any(which_const <- names(reg_split) == "constant")) { reg_split <- reg_split[!which_const] }
-      cmat <- c()
-      for (rr in 1:length(reg_split)) {
-        nruns <- length(reg_split[[rr]])
-        cweight <- 1/nruns
-        cvec <- rep(0, length(mnames))
-        cvec[ mnames %in% reg_split[[rr]] ] <- cweight
-        cmat <- rbind(cmat, cvec)
-      }
-      rownames(cmat) <- paste0(make.names(names(reg_split)), ".ravg")
-      colnames(cmat) <- make.names(mnames)
-
-      m_string <- c(
-        spm_preamble,
-        "% SETUP BATCH JOB STRUCTURE",
-        "contrast = struct;",
-        "% spmmat",
-        paste0("contrast.matlabbatch{1}.spm.stats.con.spmmat = { ['", output_dir, "' filesep 'SPM.mat']};")
-      )
-
-      for (cn in 1:nrow(cmat)) {
-        m_string <- c(m_string,
-          paste0("% consess ", cn),
-          paste0("contrast.matlabbatch{1}.spm.stats.con.consess{", cn, "}.tcon.name = '", rownames(cmat)[cn], "';"),
-          paste0("contrast.matlabbatch{1}.spm.stats.con.consess{", cn, "}.tcon.convec = [ ", paste(cmat[cn,], collapse=", "), " ];"),
-          paste0("contrast.matlabbatch{1}.spm.stats.con.consess{", cn, "}.tcon.sessrep = 'none';") #not using session replication at the moment...
-        )
-      }
-
-      m_string <- c(m_string,
-        "% delete?",
-        "contrast.matlabbatch{1}.spm.stats.con.delete = 0;",
-        "% RUN BATCH JOB",
-        "spm_jobman('run',contrast.matlabbatch);"
-      )
-
-      cat(m_string, file=file.path(output_dir, "estimate_glm_contrasts.m"), sep="\n")
-      spm_syntax[["glm_contrasts"]] <- m_string  
-
-      if (spm_execute_contrasts) {
-        system(paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""))
-      } else {
-        message("To estimate contrasts after design matrix setup, execute this command: ", paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""))
-      }
-      
-    }
-  }
-
+  spm_contrast_cmds <- generate_spm_contrasts(output_dir, condition_contrasts, unit_contrasts,
+    effects_of_interest_F, spm_path, execute=spm_execute_contrasts)
+  
+#  if (spm_execute_contrasts) {
+#    system(paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""))
+#  } else {
+#    message("To estimate contrasts after design matrix setup, execute this command: ", paste0("module load matlab/R2017b; matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""))
+#  }     
+  
   if (generate_qsub) {
     qsub_job <- c(
       "#!/usr/bin/env sh",
@@ -400,24 +355,30 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
       paste0("#PBS -l nodes=1:ppn=1:himem"), #just 1 core needed for SPM
       "#PBS -W group_list=mnh5174_collab",
       "#PBS -l pmem=8gb", #make sure each process has enough memory
-      "source /gpfs/group/mnh5174/default/lab_resources/ni_path.bash #setup environment",
+      "",
+      "export G=/gpfs/group/mnh5174/default #our group allocation",
+      "module use $G/sw/modules",
+      "",
       "module load matlab/R2017b",
-      paste0("cd '", output_dir, "';"),   
-      paste0("matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""),
+      "module load r/3.6.0",
+      paste0("cd '", output_dir, "'"),
+      paste0("matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "setup_glm_design.m"), "');exit;\""),
       paste0("matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "run_glm.m"), "');exit;\""),
-      paste0("matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "setup_glm_design.m"), "');exit;\"")
+      spm_contrast_cmds$extract_cmd,
+      spm_contrast_cmds$setup_cmd,
+      paste0("matlab -nodisplay -nosplash -r \"run('", file.path(output_dir, "estimate_glm_contrasts.m"), "');exit;\""),
+      ifelse(cleanup_tmp, paste0("rm -f ", paste(run_niftis[gzipped], collapse=" ")), "")
     )
 
     cat(qsub_job, file=file.path(output_dir, "execute_spm_qsub.bash"), sep="\n")
-    spm_syntax[["qsub_job"]] <- qsub_job
-    
+    spm_syntax[["qsub_job"]] <- qsub_job    
   }
   
-  if (cleanup_tmp) {
+  if (cleanup_tmp && !generate_qsub) {
     if (any(gzipped)) {
       sapply(run_niftis[gzipped], function(x) { unlink(x) })
     }
   }
   
-  return(m_string)
+  return(spm_syntax)
 }

@@ -289,7 +289,7 @@ This function was adapted from the fitclock package (https://github.com/PennStat
   #show unconvolved design
   plot(visualize_design_matrix(concat_design_runs(d_modified, convolved=FALSE)))
 
-  #beta series approach for cues: 1 regressor per cue event#'
+  #beta series approach for cues: 1 regressor per cue event
   example_signals$cue_evt$beta_series <- TRUE
   example_signals$ev <- NULL
   example_signals$pe <- NULL

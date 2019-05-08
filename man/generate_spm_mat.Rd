@@ -7,9 +7,10 @@
 generate_spm_mat(bdm, ts_files = NULL, output_dir = "spm_out",
   hpf = 100, hrf_derivs = "none", nifti_tmpdir = tempdir(),
   cleanup_tmp = FALSE, condition_contrasts = TRUE,
-  unit_contrasts = TRUE, spm_execute_setup = TRUE,
-  spm_execute_glm = FALSE, spm_execute_contrasts = FALSE,
-  concatenate_runs = FALSE, generate_qsub = FALSE,
+  unit_contrasts = TRUE, effects_of_interest_F = TRUE,
+  spm_execute_setup = FALSE, spm_execute_glm = FALSE,
+  spm_execute_contrasts = FALSE, concatenate_runs = FALSE,
+  generate_qsub = TRUE,
   spm_path = "/gpfs/group/mnh5174/default/lab_resources/spm12")
 }
 \arguments{
@@ -40,7 +41,10 @@ represent the condition average across all runs (e.g., [ .5, .5 ] for 2 runs). D
 \item{unit_contrasts}{Whether to estimate a unit-height contrast for every regressor in the design.
 This essentially includes a diagonal matrix in the contrast specification. Default: FALSE}
 
-\item{spm_execute_setup}{Whether to run the GLM setup script in MATLAB, creating SPM.mat. Default: TRUE}
+\item{effects_of_interest_F}{Whether to include a single F test contrast with all regressors of interest. Useful
+in adjusting VOIs for nuisance regressors. Default: TRUE}
+
+\item{spm_execute_setup}{Whether to run the GLM setup script in MATLAB, creating SPM.mat. Default: FALSE}
 
 \item{spm_execute_glm}{Whether to run the GLM after creating SPM.mat. This could take a while! Default: FALSE}
 
@@ -50,9 +54,12 @@ This essentially includes a diagonal matrix in the contrast specification. Defau
 after the GLM setup is complete. This script computes run-specific whitening and high-pass filters while keeping
 a single concatenated time series. This is useful as a preamble to DCM, which often uses concatenated time series. Default: FALSE}
 
-\item{generate_qsub}{Whether to create a qsub PBS script for running MATLAB scripts for design matrix creation and estimation}
+\item{generate_qsub}{Whether to create a qsub PBS script for running MATLAB scripts for design matrix creation and estimation. Default: TRUE}
 
 \item{spm_path}{The path to an spm12 directory. This will be included in MATLAB scripts to ensure that spm is found.}
+
+\item{include_block_contrasts}{Whether to estimate contrasts for the run-specific intercepts in the design.
+Note that this qualifies \code{condition_contrasts} and \code{unit_contrasts}, but does nothing on its own.}
 }
 \value{
 A list containing the MATLAB syntax/scripts for GLM setup, execution, and contrast estimation
