@@ -31,7 +31,7 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
   stopifnot(all(dir.exists(l1spmdirs)))
   stopifnot(all(file.exists(masks)))
   if (is.null(names(masks))) {
-    names(masks) <- tools::file_path_sans_ext(basename(masks)) #develop basic naming scheme
+    names(masks) <- sub("(\\.hdr|\\.nii|\\.img)(\\.gz)*$", "", basename(masks), perl=TRUE) #develop basic naming scheme
   }
 
   stopifnot(dir.exists(spm_path))
@@ -50,6 +50,15 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
     registerDoSEQ()
   }
 
+  nifti_tmpdir <- tempdir()
+  gzipped <- grepl(".nii.gz$", masks)
+  dir.create(nifti_tmpdir, showWarnings=FALSE)
+  masks[gzipped] <- sapply(masks[gzipped], function(x) {
+    tmpout <- tempfile(fileext=".nii", tmpdir=nifti_tmpdir)
+    system(paste0("gunzip -c ", x, " > ", tmpout))
+    return(tmpout)
+  })
+  
   #add single quotes around mask strings if not present
   masks <- sub("^'?([^']+)'?", "'\\1'", masks, perl=TRUE)
   mask_names <- sub("^'?([^']+)'?", "'\\1'", names(masks), perl=TRUE)
@@ -62,9 +71,16 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
     "spm_jobman('initcfg');",
     ""    
   )
-  
-  res <- foreach(dd=iter(l1spmdirs)) %dopar% {
+
+  #contains matlab scripts for extraction
+  matlab_scripts <- system.file("matlab", package = "dependlab")
+  stopifnot(dir.exists(matlab_scripts))
+
+  #getting weird errors
+  #res <- foreach(dd=iter(l1spmdirs), .packages="matlabr") %dopar% {
+  for (dd in l1spmdirs) {
     m_string <- c(spm_preamble,
+      paste0("addpath('", matlab_scripts, "');"),
       "cfg = struct();",
       "masks = {",
       masks,
@@ -73,15 +89,15 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
       mask_names,
       "};",
       "",
-      "threshold = ", threshold, ";",
-      "threshdesc = ", sub("^'?([^']+)'?", "'\\1'", threshdesc, perl=TRUE), ";",
-      "session = ", session, ";",
-      "extent = ", extent, ";",
-      "adjust_F_index = ", adjust_F_index, "; %adjust time series for all effects of interest",
-      "contrast_index = ", contrast_index, "; %the contrast of interest",
+      paste0("threshold = ", threshold, ";"),
+      paste0("threshdesc = ", sub("^'?([^']+)'?", "'\\1'", threshdesc, perl=TRUE), ";"),
+      paste0("session = ", session, ";"),
+      paste0("extent = ", extent, ";"),
+      paste0("adjust_F_index = ", adjust_F_index, "; %adjust time series for all effects of interest"),
+      paste0("contrast_index = ", contrast_index, "; %the contrast of interest"),
       "",
       "for jj = 1 : numel(masks)",
-      "  cfg(jj).target_dir = fullfile('", dd, "');",
+      paste0("  cfg(jj).target_dir = fullfile('", dd, "');"),
       "  cfg(jj).mask = masks{jj};",
       "  cfg(jj).adjust = adjust_F_index;",
       "  cfg(jj).session = session;",
@@ -94,11 +110,9 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
       "spm_extract_anatomical_rois(cfg);"
     )
 
-    #contains matlab scripts for extraction
-    matlab_scripts <- system.file("inst", "matlab", package = "dependlab")
-    
-    run_matlab_code(m_string, endlines = FALSE, verbose = TRUE,
-      add_clear_all = FALSE, paths_to_add = matlab_scripts)
-    
+    run_matlab_code(m_string, endlines = FALSE, verbose = TRUE, add_clear_all = FALSE)
+
+    #this argument to run_matlab_code adds the paths at the end, not the beginning, which doesn't help
+    #, paths_to_add = matlab_scripts)    
   }
 }

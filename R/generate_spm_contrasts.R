@@ -14,7 +14,7 @@ generate_spm_contrasts <- function(output_dir, condition_contrasts=TRUE, unit_co
                                    spm_path="/gpfs/group/mnh5174/default/lab_resources/spm12", execute=FALSE) {
 
   if (missing(output_dir)) { stop("No output_dir provided. This must be the folder containing the SPM.mat file") }
-  #if (!file.exists(file.path(output_dir, "SPM.mat"))) { stop("No SPM.mat file found in: ", output_dir, ". This must be setup prior to estimating contrasts.") }
+  if (execute && !file.exists(file.path(output_dir, "SPM.mat"))) { stop("No SPM.mat file found in: ", output_dir, ". This must be setup prior to estimating contrasts.") }
 
   if (condition_contrasts==FALSE && unit_contrasts==FALSE && effects_of_interest_F==FALSE) {
     message("No contrasts were requested by call to generate_spm_contrasts. As a result, nothing will occur here.")

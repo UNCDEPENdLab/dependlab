@@ -40,18 +40,28 @@ function spm_extract_anatomical_rois(cfg)
         jobs{ii}.spm.util.voi.session = cfg(ii).session;
         jobs{ii}.spm.util.voi.name = cfg(ii).name;
 
-        % The image data
-        jobs{ii}.spm.util.voi.roi{1}.spm.spmmat = {''};
-        jobs{ii}.spm.util.voi.roi{1}.spm.contrast = cfg(ii).contrast;
-        jobs{ii}.spm.util.voi.roi{1}.spm.threshdesc = cfg(ii).threshdesc;
-        jobs{ii}.spm.util.voi.roi{1}.spm.thresh = cfg(ii).threshold;
-        jobs{ii}.spm.util.voi.roi{1}.spm.extent = cfg(ii).extent;
+	%use contrast for defining region
+	if isfield(cfg(ii), 'contrast') && ~isempty(cfg(ii).contrast)
+	  % The image data
+          jobs{ii}.spm.util.voi.roi{1}.spm.spmmat = {''};
+          jobs{ii}.spm.util.voi.roi{1}.spm.contrast = cfg(ii).contrast;
+          jobs{ii}.spm.util.voi.roi{1}.spm.threshdesc = cfg(ii).threshdesc;
+          jobs{ii}.spm.util.voi.roi{1}.spm.thresh = cfg(ii).threshold;
+          jobs{ii}.spm.util.voi.roi{1}.spm.extent = cfg(ii).extent;
 
-        % The anatomical ROI mask
-        jobs{ii}.spm.util.voi.roi{2}.mask.image = {cfg(ii).mask)};
+	  % The anatomical ROI mask
+          jobs{ii}.spm.util.voi.roi{2}.mask.image = {cfg(ii).mask};
 
-        % The logical expression combining images.
-        jobs{ii}.spm.util.voi.expression = 'i1 & i2';
+	  % The logical expression combining images.
+          jobs{ii}.spm.util.voi.expression = 'i1 & i2';
+	else
+	  % Use only an anatomical ROI mask
+          jobs{ii}.spm.util.voi.roi{1}.mask.image = {cfg(ii).mask};
+
+	  % The logical expression combining images.
+          jobs{ii}.spm.util.voi.expression = 'i1';
+	end
+	
     end
 
     try
