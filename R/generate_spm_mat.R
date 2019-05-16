@@ -373,6 +373,10 @@ generate_spm_mat <- function(bdm, ts_files=NULL, output_dir="spm_out",
     cat(qsub_job, file=file.path(output_dir, "execute_spm_qsub.bash"), sep="\n")
     spm_syntax[["qsub_job"]] <- qsub_job    
   }
+
+  if (execute_qsub) {
+    system(paste0("qsub ", file.path(output_dir, "execute_spm_qsub.bash")))
+  }
   
   if (cleanup_tmp && !generate_qsub) {
     if (any(gzipped)) {

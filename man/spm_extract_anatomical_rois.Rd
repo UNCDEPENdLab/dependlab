@@ -6,7 +6,7 @@
 \usage{
 spm_extract_anatomical_rois(l1spmdirs, masks, threshold = 0.2,
   threshdesc = "none", session = 1, extent = 0, adjust_F_index = 1,
-  contrast_index = 2, ncores = 1,
+  contrast_index = NULL, ncores = 1,
   spm_path = "/gpfs/group/mnh5174/default/lab_resources/spm12",
   matlab_path = "/opt/aci/sw/matlab/R2017b/bin")
 }

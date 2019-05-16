@@ -10,7 +10,7 @@ generate_spm_mat(bdm, ts_files = NULL, output_dir = "spm_out",
   unit_contrasts = TRUE, effects_of_interest_F = TRUE,
   spm_execute_setup = FALSE, spm_execute_glm = FALSE,
   spm_execute_contrasts = FALSE, concatenate_runs = FALSE,
-  generate_qsub = TRUE,
+  generate_qsub = TRUE, execute_qsub = FALSE,
   spm_path = "/gpfs/group/mnh5174/default/lab_resources/spm12")
 }
 \arguments{

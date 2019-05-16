@@ -14,7 +14,8 @@
 #' 
 #' @importFrom matlabr run_matlab_code
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach registerDoSEQ foreach
+#' @importFrom foreach registerDoSEQ foreach %dopar%
+#' @importFrom iterators iter
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom matlabr have_matlab run_matlab_code
 #'
@@ -23,7 +24,7 @@
 #' @export
 #' 
 spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshdesc='none', session=1, extent=0,
-                                        adjust_F_index=1, contrast_index=2, ncores=1,
+                                        adjust_F_index=1, contrast_index=NULL, ncores=1,
                                         spm_path="/gpfs/group/mnh5174/default/lab_resources/spm12",
                                         matlab_path="/opt/aci/sw/matlab/R2017b/bin") {
   
@@ -58,10 +59,10 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
     system(paste0("gunzip -c ", x, " > ", tmpout))
     return(tmpout)
   })
-  
+
   #add single quotes around mask strings if not present
-  masks <- sub("^'?([^']+)'?", "'\\1'", masks, perl=TRUE)
   mask_names <- sub("^'?([^']+)'?", "'\\1'", names(masks), perl=TRUE)
+  masks <- sub("^'?([^']+)'?", "'\\1'", masks, perl=TRUE)
 
   #TODO: support multi-session data
 
@@ -76,9 +77,10 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
   matlab_scripts <- system.file("matlab", package = "dependlab")
   stopifnot(dir.exists(matlab_scripts))
 
-  #getting weird errors
-  #res <- foreach(dd=iter(l1spmdirs), .packages="matlabr") %dopar% {
-  for (dd in l1spmdirs) {
+  res <- foreach(dd=iter(l1spmdirs), .packages="matlabr") %dopar% {
+    #set the matlab path for matlabr in each worker
+    options(matlab.path=matlab_path)
+
     m_string <- c(spm_preamble,
       paste0("addpath('", matlab_scripts, "');"),
       "cfg = struct();",
@@ -93,22 +95,30 @@ spm_extract_anatomical_rois <- function(l1spmdirs, masks, threshold=0.2, threshd
       paste0("threshdesc = ", sub("^'?([^']+)'?", "'\\1'", threshdesc, perl=TRUE), ";"),
       paste0("session = ", session, ";"),
       paste0("extent = ", extent, ";"),
-      paste0("adjust_F_index = ", adjust_F_index, "; %adjust time series for all effects of interest"),
-      paste0("contrast_index = ", contrast_index, "; %the contrast of interest"),
+      paste0("adjust_F_index = ", ifelse(is.null(adjust_F_index), "[]", adjust_F_index), "; %adjust time series for all effects of interest"),
+      paste0("contrast_index = ", ifelse(is.null(contrast_index), "[]", contrast_index), "; %the contrast of interest"),
       "",
       "for jj = 1 : numel(masks)",
       paste0("  cfg(jj).target_dir = fullfile('", dd, "');"),
       "  cfg(jj).mask = masks{jj};",
       "  cfg(jj).adjust = adjust_F_index;",
       "  cfg(jj).session = session;",
-      "  cfg(jj).name = names{jj};",
+      "  cfg(jj).name = names{jj};"
+    )
+
+    if (!is.null(contrast_index)) {
+      m_string <- c(m_string,
       "  cfg(jj).contrast = contrast_index;",
       "  cfg(jj).threshold = threshold;",
       "  cfg(jj).threshdesc = threshdesc;",
-      "  cfg(jj).extent = extent;",
+      "  cfg(jj).extent = extent;"
+      )
+    }
+
+    m_string <- c(m_string,
       "end",
       "spm_extract_anatomical_rois(cfg);"
-    )
+    )      
 
     run_matlab_code(m_string, endlines = FALSE, verbose = TRUE, add_clear_all = FALSE)
 
