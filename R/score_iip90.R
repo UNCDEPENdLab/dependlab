@@ -26,7 +26,7 @@
 #' @importFrom dplyr select mutate
 #'
 score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
-                      drop_items=FALSE, keep_reverse_codes=FALSE, min_value=0, max_value=4) {
+                      drop_items=FALSE, keep_octants=TRUE, min_value=0, max_value=4) {
 
   # warning("This function is not complete yet. Just returning original data.frame for now.")
   # return(df)
@@ -74,7 +74,7 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
   
   #NB. There is no reverse scoring for the IIP-90
 
-  #mean impute, if requested (after reverse scoring to get item direction correct)
+  #mean impute, if requested
   if (max_impute > 0) {
     df <- mean_impute_items(df, pa_items, thresh=max_impute)
     df <- mean_impute_items(df, bc_items, thresh=max_impute)
@@ -126,6 +126,7 @@ score_iip90 <- function(df, item_prefix="IIP", max_impute=0.2,
   
  
   if (drop_items) { df <- df %>% select(-orig_items) }
-
+  if (!keep_octants) { df <- df %>% select(-IIP_pa, -IIP_bc, -IIP_de, -IIP_fg, -IIP_hi, -IIP_jk, -IIP_lm, -IIP_no) }
+  
   return(df)
 }
