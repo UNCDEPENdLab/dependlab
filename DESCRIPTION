@@ -1,8 +1,8 @@
 Package: dependlab
 Type: Package
 Title: Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)
-Version: 0.1.4
-Date: 2019-05-01
+Version: 0.1.5
+Date: 2019-05-18
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
@@ -34,4 +34,6 @@ Imports:
   RNifti,
   doParallel,
   foreach,
-  matlabr
+  matlabr,
+  iterators
+

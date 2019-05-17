@@ -1,3 +1,6 @@
+Version 0.1-5
+  - feature: add deconvolve_nlreg_resample function that implement Bush 2015 deconvolution with resampling approach
+
 Version 0.1-4
   - feature: generate_spm_mat function for generating SPM12 GLMs from build_design_matrix
   - feature: spm_extract_anatomical_rois function for extracting time series (VOIs) from SPM.mat files (for DCM)

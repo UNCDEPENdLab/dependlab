@@ -6,7 +6,7 @@
 Adapted from the original provided by Keith Bush}
 \usage{
 deconvolve_nlreg(BOLDobs, kernel, nev_lr = 0.01, epsilon = 0.005,
-  normalize = TRUE)
+  beta = 40, normalize = TRUE, trim_kernel = TRUE)
 }
 \arguments{
 \item{BOLDobs}{observed BOLD timeseries}
@@ -17,7 +17,12 @@ deconvolve_nlreg(BOLDobs, kernel, nev_lr = 0.01, epsilon = 0.005,
 
 \item{epsilon}{relative error change (termination condition). Default: .005}
 
+\item{beta}{slope of the sigmoid transfer function (higher = more nonlinear)}
+
 \item{normalize}{whether to unit-normalize (z-score) \code{BOLDobs} before deconvolution. Default: TRUE}
+
+\item{trim_kernel}{whether to remove the first K time points from the deconvolved vector, corresponding to
+kernel leftovers from convolution. Default: TRUE}
 }
 \value{
 A time series of the same length containing reconstructed neural events

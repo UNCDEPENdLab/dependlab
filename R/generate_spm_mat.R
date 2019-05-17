@@ -29,6 +29,7 @@
 #'            after the GLM setup is complete. This script computes run-specific whitening and high-pass filters while keeping
 #'            a single concatenated time series. This is useful as a preamble to DCM, which often uses concatenated time series. Default: FALSE
 #' @param generate_qsub Whether to create a qsub PBS script for running MATLAB scripts for design matrix creation and estimation. Default: TRUE
+#' @param execute_qsub Whether to submit the PBS script create by \code{generate_qsub} to the cluster using the qsub command. Default: FALSE
 #' @param spm_path The path to an spm12 directory. This will be included in MATLAB scripts to ensure that spm is found.
 #'
 #' @importFrom R.matlab readMat
