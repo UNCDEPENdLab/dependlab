@@ -129,17 +129,38 @@ dsigmoid <- function(x, beta=1) {
   return(y)
 }
 
-#' @keywords internal
-generate_feature <- function(encoding, K) {
-  fmatrix = matrix(0, length(encoding), K)
-  fmatrix[,1] = encoding
+#generate_feature has been shifted to a compiled C++ function
+#benchmarking indicates that this is about 2.4x faster, on average
 
-  for (i in 2:K) {
-    fmatrix[,i] = c(rep(0, i-1), encoding[1:(length(encoding) - (i-1))])
-  }
-  return(fmatrix)
-}
-
+# @keywords internal
+# generate_feature_orig <- function(encoding, K) {
+#   fmatrix = matrix(0, length(encoding), K)
+#   fmatrix[,1] = encoding
+#
+#   for (i in 2:K) {
+#     fmatrix[,i] = c(rep(0, i-1), encoding[1:(length(encoding) - (i-1))])
+#   }
+#   return(fmatrix)
+# }
+#
+# generate_feature_list <- function(encoding, K) {
+#   fmatrix = list()
+#   fmatrix[[1]] = encoding
+#
+#   for (i in 2:K) {
+#     fmatrix[[i]] = c(rep(0, i-1), encoding[1:(length(encoding) - (i-1))])
+#   }
+#
+#   fmatrix <- do.call(cbind, fmatrix)
+#   return(fmatrix)
+# }
+#
+# #use dplyr lag
+# # @importFrom dplyr lag
+# generate_feature_dplyr <- function(encoding, K) {
+#   fmatrix <- sapply(0:(K-1), function(x) { dplyr::lag(encoding, n=x, default=0) })
+#   return(fmatrix)
+# }
 
 #' This function deconvolves the BOLD signal using Bush 2011 method, augmented
 #' by the resampling approach of Bush 2015.
