@@ -26,16 +26,17 @@ NumericMatrix generate_feature(NumericVector encoding, int K) {
 
     //Fill in shifted encoding for this column in a nested loop.
     //This is about 30% slower than the vectorized approach below
-    // for (int j=0; j < n - i; j++) {
-    //   shift_col(j+i) = encoding(j);
-    // }
+    //But on the ICS clusters, the vectorized approach segfaults regularly (not totally clear why)
+    for (int j=0; j < n - i; j++) {
+      shift_col(j+i) = encoding(j);
+    }
 
     //Rcpp quietly refuses to handle subvectors on LHS and RHS
     //shift_col[Rcpp::seq(i, n)] = encoding[Rcpp::seq(0, n - i)];
 
     //Use of a temporary variable works
-    NumericVector shift_part = encoding[Rcpp::seq(0, n - i)];
-    shift_col[Rcpp::seq(i, n)] = shift_part;
+    //NumericVector shift_part = encoding[Rcpp::seq(0, n - i)];
+    //shift_col[Rcpp::seq(i, n)] = shift_part;
 
     fmatrix(_,i) = shift_col; //assign shifted column back to matrix
 

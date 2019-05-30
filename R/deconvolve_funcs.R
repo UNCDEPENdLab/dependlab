@@ -60,7 +60,8 @@ deconvolve_nlreg <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005, beta=40,
     encoding = sigmoid(activation, beta)
 
     ##Construct feature space
-    feature = generate_feature(encoding, K)
+    #message("encoding is vec: ", is.vector(encoding), ", len:", length(encoding), ", K is: ", K)
+    feature = generate_feature_armadillo(encoding, K)
 
     ##Generate virtual bold response by multiplying feature (N x K) by kernel (K x 1) to get N x 1 estimated response
     ytilde = feature[K:nrow(feature),] %*% kernel
