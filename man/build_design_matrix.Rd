@@ -255,6 +255,7 @@ This function was adapted from the fitclock package (https://github.com/PennStat
 }
 \examples{
 
+\dontrun{
   data(example_events)
   data(example_signals)
 
@@ -296,7 +297,7 @@ This function was adapted from the fitclock package (https://github.com/PennStat
 
   d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
     baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
-
+}
 
 }
 \author{

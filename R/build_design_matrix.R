@@ -233,6 +233,7 @@
 #' @author Alison Schreiber
 #' @examples
 #'
+#' \dontrun{
 #'   data(example_events)
 #'   data(example_signals)
 #'
@@ -274,8 +275,8 @@
 #'
 #'   d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
 #'     baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
-#'
-#'
+#' }
+#' 
 #' @export
 build_design_matrix <- function(
   events = NULL,
@@ -466,7 +467,6 @@ build_design_matrix <- function(
       nuisance_regressors_currun <- read.table(nuisance_regressors[i])
       nuisance_regressors_currun$run <- i
       rv = run_volumes[i]
-      print(rv)
       nuisance_regressors_currun <- dplyr::slice(nuisance_regressors_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
       nuisance_regressors_df <- bind_rows(nuisance_regressors_df, nuisance_regressors_currun)
     }
@@ -788,7 +788,8 @@ build_design_matrix <- function(
       } else {
         stop("Don't know how to handle baseline_parameterization:", baseline_parameterization)
       }
-      d
+
+      return(d)
     })
   }
 
