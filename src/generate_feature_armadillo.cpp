@@ -1,3 +1,5 @@
+#define ARMA_NO_DEBUG
+
 #include "RcppArmadillo.h"
 using namespace Rcpp;
 using namespace arma;
@@ -21,7 +23,9 @@ Rcpp::NumericMatrix generate_feature_armadillo(arma::vec encoding, int K) {
   int n = encoding.size();
   arma::mat fmatrix(n, K, fill::zeros); //preallocate matrix
 
-  fmatrix.col(0) = encoding; //unshifted variant placed in first column
+  //fmatrix.col(0) = encoding; //unshifted variant placed in first column
+  arma::vec first_col(fmatrix.colptr(0), n, false); //in-memory variant of preceding line
+  first_col = encoding;
 
   for (int i=1; i < K; i++) {
     //these don't pan out well because they don't return a vector type

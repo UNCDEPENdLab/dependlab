@@ -276,7 +276,7 @@
 #'   d_beta <- build_design_matrix(events = example_events, signals = example_signals, tr=1.0, plot=FALSE,
 #'     baseline_coef_order=2, drop_volumes=3, write_timing_files = c("convolved", "FSL"))
 #' }
-#' 
+#'
 #' @export
 build_design_matrix <- function(
   events = NULL,
@@ -312,9 +312,20 @@ build_design_matrix <- function(
   if (!"trial" %in% names(events)) { stop("events data.frame must contain trial column with the trial number for each event") }
   if (!"onset" %in% names(events)) { stop("events data.frame must contain onset column with the onset time in seconds") }
   if (!"duration" %in% names(events)) { stop("events data.frame must contain duration column with the event duration in seconds") }
+
   if (!"run" %in% names(events)) {
     message("No run column found in events. Assuming 1 run and adding this column")
     events$run <- 1
+  }
+
+  if (any(events$duration < 0)) {
+    print(subset(events, duration < 0))
+    stop("Invalid negative durations included in events data.frame")
+  }
+
+  if (any(events$onset < 0)) {
+    print(subset(events, onset < 0))
+    stop("Invalid negative onsets included in events data.frame")
   }
 
   #merge the trial-indexed signals with the time-indexed events
@@ -338,7 +349,7 @@ build_design_matrix <- function(
         s_aligned$duration <- s_aligned[[s$duration]]
       }
     }
-    
+
     #transform to make dmat happy (runs x regressors 2-d list)
     #dplyr::select will tolerate quoted names, which avoids R CMD CHECK complaints
     retdf <- s_aligned %>% dplyr::select("trial", "onset", "duration", "value")
@@ -505,7 +516,7 @@ build_design_matrix <- function(
     #assuming that a list of data.frames for each run of the data
     #all that need to do is concatenate the data frames after filtering any obs that are above run_volumes
     ts_multipliers_df <- data.frame()
-    
+
     for(i in 1:length(ts_multipliers)) {
       ts_multipliers_currun <- ts_multipliers[[i]]
       stopifnot(is.data.frame(ts_multipliers_currun))
@@ -550,7 +561,7 @@ build_design_matrix <- function(
   run_volumes <- run_volumes[runs_to_output] #need to subset this, too, for calculations below to match
   drop_volumes <- drop_volumes[runs_to_output] #need to subset this, too, for calculations below to match
   if (!is.null(run_niftis)) { run_niftis <- run_niftis[runs_to_output] }
-  
+
   #run_volumes and drop_volumes are used by convolve_regressor to figure out the appropriate regressor length
   bdm_args$run_volumes <- run_volumes #copy into argument list
   bdm_args$drop_volumes <- drop_volumes #copy into argument list
@@ -815,7 +826,7 @@ build_design_matrix <- function(
 
   #just the onsets for each event
   concat_onsets <- lapply(design_concat, function(x) { x[,"onset"] })
-  
+
   to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
                    collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_niftis=run_niftis, run_volumes=run_volumes, tr=tr)
 
