@@ -152,7 +152,10 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
   if (any(whichHigh <- (reg[,"onset"]/tr) >= n_vols)) {
     if (convolve) { message("At least one event onset falls on or after last volume of run. Omitting this from model.") } #just print on convolved execution
     print(reg[whichHigh,])
-    reg <- reg[!whichHigh,]
+    r_orig <- reg
+    reg <- reg[!whichHigh,] #this loses attributes, need to copy them over for code to work as expected
+    attr(reg, "event") <- attr(r_orig, "event")
+    attr(reg, "reg_name") <- attr(r_orig, "reg_name")
   }
 
   hrf_max <- NULL #only used for durmax_1 normalization
