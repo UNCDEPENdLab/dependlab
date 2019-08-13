@@ -19,6 +19,7 @@
 #' 
 #' @importFrom dplyr case_when mutate if_else
 #' 
+#' @return 
 
 
 # TB_measure_adult = 18+
@@ -1311,21 +1312,21 @@ posaf_child <- function(raw) {
 
 # Parent function to call sub functions and create variables (Theta and T)
 score_emotb <- function(df, drop_items=FALSE) {
-  df <- df %>% mutate(Apathy_Theta = if_else(Age >= 18, apathy_adult(Apathy_Raw), NA_real_), #this needs to be revised, apathy has not child
+  df <- df %>% mutate(Apathy_Theta = if_else(Age >= 18, apathy_adult(Apathy_Raw), NA_real_),
                       PercStrs_Theta = if_else(Age >= 18, percstrs_adult(PercStrs_Raw), percstrs_teen(PercStrs_Raw)),
-                      Self_Theta = if_else(Age >= 18, self_adult(Self_Raw), if_else(Age <= 12, self_child(Self_Raw), self_teen(Self_Raw))), #this needs to be revised, self-efficacy has adult, teen, AND child
-                      MP_Theta = if_else(Age >= 18, mp_adult(MP_Raw), NA_real_), #revise - MP only has 18+
+                      Self_Theta = if_else(Age >= 18, self_adult(Self_Raw), if_else(Age <= 12, self_child(Self_Raw), self_teen(Self_Raw))), 
+                      MP_Theta = if_else(Age >= 18, mp_adult(MP_Raw), NA_real_), 
                       Sad_Theta = if_else(Age >= 18, sad_adult(Sad_Raw), sad_teen(Sad_Raw)),
-                      GLS_Theta = if_else(Age >= 18, gls_adult(GLS_Raw), if_else(Age <= 12, gls_child(GLS_Raw), gls_teen(GLS_Raw))), #revise - GLS has adult, teen, AND child
-                      PosAf_Theta = if_else(Age >= 18, posaf_adult(PosAf_Raw), if_else(Age <= 12, posaf_child(PosAf_Raw), posaf_teen(PosAf_Raw))), #revise - posaf has adult, teen, AND child
+                      GLS_Theta = if_else(Age >= 18, gls_adult(GLS_Raw), if_else(Age <= 12, gls_child(GLS_Raw), gls_teen(GLS_Raw))), 
+                      PosAf_Theta = if_else(Age >= 18, posaf_adult(PosAf_Raw), if_else(Age <= 12, posaf_child(PosAf_Raw), posaf_teen(PosAf_Raw))), 
                       AngAf_Theta = if_else(Age >= 18, angaf_adult(AngAf_Raw), angaf_teen(AngAf_Raw)),
-                      AngPA_Theta = if_else(Age >= 18, angpa_adult(AngPA_Raw), NA_real_), #revise - AngPA only has 18+
-                      AngHost_Theta = if_else(Age >= 18, anghost_adult(AngHost_Raw), NA_real_), #revise - AngHost only has 18+
+                      AngPA_Theta = if_else(Age >= 18, angpa_adult(AngPA_Raw), NA_real_), 
+                      AngHost_Theta = if_else(Age >= 18, anghost_adult(AngHost_Raw), NA_real_),
                       EmoSup_Theta = if_else(Age >= 18, emosup_adult(EmoSup_Raw), emosup_teen(EmoSup_Raw)),
                       FearAf_Theta = if_else(Age >= 18, fearaf_adult(FearAf_Raw), fearaf_teen(FearAf_Raw)),
-                      FearSoma_Theta = if_else(Age >= 18, fearsoma_adult(FearSoma_Raw), NA_real_), #revise - fearsoma only has 18+
+                      FearSoma_Theta = if_else(Age >= 18, fearsoma_adult(FearSoma_Raw), NA_real_),
                       Friend_Theta = if_else(Age >= 18, friend_adult(Friend_Raw), friend_teen(Friend_Raw)),
-                      InstrSup_Theta = if_else(Age >= 18, instrsup_adult(InstrSup_Raw), NA_real_), #revise - InstrSup only has 18+
+                      InstrSup_Theta = if_else(Age >= 18, instrsup_adult(InstrSup_Raw), NA_real_),
                       Lone_Theta = if_else(Age >= 18, lone_adult(Lone_Raw), lone_teen(Lone_Raw)),
                       PercHost_Theta = if_else(Age >= 18, perchost_adult(PercHost_Raw), perchost_teen(PercHost_Raw)),
                       PercRej_Theta = if_else(Age >= 18, percrej_adult(PercRej_Raw), percrej_teen(PercRej_Raw)))
