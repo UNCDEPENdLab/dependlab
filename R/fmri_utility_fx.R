@@ -206,11 +206,20 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
                                  a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
 
       if (normeach) {
-        if (times[i] + durations[i] > n_vols*tr) {
+        if (times[i] + durations[i] > (n_vols*tr - 20)) {
           #when the event occurs at the end of the time series and is the only event (i.e., as in evtmax_1), the HRF never reaches its peak. The further it is
           #away from the peak, the stranger the stim_conv/max(stim_conv) scaling will be -- it can lead to odd between-event scaling in the regressor.
-          message("Event occurs at the tail of the run. Omitting from evtmax_1 regressor to avoid strange scaling. Please check that the end of your convolved regressors matches your expectation.")
-          stim_conv <- rep(0, length(stim_conv))
+
+          #Update Sep2019: it turns out that anything convolved regressor that has not achieved its peak by the end of the run -- even if it fits within the time interval --
+          #  can be rescaled improperly. A general solution is to place this event in the middle of the interval, convolve it with the HRF, then use *that* height as the normalization factor.
+          #  Apply this alternative correction to any event that begins or is 'on' in the last 20 seconds.
+          message("Event occurs at the tail of the run. Using HRF peak from center of run for evtmax_1 regressor to avoid strange scaling. Please check that the end of your convolved regressors matches your expectation.")
+
+          mid_vol <- nvols*tr/2
+          stim_at_center <- fmri.stimulus(n_vols=n_vols, values=1.0, times=mid_vol, durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve, ts_multiplier=ts_multiplier,
+                                     a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
+
+          stim_conv <- stim_conv/max(stim_at_center) #rescale HRF to a max of 1.0 for each event, regardless of duration -- EQUIVALENT TO dmUBLOCK(1). Use the peak of the HRF aligned to center of time interval
         } else {
           stim_conv <- stim_conv/max(stim_conv) #rescale HRF to a max of 1.0 for each event, regardless of duration -- EQUIVALENT TO dmUBLOCK(1)
         }
