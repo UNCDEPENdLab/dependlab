@@ -215,7 +215,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
           #  Apply this alternative correction to any event that begins or is 'on' in the last 20 seconds.
           message("Event occurs at the tail of the run. Using HRF peak from center of run for evtmax_1 regressor to avoid strange scaling. Please check that the end of your convolved regressors matches your expectation.")
 
-          mid_vol <- nvols*tr/2
+          mid_vol <- n_vols*tr/2
           stim_at_center <- fmri.stimulus(n_vols=n_vols, values=1.0, times=mid_vol, durations=durations[i], tr=tr, demean=FALSE, center_values=FALSE, convolve = convolve, ts_multiplier=ts_multiplier,
                                      a1=hrf_parameters["a1"], a2=hrf_parameters["a2"], b1=hrf_parameters["b1"], b2=hrf_parameters["b2"], cc=hrf_parameters["cc"])
 
