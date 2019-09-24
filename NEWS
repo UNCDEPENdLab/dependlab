@@ -3,6 +3,8 @@ Version 0.1-5
   - feature: Added runFSLCommand
   - enhancement: write generate_feature_armadillo generate_feature in C++ to speed up this bottleneck in deconvolve_nlreg
   - bugfix: in evtmax_1, rescale the normalization factor for any event within the last 20 seconds using an HRF centered in the time of the run
+  - enhancement: write additional_regressors if write_timing_files is not null
+  - enhancement: mean center all additional regressors
 
 Version 0.1-4
   - feature: generate_spm_mat function for generating SPM12 GLMs from build_design_matrix

@@ -12,6 +12,9 @@ apathy_adult(raw)
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 }
+\value{
+A \code{data.frame} containing the scored emotion toolbox scales
+}
 \description{
 Score the NIH Toolbox Emotion Measures (2019)
 This is for the raw score to t-score conversions for bank/fixed forms
@@ -19,7 +22,7 @@ This is for the raw score to t-score conversions for bank/fixed forms
 \details{
 Adds two columns, \code{_Theta} and \code{_Theta_T}, to \code{df} containing the nih toolbox emotion measures, respectively.
 
-Note: scoring is based on the 2019 raw score to t-score conversion tables manual 
+Note: scoring is based on the 2019 raw score to t-score conversion tables manual
 
 Note: some measures were omitted from the manual, in which case older versions were used
 

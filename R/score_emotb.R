@@ -1,25 +1,25 @@
 #' Score the NIH Toolbox Emotion Measures (2019)
 #' This is for the raw score to t-score conversions for bank/fixed forms
-#' 
+#'
 #' @param df a data.frame containing the TB Emotion Measures items to be scored
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
-#' 
-#' @details 
-#' 
+#'
+#' @details
+#'
 #' Adds two columns, \code{_Theta} and \code{_Theta_T}, to \code{df} containing the nih toolbox emotion measures, respectively.
-#' 
-#' Note: scoring is based on the 2019 raw score to t-score conversion tables manual 
-#' 
+#'
+#' Note: scoring is based on the 2019 raw score to t-score conversion tables manual
+#'
 #' Note: some measures were omitted from the manual, in which case older versions were used
-#' 
+#'
 #' See: \url{http://www.healthmeasures.net/images/nihtoolbox/Technical_Manuals/Emotion/NIH_TB_Emotion_Raw_Score_to_T-Score_Conversion_Tables_Manual_3.19.19.pdf}
-#' 
+#'
 #' @export
 #' @author Michael Hallquist & Melanie Glatz
-#' 
+#'
 #' @importFrom dplyr case_when mutate if_else
-#' 
-#' @return 
+#'
+#' @return A \code{data.frame} containing the scored emotion toolbox scales
 
 
 # TB_measure_adult = 18+
@@ -56,7 +56,7 @@ apathy_adult <- function(raw) {
   return(theta)
 }
 
-# Perceived Hostility Bank/Fixed Form Ages 18+  
+# Perceived Hostility Bank/Fixed Form Ages 18+
 perchost_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.65,
@@ -69,8 +69,8 @@ perchost_adult <- function(raw) {
     raw == 15 ~ 0.09,
     raw == 16 ~ 0.24,
     raw == 17 ~ 0.38,
-    raw == 18 ~ 0.52,    
-    raw == 19 ~ 0.65,    
+    raw == 18 ~ 0.52,
+    raw == 19 ~ 0.65,
     raw == 20 ~ 0.79,
     raw == 21 ~ 0.93,
     raw == 22 ~ 1.07,
@@ -140,8 +140,8 @@ angpa_adult <- function(raw) {
     raw == 15 ~ 1.35,
     raw == 16 ~ 1.44,
     raw == 17 ~ 1.53,
-    raw == 18 ~ 1.62,    
-    raw == 19 ~ 1.7,    
+    raw == 18 ~ 1.62,
+    raw == 19 ~ 1.7,
     raw == 20 ~ 1.79,
     raw == 21 ~ 1.87,
     raw == 22 ~ 1.95,
@@ -178,8 +178,8 @@ anghost_adult <- function(raw) {
     raw == 15 ~ 0.74,
     raw == 16 ~ 0.85,
     raw == 17 ~ 0.96,
-    raw == 18 ~ 1.06,    
-    raw == 19 ~ 1.16,    
+    raw == 18 ~ 1.06,
+    raw == 19 ~ 1.16,
     raw == 20 ~ 1.25,
     raw == 21 ~ 1.35,
     raw == 22 ~ 1.44,
@@ -198,7 +198,7 @@ anghost_adult <- function(raw) {
     raw == 35 ~ 3.02
   )
   return(theta)
-} 
+}
 
 # Anger - Affect Fixed Form Ages 18+ (Anger FF Ages 18+)
 angaf_adult <- function(raw) {
@@ -216,8 +216,8 @@ angaf_adult <- function(raw) {
     raw == 15 ~ 0.88,
     raw == 16 ~ 1.08,
     raw == 17 ~ 1.29,
-    raw == 18 ~ 1.5,    
-    raw == 19 ~ 1.72,    
+    raw == 18 ~ 1.5,
+    raw == 19 ~ 1.72,
     raw == 20 ~ 1.94,
     raw == 21 ~ 2.17,
     raw == 22 ~ 2.41,
@@ -244,8 +244,8 @@ angaf_teen <- function(raw) {
     raw == 15 ~ 0.83,
     raw == 16 ~ 1.03,
     raw == 17 ~ 1.23,
-    raw == 18 ~ 1.43,    
-    raw == 19 ~ 1.63,    
+    raw == 18 ~ 1.43,
+    raw == 19 ~ 1.63,
     raw == 20 ~ 1.84,
     raw == 21 ~ 2.04,
     raw == 22 ~ 2.26,
@@ -269,8 +269,8 @@ emosup_adult <- function(raw) {
     raw == 15 ~ -2.38,
     raw == 16 ~ -2.28,
     raw == 17 ~ -2.18,
-    raw == 18 ~ -2.08,    
-    raw == 19 ~ -1.98,    
+    raw == 18 ~ -2.08,
+    raw == 19 ~ -1.98,
     raw == 20 ~ -1.87,
     raw == 21 ~ -1.76,
     raw == 22 ~ -1.65,
@@ -344,8 +344,8 @@ fearaf_adult <- function(raw) {
     raw == 15 ~ 0.38,
     raw == 16 ~ 0.51,
     raw == 17 ~ 0.63,
-    raw == 18 ~ 0.76,    
-    raw == 19 ~ 0.88,    
+    raw == 18 ~ 0.76,
+    raw == 19 ~ 0.88,
     raw == 20 ~ 1,
     raw == 21 ~ 1.13,
     raw == 22 ~ 1.26,
@@ -421,8 +421,8 @@ fearsoma_adult <- function(raw) {
     raw == 15 ~ 1.58,
     raw == 16 ~ 1.76,
     raw == 17 ~ 1.94,
-    raw == 18 ~ 2.11,    
-    raw == 19 ~ 2.29,    
+    raw == 18 ~ 2.11,
+    raw == 19 ~ 2.29,
     raw == 20 ~ 2.46,
     raw == 21 ~ 2.63,
     raw == 22 ~ 2.79,
@@ -451,8 +451,8 @@ friend_adult <- function(raw) {
     raw == 15 ~ -1.99,
     raw == 16 ~ -1.87,
     raw == 17 ~ -1.75,
-    raw == 18 ~ -1.64,    
-    raw == 19 ~ -1.52,    
+    raw == 18 ~ -1.64,
+    raw == 19 ~ -1.52,
     raw == 20 ~ -1.41,
     raw == 21 ~ -1.29,
     raw == 22 ~ -1.18,
@@ -519,8 +519,8 @@ instrsup_adult <- function(raw) {
     raw == 15 ~ -1.71,
     raw == 16 ~ -1.62,
     raw == 17 ~ -1.54,
-    raw == 18 ~ -1.46,    
-    raw == 19 ~ -1.38,    
+    raw == 18 ~ -1.46,
+    raw == 19 ~ -1.38,
     raw == 20 ~ -1.3,
     raw == 21 ~ -1.22,
     raw == 22 ~ -1.14,
@@ -562,8 +562,8 @@ lone_adult <- function(raw) {
     raw == 15 ~ 1.37,
     raw == 16 ~ 1.56,
     raw == 17 ~ 1.75,
-    raw == 18 ~ 1.93,    
-    raw == 19 ~ 2.1,    
+    raw == 18 ~ 1.93,
+    raw == 19 ~ 2.1,
     raw == 20 ~ 2.27,
     raw == 21 ~ 2.43,
     raw == 22 ~ 2.6,
@@ -623,8 +623,8 @@ percrej_adult <- function(raw) {
     raw == 15 ~ 0.26,
     raw == 16 ~ 0.39,
     raw == 17 ~ 0.53,
-    raw == 18 ~ 0.66,    
-    raw == 19 ~ 0.79,    
+    raw == 18 ~ 0.66,
+    raw == 19 ~ 0.79,
     raw == 20 ~ 0.93,
     raw == 21 ~ 1.06,
     raw == 22 ~ 1.19,
@@ -706,7 +706,7 @@ percstrs_adult <- function(raw) {
     raw == 32 ~ 1.12,
     raw == 33 ~ 1.26,
     raw == 34 ~ 1.4,
-    raw == 35 ~ 1.54, 
+    raw == 35 ~ 1.54,
     raw == 36 ~ 1.68,
     raw == 37 ~ 1.82,
     raw == 38 ~ 1.96,
@@ -952,7 +952,7 @@ sad_adult <- function(raw) {
     raw == 10 ~ -0.38,
     raw == 11 ~ -0.18,
     raw == 12 ~ -0.02,
-    raw == 13 ~ 0.12, 
+    raw == 13 ~ 0.12,
     raw == 14 ~ 0.23,
     raw == 15 ~ 0.34,
     raw == 16 ~ 0.43,
@@ -1118,7 +1118,7 @@ gls_teen <- function(raw) {
     raw == 60 ~ 2.42
   )
   return(theta)
-} 
+}
 
 # General Life Satisfaction Fixed Form Ages 8-12
 gls_child <- function(raw) {
@@ -1146,7 +1146,7 @@ gls_child <- function(raw) {
     raw == 25 ~ 1.54
   )
   return(theta)
-} 
+}
 
 # Positive Affect Fixed Form Ages 18+
 posaf_adult <- function(raw) {
@@ -1314,13 +1314,13 @@ posaf_child <- function(raw) {
 score_emotb <- function(df, drop_items=FALSE) {
   df <- df %>% mutate(Apathy_Theta = if_else(Age >= 18, apathy_adult(Apathy_Raw), NA_real_),
                       PercStrs_Theta = if_else(Age >= 18, percstrs_adult(PercStrs_Raw), percstrs_teen(PercStrs_Raw)),
-                      Self_Theta = if_else(Age >= 18, self_adult(Self_Raw), if_else(Age <= 12, self_child(Self_Raw), self_teen(Self_Raw))), 
-                      MP_Theta = if_else(Age >= 18, mp_adult(MP_Raw), NA_real_), 
+                      Self_Theta = if_else(Age >= 18, self_adult(Self_Raw), if_else(Age <= 12, self_child(Self_Raw), self_teen(Self_Raw))),
+                      MP_Theta = if_else(Age >= 18, mp_adult(MP_Raw), NA_real_),
                       Sad_Theta = if_else(Age >= 18, sad_adult(Sad_Raw), sad_teen(Sad_Raw)),
-                      GLS_Theta = if_else(Age >= 18, gls_adult(GLS_Raw), if_else(Age <= 12, gls_child(GLS_Raw), gls_teen(GLS_Raw))), 
-                      PosAf_Theta = if_else(Age >= 18, posaf_adult(PosAf_Raw), if_else(Age <= 12, posaf_child(PosAf_Raw), posaf_teen(PosAf_Raw))), 
+                      GLS_Theta = if_else(Age >= 18, gls_adult(GLS_Raw), if_else(Age <= 12, gls_child(GLS_Raw), gls_teen(GLS_Raw))),
+                      PosAf_Theta = if_else(Age >= 18, posaf_adult(PosAf_Raw), if_else(Age <= 12, posaf_child(PosAf_Raw), posaf_teen(PosAf_Raw))),
                       AngAf_Theta = if_else(Age >= 18, angaf_adult(AngAf_Raw), angaf_teen(AngAf_Raw)),
-                      AngPA_Theta = if_else(Age >= 18, angpa_adult(AngPA_Raw), NA_real_), 
+                      AngPA_Theta = if_else(Age >= 18, angpa_adult(AngPA_Raw), NA_real_),
                       AngHost_Theta = if_else(Age >= 18, anghost_adult(AngHost_Raw), NA_real_),
                       EmoSup_Theta = if_else(Age >= 18, emosup_adult(EmoSup_Raw), emosup_teen(EmoSup_Raw)),
                       FearAf_Theta = if_else(Age >= 18, fearaf_adult(FearAf_Raw), fearaf_teen(FearAf_Raw)),
@@ -1332,7 +1332,7 @@ score_emotb <- function(df, drop_items=FALSE) {
                       PercRej_Theta = if_else(Age >= 18, percrej_adult(PercRej_Raw), percrej_teen(PercRej_Raw)))
   theta_to_t <- function(x) { 50 + 10*x }
   df <- df %>% mutate_at(vars(ends_with("_Theta")), list(T=~theta_to_t(.)))
-  
+
   if (drop_items) { df <- df %>% select(-starts_with("TB_")) }
   return(df)
 }
