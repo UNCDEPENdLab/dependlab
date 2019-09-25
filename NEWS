@@ -1,6 +1,7 @@
 Version 0.1-5
   - feature: add deconvolve_nlreg_resample function that implement Bush 2015 deconvolution with resampling approach
   - feature: Added runFSLCommand
+  - feature: Added runAFNICommand
   - enhancement: write generate_feature_armadillo generate_feature in C++ to speed up this bottleneck in deconvolve_nlreg
   - bugfix: in evtmax_1, rescale the normalization factor for any event within the last 20 seconds using an HRF centered in the time of the run
   - enhancement: write additional_regressors if write_timing_files is not null
