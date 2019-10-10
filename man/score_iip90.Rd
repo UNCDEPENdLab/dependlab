@@ -5,7 +5,7 @@
 \title{Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex version}
 \usage{
 score_iip90(df, item_prefix = "IIP", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 0,
+  drop_items = FALSE, keep_octants = TRUE, min_value = 0,
   max_value = 4)
 }
 \arguments{
@@ -13,24 +13,24 @@ score_iip90(df, item_prefix = "IIP", max_impute = 0.2,
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "IIP"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per subscale.
+\item{max_impute}{the proportion of missingness [0..1] or number [1..n] of missing values per subscale.
 Below this, the mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
+\item{keep_octants}{whether to retain the IIP octant scores. Default: FALSE}
+
 \item{min_value}{the lowest value for the items anchors, used to check response validity. Default: 0}
 
 \item{max_value}{the highest value for the items anchors, used to check response validity. Default: 4}
-
-\item{keep_octants}{whether to retain the IIP octant scores. Default: FALSE}
 }
 \description{
 Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex version
 }
 \details{
 UPDATE ME!
-Adds two columns, \code{ECR_anxiety} and \code{ECR_avoidance}, to \code{df} containing
-the anxiety and avoidance scales, respectively.
+Adds twenty columns, eight for octant scales, six for pd scales, and six for circumplex scales, to \code{df} containing
+the octant, pd, and additional scales, respectively.
 
 Note: the default ECR scoring uses the mean of the items for the scales.
 

@@ -25,6 +25,8 @@
 #'
 #' Maintainer: Michael Hallquist \email{michael.hallquist@@gmail.com}
 #' @keywords package
+#' @useDynLib dependlab, .registration = TRUE
 #' @import lme4
 #' @importFrom utils packageDescription
+#' @importFrom Rcpp sourceCpp
 NULL

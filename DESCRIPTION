@@ -1,8 +1,8 @@
 Package: dependlab
 Type: Package
 Title: Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)
-Version: 0.1.2
-Date: 2018-12-12
+Version: 0.1.5
+Date: 2019-05-18
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
@@ -15,17 +15,28 @@ LazyLoad: yes
 LazyData: yes
 RoxygenNote: 6.1.1
 Imports:
-  car,
-  data.table,
-  dplyr,
-  fmri,
-  forecast,
-  ggplot2,
-  lme4,
-  oro.nifti,
-  orthopolynom,
-  signal,
-  Hmisc,
-  tidyr,
-  reshape2,
-  scales
+    car,
+    data.table,
+    dplyr,
+    fmri,
+    forecast,
+    ggplot2,
+    lme4,
+    oro.nifti,
+    orthopolynom,
+    signal,
+    Hmisc,
+    tidyr,
+    reshape2,
+    scales,
+    MASS,
+    R.matlab,
+    RNifti,
+    doParallel,
+    foreach,
+    matlabr,
+    iterators,
+    Rcpp (>= 1.0.1)
+LinkingTo:
+    Rcpp,
+    RcppArmadillo

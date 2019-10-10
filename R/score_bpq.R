@@ -9,6 +9,7 @@
 #' @param input_codes the original T/F coding scheme of the input dataframe. These are converted to the specified min and max value.
 #' @param min_value the minimum value for the item anchors, used in reverse scoring. Default: 0
 #' @param max_value the highest value for the item anchors, used in reverse scoring. Default: 1
+#' @param bad_items numeric value or vector of the items that need to be dropped before imputation or calculation of subscales
 #' 
 #' @details 
 #' 
@@ -27,7 +28,7 @@
 #' @importFrom dplyr select mutate
 #' 
 score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2, 
-                       drop_items=FALSE, keep_reverse_codes=FALSE, input_codes=c(1,2), min_value=0, max_value=1) {
+                      drop_items=FALSE, keep_reverse_codes=FALSE, input_codes=c(1,2), min_value=0, max_value=1, bad_items = NULL) {
   
   orig_items <- paste0(item_prefix, 1:80) #expect item names
   stopifnot(is.data.frame(df))
@@ -46,7 +47,7 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
   }
   
   
-  reverse_keys <- c(4, 8, 10, 28, 32, 43, 45, 48, 52, 53, 54, 60) #numeric values of items to reverse key
+  reverse_keys <- c(4, 8, 10, 28, 32, 43, 45, 48, 52, 53, 54, 60, 67) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items
   
@@ -67,6 +68,24 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
   #apply reverse scoring
   df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { max_value + min_value - x }) #1-5 scoring by default
   
+  
+  #if user wants to drop a bad item, best to drop before imputation or calculation of subscale
+  if(!is.null(bad_items)){
+    if(is.numeric(bad_items)){
+      items_list <- list(impuls_items, instab_items, abandon_items, relations_items, self_items, suicide_items, empti_items, anger_items, psycho_items, total_items)
+      names(items_list) <- c("impuls_items", "instab_items", "abandon_items", "relations_items", "self_items", "suicide_items", "empti_items", "anger_items", "psycho_items", "total_items")
+      for(i in 1:length(items_list)){
+        name <- names(items_list)[i]
+        subdf <- items_list[[i]]
+        if(any(paste0(item_prefix,bad_items) %in% subdf)){
+          subdf <- subdf[which(subdf!=paste0(item_prefix,bad_items))]
+          assign(name, subdf)
+          message("dropping ", bad_items, " from calculation of ", name)
+        }
+      }
+    }
+  }
+  
   #mean impute, if requested (after reverse scoring to get item direction correct)
   if (max_impute > 0) {
     df <- mean_impute_items(df, impuls_items, thresh=max_impute)
@@ -80,6 +99,8 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
     df <- mean_impute_items(df, psycho_items, thresh=max_impute)
     df <- mean_impute_items(df, total_items, thresh=max_impute)
   }
+  
+  
   
   #https://github.com/jennybc/row-oriented-workflows/blob/master/ex09_row-summaries.md
   df <- df %>% mutate(
