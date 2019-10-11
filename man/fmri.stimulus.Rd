@@ -6,9 +6,9 @@
 \usage{
 fmri.stimulus(n_vols = 1, onsets = c(1), durations = c(1),
   values = c(1), times = NULL, center_values = FALSE,
-  rm_zeros = TRUE, convolve = TRUE, tr = 2, demean = TRUE,
-  a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35,
-  convmax_1 = FALSE)
+  rm_zeros = TRUE, convolve = TRUE, tr = 2, ts_multiplier = NULL,
+  demean = TRUE, convmax_1 = FALSE, a1 = 6, a2 = 12, b1 = 0.9,
+  b2 = 0.9, cc = 0.35)
 }
 \arguments{
 \item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}
@@ -31,7 +31,11 @@ values prior to convolution, and retaining zeros will lead them to be non-zero a
 
 \item{tr}{The repetition time (sometimes called TR) in seconds}
 
-\item{demean}{Whether to demean the regressor after convolution}
+\item{ts_multiplier}{A time series of length \code{n_vols} that is multiplied against the stimulus before convolution.}
+
+\item{demean}{Whether to demean the regressor after convolution. Default: TRUE}
+
+\item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
 
 \item{a1}{The a1 parameter of the double gamma}
 
@@ -42,8 +46,6 @@ values prior to convolution, and retaining zeros will lead them to be non-zero a
 \item{b2}{The b2 parameter of the double gamma}
 
 \item{cc}{The cc parameter of the double gamma}
-
-\item{convmax_1}{Whether to rescale the convolved regressor to a maximum height of 1.}
 }
 \description{
 Extended from \code{fmri} package to allow for continuous-valued regressor,

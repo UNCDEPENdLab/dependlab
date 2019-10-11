@@ -112,7 +112,7 @@ list of data.frames (1 df per run). These values are tacked onto design_convolve
 (and not convolved with HRF), so each regressor should be length of the number of
 run_volumes within that run. If you pass in a vector of .txt files containing additional regressors,
 these will be read into R, truncated to run_volumes, and column-wise concatenated with
-substative regressors.}
+substantive regressors.}
 }
 \value{
 A list of containing different aspects of the design matrix:

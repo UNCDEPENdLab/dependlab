@@ -337,9 +337,9 @@ build_design_matrix <- function(
   bdm_args <- as.list(environment(), all.names = TRUE)
   #validate events data.frame
 
-  if (is.null(events)) { "You must pass in an events data.frame. See ?build_design_matrix for details." }
-  if (is.null(signals)) { "You must pass in a signals list. See ?build_design_matrix for details." }
-  if (is.null(tr)) { "You must pass in the tr (repetition time) in seconds. See ?build_design_matrix for details." }
+  if (is.null(events)) { stop("You must pass in an events data.frame. See ?build_design_matrix for details.") }
+  if (is.null(signals)) { stop("You must pass in a signals list. See ?build_design_matrix for details.") }
+  if (is.null(tr)) { stop("You must pass in the tr (repetition time) in seconds. See ?build_design_matrix for details.") }
 
   stopifnot(inherits(events, "data.frame"))
   if (!"event" %in% names(events)) { stop("events data.frame must contain event column with the name of the event") }
@@ -599,6 +599,7 @@ build_design_matrix <- function(
   #also get an unconvolved version on the time grid for diagnostics.
   dmat_convolved <- place_dmat_on_time_grid(dmat, convolve=TRUE, bdm_args)
   dmat_unconvolved <- place_dmat_on_time_grid(dmat, convolve=FALSE, bdm_args)
+
   #dmat_convolved should now be a 1-d runs list where each element is a data.frame of convolved regressors.
   names(dmat_convolved) <- names(dmat_unconvolved) <- paste0("run", runs_to_output)
 
