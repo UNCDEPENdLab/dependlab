@@ -778,8 +778,18 @@ build_design_matrix <- function(
     if (length(custom_reg) > 0L) { run <- run[-1*custom_reg]}
 
     #check correlations among regressors for trial-wise estimates
-    #TODO: This also needs to support uneven numbers of events per regressor. Data.frame fails in this case
-    cmat <- do.call(data.frame, lapply(run, function(regressor) { regressor[,"value"] }))
+
+    #get the union of all trial numbers across regressors
+    utrial <- sort(unique(unlist(sapply(run, function(regressor) { regressor[,"trial"]}))))
+
+    #initialize a trial x regressor matrix
+    cmat <- matrix(NA, nrow=length(utrial), ncol=length(run), dimnames=list(trial=utrial, regressor=names(run)))
+
+    #populate the relevant values for each regressor at the appropriate trials
+    for (i in 1:length(run)) {
+      cmat[run[[i]][,"trial"], names(run)[i]] <- run[[i]][,"value"]
+    }
+    cmat <- as.data.frame(cmat) #convert to a data.frame
 
     #remove any constant columns (e.g., task indicator regressor for clock) so that VIF computation is sensible
     zerosd <- sapply(cmat, sd, na.rm=TRUE)
