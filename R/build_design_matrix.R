@@ -366,14 +366,26 @@ build_design_matrix <- function(
   #basically: put the events onto the time grid of the run based on the "event" element of the list
   signals_aligned <- lapply(signals, function(s) {
     if (is.null(s$event)) { stop("Signal does not have event element") }
+    if (is.null(s$value)) {
+      message("Signal is missing a 'value' element. Adding 1 for value, assuming a unit-height regressor.")
+      s$value <- 1
+    }
+
     df_events <- dplyr::filter(events, event==s$event)
     df_signal <- s$value #the signal data.frame for this signal
     if (length(df_signal)==1L && is.numeric(df_signal)) { #task indicator-type regressor
       s_aligned <- df_events
       s_aligned$value <- df_signal #replicate requested height for all occurrences
-    } else {
+    } else if (is.data.frame(df_signal)) {
+      if (!identical(sort(unique(df_events$run)), sort(unique(df_signal$run)))) {
+        missing_runs <- setdiff(df_events$run, df_signal$run) #setdiff discards duplicates
+        for (m in missing_runs) {
+          message("Missing value for event: ", s$event, " in run: ", as.character(m))
+          df_signal <- rbind(df_signal, data.frame(run=m, trial=1, value=0)) #populate an empty event for each missing run
+        }
+      }
       s_aligned <- df_signal %>% dplyr::left_join(df_events, by=c("run", "trial")) %>% arrange(run, trial) #enforce match on signal side
-    }
+    } else { stop("Unknown data type for signal.") }
 
     if (length(s$duration) > 1L) { stop("Don't know how to interpret multi-element duration argument for signal: ", paste0(s$duration, collapse=", ")) }
     if(!is.null(s$duration)) {
@@ -619,7 +631,7 @@ build_design_matrix <- function(
       df[,"onset"] <- df[,"onset"] - time_offset[i]
       if (min(df[,"onset"] < 0)) {
         message("For run ", dimnames(dmat)[[1]][i], ", regressor ", dimnames(dmat)[[2]][j], ", there are ",
-                sum(df[,"onset"] < 0), "events before time 0")
+                sum(df[,"onset"] < 0), " events before time 0")
       }
       dmat[[i,j]] <- df
     }
@@ -672,7 +684,7 @@ build_design_matrix <- function(
     if ("FSL" %in% write_timing_files) {
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
-          regout <- dmat[[i,reg]][,c("onset", "duration", "value")]
+          regout <- dmat[[i,reg]][,c("onset", "duration", "value"), drop=FALSE]
 
           #handle beta series outputs
           if (isTRUE(bdm_args$beta_series[reg])) {
@@ -793,7 +805,7 @@ build_design_matrix <- function(
 
     #remove any constant columns (e.g., task indicator regressor for clock) so that VIF computation is sensible
     zerosd <- sapply(cmat, sd, na.rm=TRUE)
-    cmat_noconst <- cmat[,zerosd != 0.0, drop=FALSE]
+    cmat_noconst <- cmat[,!is.na(zerosd) & zerosd != 0.0, drop=FALSE]
 
     if (ncol(cmat_noconst) == 0L) {
       #if only task indicator regressors are included, then they cannot be collinear before convolution since there is no variability

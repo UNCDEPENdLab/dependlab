@@ -184,7 +184,9 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 
   if (length(times) == 0L) {
     warning("No non-zero events for regressor to be convolved. Returning all-zero result for fMRI GLM.")
-    return(rep(0, n_vols))
+    ret <- matrix(0, nrow=n_vols -  drop_volumes, ncol=1)
+    colnames(ret) <- attr(reg, "reg_name")
+    return(ret)
   }
 
   #handle mean centering of parametric values prior to convolution
