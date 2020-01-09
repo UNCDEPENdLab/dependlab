@@ -25,7 +25,7 @@ place_dmat_on_time_grid <- function(dmat, convolve=TRUE, bdm_args) {
 
   if (bdm_args$convolve_wi_run) {
     #create an HRF-convolved version of the list
-    
+
     dmat_convolved <- lapply(1:dim(dmat)[1L], function(i) {
       run.convolve <- lapply(1:dim(dmat)[2L], function(j) {
         reg <- dmat[[i,j]] #regressor j for a given run i
@@ -155,7 +155,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
   hrf_max <- NULL #only used for durmax_1 normalization
 
   normeach <- FALSE #signals evtmax_1 scaling
-  if (!convolve) {    
+  if (!convolve) {
     normalize_hrf <- FALSE #irrelevant when we are not convolving
   } else if (normalization == "evtmax_1") {
     normalize_hrf <- TRUE
@@ -234,7 +234,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
         #if (any(sapply(varying_cols, isFALSE))) { browser() }
         normedEvents <- normedEvents[,varying_cols]
       }
-      
+
       #keep beta series representation of a time x regressors matrix
       tc_conv <- normedEvents
     }
@@ -655,4 +655,3 @@ cleanup_regressor <- function(times, durations, values, rm_zeros=TRUE) {
 
   return(list(times=times, durations=durations, values=values))
 }
-
