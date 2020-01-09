@@ -337,9 +337,9 @@ build_design_matrix <- function(
   bdm_args <- as.list(environment(), all.names = TRUE)
   #validate events data.frame
 
-  if (is.null(events)) { "You must pass in an events data.frame. See ?build_design_matrix for details." }
-  if (is.null(signals)) { "You must pass in a signals list. See ?build_design_matrix for details." }
-  if (is.null(tr)) { "You must pass in the tr (repetition time) in seconds. See ?build_design_matrix for details." }
+  if (is.null(events)) { stop("You must pass in an events data.frame. See ?build_design_matrix for details.") }
+  if (is.null(signals)) { stop("You must pass in a signals list. See ?build_design_matrix for details.") }
+  if (is.null(tr)) { stop("You must pass in the tr (repetition time) in seconds. See ?build_design_matrix for details.") }
 
   stopifnot(inherits(events, "data.frame"))
   if (!"event" %in% names(events)) { stop("events data.frame must contain event column with the name of the event") }
@@ -366,14 +366,26 @@ build_design_matrix <- function(
   #basically: put the events onto the time grid of the run based on the "event" element of the list
   signals_aligned <- lapply(signals, function(s) {
     if (is.null(s$event)) { stop("Signal does not have event element") }
+    if (is.null(s$value)) {
+      message("Signal is missing a 'value' element. Adding 1 for value, assuming a unit-height regressor.")
+      s$value <- 1
+    }
+
     df_events <- dplyr::filter(events, event==s$event)
     df_signal <- s$value #the signal data.frame for this signal
     if (length(df_signal)==1L && is.numeric(df_signal)) { #task indicator-type regressor
       s_aligned <- df_events
       s_aligned$value <- df_signal #replicate requested height for all occurrences
-    } else {
+    } else if (is.data.frame(df_signal)) {
+      if (!identical(sort(unique(df_events$run)), sort(unique(df_signal$run)))) {
+        missing_runs <- setdiff(df_events$run, df_signal$run) #setdiff discards duplicates
+        for (m in missing_runs) {
+          message("Missing value for event: ", s$event, " in run: ", as.character(m))
+          df_signal <- rbind(df_signal, data.frame(run=m, trial=1, value=0)) #populate an empty event for each missing run
+        }
+      }
       s_aligned <- df_signal %>% dplyr::left_join(df_events, by=c("run", "trial")) %>% arrange(run, trial) #enforce match on signal side
-    }
+    } else { stop("Unknown data type for signal.") }
 
     if (length(s$duration) > 1L) { stop("Don't know how to interpret multi-element duration argument for signal: ", paste0(s$duration, collapse=", ")) }
     if(!is.null(s$duration)) {
@@ -599,6 +611,7 @@ build_design_matrix <- function(
   #also get an unconvolved version on the time grid for diagnostics.
   dmat_convolved <- place_dmat_on_time_grid(dmat, convolve=TRUE, bdm_args)
   dmat_unconvolved <- place_dmat_on_time_grid(dmat, convolve=FALSE, bdm_args)
+
   #dmat_convolved should now be a 1-d runs list where each element is a data.frame of convolved regressors.
   names(dmat_convolved) <- names(dmat_unconvolved) <- paste0("run", runs_to_output)
 
@@ -618,7 +631,7 @@ build_design_matrix <- function(
       df[,"onset"] <- df[,"onset"] - time_offset[i]
       if (min(df[,"onset"] < 0)) {
         message("For run ", dimnames(dmat)[[1]][i], ", regressor ", dimnames(dmat)[[2]][j], ", there are ",
-                sum(df[,"onset"] < 0), "events before time 0")
+                sum(df[,"onset"] < 0), " events before time 0")
       }
       dmat[[i,j]] <- df
     }
@@ -671,7 +684,7 @@ build_design_matrix <- function(
     if ("FSL" %in% write_timing_files) {
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
-          regout <- dmat[[i,reg]][,c("onset", "duration", "value")]
+          regout <- dmat[[i,reg]][,c("onset", "duration", "value"), drop=FALSE]
 
           #handle beta series outputs
           if (isTRUE(bdm_args$beta_series[reg])) {
@@ -777,12 +790,22 @@ build_design_matrix <- function(
     if (length(custom_reg) > 0L) { run <- run[-1*custom_reg]}
 
     #check correlations among regressors for trial-wise estimates
-    #TODO: This also needs to support uneven numbers of events per regressor. Data.frame fails in this case
-    cmat <- do.call(data.frame, lapply(run, function(regressor) { regressor[,"value"] }))
+
+    #get the union of all trial numbers across regressors
+    utrial <- sort(unique(unlist(sapply(run, function(regressor) { regressor[,"trial"]}))))
+
+    #initialize a trial x regressor matrix
+    cmat <- matrix(NA, nrow=length(utrial), ncol=length(run), dimnames=list(trial=utrial, regressor=names(run)))
+
+    #populate the relevant values for each regressor at the appropriate trials
+    for (i in 1:length(run)) {
+      cmat[run[[i]][,"trial"], names(run)[i]] <- run[[i]][,"value"]
+    }
+    cmat <- as.data.frame(cmat) #convert to a data.frame
 
     #remove any constant columns (e.g., task indicator regressor for clock) so that VIF computation is sensible
     zerosd <- sapply(cmat, sd, na.rm=TRUE)
-    cmat_noconst <- cmat[,zerosd != 0.0, drop=FALSE]
+    cmat_noconst <- cmat[,!is.na(zerosd) & zerosd != 0.0, drop=FALSE]
 
     if (ncol(cmat_noconst) == 0L) {
       #if only task indicator regressors are included, then they cannot be collinear before convolution since there is no variability
