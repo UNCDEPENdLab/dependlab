@@ -353,7 +353,7 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
 
   #handle mean centering of parametric values prior to convolution
   #this is useful when one wishes to dissociate variance due to parametric modulation versus stimulus occurrence
-  if (!all(is.na(values)) && center_values && !all(abs(values - 1.0) < 1e-5) {
+  if (!all(is.na(values)) && center_values && !all(abs(values - 1.0) < 1e-5)) {
     values <- values - mean(values, na.rm=TRUE)
   }
 
