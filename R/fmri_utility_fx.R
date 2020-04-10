@@ -192,11 +192,10 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
   #handle mean centering of parametric values prior to convolution
   #this is useful when one wishes to dissociate variance due to parametric modulation versus stimulus occurrence
   #don't demean a constant regressor such as an event regressor (all values = 1)
-  if (!all(is.na(values))) {
-  if (center_values && sd(values) > 1e-5) {
+  if (!all(is.na(values)) && center_values && sd(values, na.rm=TRUE) > 1e-5) {
     values <- values - mean(values, na.rm=TRUE)
   }
-  }
+
   #split regressor into separate events prior to convolution
   #in the case of evtmax_1 normalization, normalize the HRF for the event to max height of 1 prior to multiplying against the event value/height
   #in the case of durmax_1 normalization, normalize the HRF to a height of 1 for long events (~15s)
@@ -239,7 +238,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
       if (convolve) {
         #first remove any constant regressors (likely just from evtmax_1 at end of run)
         #NB. This should only be applied to convolved regressors. For unconvolved, brief events are sometimes all zero because of rounding on the time grid
-        varying_cols <- apply(normedEvents, 2, function(x) { sd(x) > 1e-5 })
+        varying_cols <- apply(normedEvents, 2, function(x) { sd(x, na.rm=TRUE) > 1e-5 })
         #if (any(sapply(varying_cols, isFALSE))) { browser() }
         normedEvents <- normedEvents[,varying_cols]
       }
@@ -278,7 +277,7 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 
   #grand mean center convolved regressor
   if (demean_convolved) {
-    tc_conv <- apply(tc_conv, 2, function(col) { col - mean(col) })
+    tc_conv <- apply(tc_conv, 2, function(col) { col - mean(col, na.rm=TRUE) })
   }
 
   #If requested, drop volumes from the regressor. This should be applied after convolution in case an event happens during the
@@ -354,12 +353,9 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
 
   #handle mean centering of parametric values prior to convolution
   #this is useful when one wishes to dissociate variance due to parametric modulation versus stimulus occurrence
-
-  if (!all(is.na(values))) {
-      if (center_values && !all(values==1.0)) {
-        values <- values - mean(values)
-      }
-    }
+  if (!all(is.na(values)) && center_values && !all(abs(values - 1.0) < 1e-5) {
+    values <- values - mean(values, na.rm=TRUE)
+  }
 
   if (is.null(times)) {
     #onsets are specified in terms of scans (i.e., use onsets argument)
@@ -449,7 +445,7 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
     stimulus <- stimulus[unique((scale:n_vols)%/%scale)*scale] #subset the elements of the upsampled grid back onto the observed TRs
     return(stimulus)
   } else if (demean) {
-    hrf - mean(hrf)
+    hrf - mean(hrf, na.rm=TRUE)
   } else {
     hrf
   }
