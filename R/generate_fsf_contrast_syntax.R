@@ -18,7 +18,7 @@
 #'                 'c1_gt_c2'=c(0, 1, 0, 0),
 #'                 'c2_gt_c3'=c(0, 1, -1, 0),
 #'                 'c1_gt_c3'=c(0, 0, -1, 0))
-#' 
+#'
 #'   result <- generate_fsf_contrast_syntax(cmat)
 #'
 #' @author Michael Hallquist
@@ -29,19 +29,19 @@ generate_fsf_contrast_syntax <- function(cmat, ftests=NULL, include_overall=TRUE
   #cmat is a contrast matrix containing the contrast names in rownames() and coefficients for the EV contrast vector
 
   nftests <- ifelse(is.null(ftests), 0, length(ftests))
-  
+
   #don't support separation between original (one per column) and 'real' (one per basis element) EVs
   fsf_syntax <- c(
     "# Number of contrasts",
-    paste0("set fmri(ncon_orig) ", nrow(cmat)),
+    paste0("set fmri(ncon_orig) ", 0), #nrow(cmat)),
     paste0("set fmri(ncon_real) ", nrow(cmat)),
     "",
     "# Number of F-tests",
-    paste0("set fmri(nftests_orig) ", nftests),
+    paste0("set fmri(nftests_orig) ", 0), #nftests),
     paste0("set fmri(nftests_real) ", nftests),
     ""
   )
-  
+
   if (include_overall) {
     fsf_syntax <- c(fsf_syntax,
       "# Contrast & F-tests mode",
@@ -52,7 +52,7 @@ generate_fsf_contrast_syntax <- function(cmat, ftests=NULL, include_overall=TRUE
       ""
     )
   }
-  
+
   for (i in 1:nrow(cmat)) {
     #whether to display images for contrast (only support yes)
     fsf_syntax <- c(fsf_syntax,
@@ -75,7 +75,7 @@ generate_fsf_contrast_syntax <- function(cmat, ftests=NULL, include_overall=TRUE
     #contrast masking by F test (not supported/disabled, but including to match FSL expectations)
     #note: re-defining j in terms of number of contrasts, not EVs as in previous loop
     #we are basically looking at contrast x contrast masking (intersection/conjunction)
-      
+
     for (j in 1:nrow(cmat)) {
       if (i != j) { #can't mask contrast with itself
         fsf_syntax <- c(fsf_syntax,
@@ -83,7 +83,7 @@ generate_fsf_contrast_syntax <- function(cmat, ftests=NULL, include_overall=TRUE
           paste0("set fmri(conmask", i, "_", j, ") 0"), "")
       }
     }
-        
+
   }
 
   if (include_overall) { #include contrast masking general info
