@@ -4,9 +4,15 @@
 \alias{score_bfi}
 \title{Score The Big Five Inventory-2 -- 60 items BFI-2 (Soto & John, 2017)}
 \usage{
-score_bfi(df, item_prefix = "BFI", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 5)
+score_bfi(
+  df,
+  item_prefix = "BFI",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 5
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 60 BFI-2 items to be scored}

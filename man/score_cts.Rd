@@ -4,8 +4,14 @@
 \alias{score_cts}
 \title{Score the Conflict Tactics Scale (CTS)}
 \usage{
-score_cts(df, item_prefix = "CTS", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 7)
+score_cts(
+  df,
+  item_prefix = "CTS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 7
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 40 CTS items to be scored}

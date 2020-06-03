@@ -4,11 +4,19 @@
 \alias{spm_extract_anatomical_rois}
 \title{This is a wrapper around the spm_extract_anatomical_rois.m script in the inst directory}
 \usage{
-spm_extract_anatomical_rois(l1spmdirs, masks, threshold = 0.2,
-  threshdesc = "none", session = 1, extent = 0, adjust_F_index = 1,
-  contrast_index = NULL, ncores = 1,
+spm_extract_anatomical_rois(
+  l1spmdirs,
+  masks,
+  threshold = 0.2,
+  threshdesc = "none",
+  session = 1,
+  extent = 0,
+  adjust_F_index = 1,
+  contrast_index = NULL,
+  ncores = 1,
   spm_path = "/gpfs/group/mnh5174/default/lab_resources/spm12",
-  matlab_path = "/opt/aci/sw/matlab/R2017b/bin")
+  matlab_path = "/opt/aci/sw/matlab/R2017b/bin"
+)
 }
 \arguments{
 \item{l1spmdirs}{character vector of level 1 SPM directories containing SPM.mat files}

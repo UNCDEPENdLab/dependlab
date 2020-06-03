@@ -4,8 +4,14 @@
 \alias{score_isc}
 \title{Score the Interpersonal Stressors Circumplex (ISC)}
 \usage{
-score_isc(df, item_prefix = "ISC", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 8)
+score_isc(
+  df,
+  item_prefix = "ISC",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 8
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 64 ISC items to be scored}

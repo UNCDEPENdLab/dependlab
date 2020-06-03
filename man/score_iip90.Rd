@@ -4,9 +4,15 @@
 \alias{score_iip90}
 \title{Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex version}
 \usage{
-score_iip90(df, item_prefix = "IIP", max_impute = 0.2,
-  drop_items = FALSE, keep_octants = TRUE, min_value = 0,
-  max_value = 4)
+score_iip90(
+  df,
+  item_prefix = "IIP",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_octants = TRUE,
+  min_value = 0,
+  max_value = 4
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 90 IIP items to be scored}

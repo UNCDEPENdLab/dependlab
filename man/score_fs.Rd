@@ -4,8 +4,14 @@
 \alias{score_fs}
 \title{Score the Flourishing Scale (Diener, Wirtz, Tov, Kim-Prieto, Choi, Oishi, & Biswas-Diener, 2009)}
 \usage{
-score_fs(df, item_prefix = "FS", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 7)
+score_fs(
+  df,
+  item_prefix = "FS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 7
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 8 FS items to be scored}

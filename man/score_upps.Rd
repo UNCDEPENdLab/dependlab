@@ -4,9 +4,15 @@
 \alias{score_upps}
 \title{Score the UPPS-P Impulsive Behavior scale -- revised 59 item version (Lynam, Smith, Whiteside, & Cyders, 2007)}
 \usage{
-score_upps(df, item_prefix = "UPPS", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 4)
+score_upps(
+  df,
+  item_prefix = "UPPS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 4
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 59 UPPS items to be scored}

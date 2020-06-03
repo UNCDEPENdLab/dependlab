@@ -6,8 +6,13 @@
 It accepts a vector PBS arguments to be passed to the scheduler and
 a vector of environment variables that should be passed to the compute node at job execution.}
 \usage{
-qsub_file(script, pbs_args = NULL, env_variables = NULL, echo = TRUE,
-  fail_on_error = FALSE)
+qsub_file(
+  script,
+  pbs_args = NULL,
+  env_variables = NULL,
+  echo = TRUE,
+  fail_on_error = FALSE
+)
 }
 \arguments{
 \item{script}{A script that should be executed by the PBS scheduler. This can contain PBS directives, but in the

@@ -4,9 +4,15 @@
 \alias{score_asws}
 \title{Score the Adolescent Sleep Wake Scale (ASWS)}
 \usage{
-score_asws(df, item_prefix = "ASWS", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 6)
+score_asws(
+  df,
+  item_prefix = "ASWS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 6
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 28 ASWS items to be scored}

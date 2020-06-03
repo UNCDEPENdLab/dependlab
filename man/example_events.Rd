@@ -4,7 +4,9 @@
 \name{example_events}
 \alias{example_events}
 \title{example events structure for build_design_matrix}
-\format{An object of class \code{data.frame} with 200 rows and 6 columns.}
+\format{
+An object of class \code{data.frame} with 200 rows and 6 columns.
+}
 \usage{
 example_events
 }

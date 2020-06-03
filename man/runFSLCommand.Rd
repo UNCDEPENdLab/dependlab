@@ -4,8 +4,7 @@
 \alias{runFSLCommand}
 \title{Wrapper for running an fsl command safely within R}
 \usage{
-runFSLCommand(args, fsldir = NULL, stdout = NULL, stderr = NULL,
-  echo = TRUE)
+runFSLCommand(args, fsldir = NULL, stdout = NULL, stderr = NULL, echo = TRUE)
 }
 \arguments{
 \item{args}{FSL command string to be run}

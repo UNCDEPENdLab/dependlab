@@ -4,9 +4,18 @@
 \alias{score_bpq}
 \title{Score the Borderline Personality Questionnaire (BPQ)}
 \usage{
-score_bpq(df, item_prefix = "BPQ", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, input_codes = c(1,
-  2), min_value = 0, max_value = 1, bad_items = NULL)
+score_bpq(
+  df,
+  item_prefix = "BPQ",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  input_codes = c(1, 2),
+  min_value = 0,
+  max_value = 1,
+  bad_items = NULL,
+  add_alphas = TRUE
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 80 BPQ items to be scored}
@@ -27,6 +36,8 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 1}
 
 \item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Borderline Personality Questionnaire (BPQ)

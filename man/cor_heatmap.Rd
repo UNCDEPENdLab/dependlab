@@ -4,8 +4,14 @@
 \alias{cor_heatmap}
 \title{Function to generate ggplot correlation heatmap}
 \usage{
-cor_heatmap(df, cormat = NULL, alphaSort = TRUE, base_size = 14,
-  tileTextSize = 3.8, title = NULL)
+cor_heatmap(
+  df,
+  cormat = NULL,
+  alphaSort = TRUE,
+  base_size = 14,
+  tileTextSize = 3.8,
+  title = NULL
+)
 }
 \arguments{
 \item{df}{data.frame to plot}

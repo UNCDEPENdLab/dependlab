@@ -4,14 +4,26 @@
 \alias{build_design_matrix}
 \title{Creates an fmri design matrix, including timing files for for AFNI or FSL.}
 \usage{
-build_design_matrix(events = NULL, signals = NULL, tr = NULL,
-  center_values = TRUE, hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9,
-  b2 = 0.9, cc = 0.35), baseline_coef_order = -1L,
-  baseline_parameterization = "Legendre", run_volumes = NULL,
-  drop_volumes = 0L, runs_to_output = NULL, plot = TRUE,
-  write_timing_files = NULL, output_directory = "run_timing",
-  convolve_wi_run = TRUE, high_pass = NULL, iti_post = 12,
-  ts_multipliers = NULL, additional_regressors = NULL)
+build_design_matrix(
+  events = NULL,
+  signals = NULL,
+  tr = NULL,
+  center_values = TRUE,
+  hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35),
+  baseline_coef_order = -1L,
+  baseline_parameterization = "Legendre",
+  run_volumes = NULL,
+  drop_volumes = 0L,
+  runs_to_output = NULL,
+  plot = TRUE,
+  write_timing_files = NULL,
+  output_directory = "run_timing",
+  convolve_wi_run = TRUE,
+  high_pass = NULL,
+  iti_post = 12,
+  ts_multipliers = NULL,
+  additional_regressors = NULL
+)
 }
 \arguments{
 \item{events}{a data.frame that includes a column for the event type (e.g. outcome vs. cue),

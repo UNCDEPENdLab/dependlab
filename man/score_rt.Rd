@@ -4,9 +4,15 @@
 \alias{score_rt}
 \title{Score the Risk Taking -- 18 item scale (RT-18)}
 \usage{
-score_rt(df, item_prefix = "RT", max_impute = 0.2,
-  drop_items = FALSE, input_codes = c(1, 2), min_value = 0,
-  max_value = 1)
+score_rt(
+  df,
+  item_prefix = "RT",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  input_codes = c(1, 2),
+  min_value = 0,
+  max_value = 1
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 18 RT items to be scored}

@@ -4,9 +4,15 @@
 \alias{score_rse}
 \title{Score the Relationship and Sex Education (RSE) scale}
 \usage{
-score_rse(df, item_prefix = "RSE", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 4)
+score_rse(
+  df,
+  item_prefix = "RSE",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 4
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 10 RSE items to be scored}

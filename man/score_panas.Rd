@@ -4,8 +4,14 @@
 \alias{score_panas}
 \title{Score the Positive and Negative Affect Schedule (PANAS) scale}
 \usage{
-score_panas(df, item_prefix = "PANAS", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 5)
+score_panas(
+  df,
+  item_prefix = "PANAS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 5
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 20 PANAS items to be scored}

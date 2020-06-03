@@ -4,11 +4,22 @@
 \alias{convolve_regressor}
 \title{This function convolves a regressor with a normalized HRF whose peak amplitude is 1.0}
 \usage{
-convolve_regressor(n_vols, reg, tr = 1, normalization = "none",
-  rm_zeros = TRUE, center_values = TRUE, convmax_1 = FALSE,
-  demean_convolved = FALSE, high_pass = NULL, convolve = TRUE,
-  beta_series = FALSE, ts_multiplier = NULL, drop_volumes = 0,
-  hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35))
+convolve_regressor(
+  n_vols,
+  reg,
+  tr = 1,
+  normalization = "none",
+  rm_zeros = TRUE,
+  center_values = TRUE,
+  convmax_1 = FALSE,
+  demean_convolved = FALSE,
+  high_pass = NULL,
+  convolve = TRUE,
+  beta_series = FALSE,
+  ts_multiplier = NULL,
+  drop_volumes = 0,
+  hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35)
+)
 }
 \arguments{
 \item{n_vols}{The number of volumes (scans) to be output in the convolved regressor}

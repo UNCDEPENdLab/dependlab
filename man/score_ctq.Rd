@@ -4,9 +4,15 @@
 \alias{score_ctq}
 \title{Score the Childhood Trauma Questionnaire -- CTQ scale (Bernstein & Fink, 1998)}
 \usage{
-score_ctq(df, item_prefix = "CTQ", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 5)
+score_ctq(
+  df,
+  item_prefix = "CTQ",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 5
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 28 CTQ items to be scored}

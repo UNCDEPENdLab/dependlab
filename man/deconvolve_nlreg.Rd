@@ -5,8 +5,15 @@
 \title{R port of Bush and Cisler 2013, Magnetic Resonance Imaging
 Adapted from the original provided by Keith Bush}
 \usage{
-deconvolve_nlreg(BOLDobs, kernel, nev_lr = 0.01, epsilon = 0.005,
-  beta = 40, normalize = TRUE, trim_kernel = TRUE)
+deconvolve_nlreg(
+  BOLDobs,
+  kernel,
+  nev_lr = 0.01,
+  epsilon = 0.005,
+  beta = 40,
+  normalize = TRUE,
+  trim_kernel = TRUE
+)
 }
 \arguments{
 \item{BOLDobs}{observed BOLD timeseries}

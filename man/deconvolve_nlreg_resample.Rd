@@ -5,8 +5,15 @@
 \title{This function deconvolves the BOLD signal using Bush 2011 method, augmented
 by the resampling approach of Bush 2015.}
 \usage{
-deconvolve_nlreg_resample(BOLDobs, kernel, nev_lr = 0.01,
-  epsilon = 0.005, beta = 40, Nresample = 30, trim_kernel = TRUE)
+deconvolve_nlreg_resample(
+  BOLDobs,
+  kernel,
+  nev_lr = 0.01,
+  epsilon = 0.005,
+  beta = 40,
+  Nresample = 30,
+  trim_kernel = TRUE
+)
 }
 \arguments{
 \item{BOLDobs}{observed BOLD signal}

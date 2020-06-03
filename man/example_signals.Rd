@@ -4,7 +4,9 @@
 \name{example_signals}
 \alias{example_signals}
 \title{example signals structure for build_design_matrix}
-\format{An object of class \code{list} of length 2.}
+\format{
+An object of class \code{list} of length 2.
+}
 \usage{
 example_signals
 }

@@ -5,9 +5,16 @@
 \title{Score the NEO Five-Factor Inventory (NEO-FFI) scale (Costa & McCrae, 1992)
 This is for the 60-item version}
 \usage{
-score_neo(df, item_prefix = "NEO", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 5)
+score_neo(
+  df,
+  item_prefix = "NEO",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 5,
+  add_alphas = TRUE
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 60 NEO items to be scored}
@@ -24,13 +31,15 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 1}
 
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 5}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the NEO Five-Factor Inventory (NEO-FFI) scale (Costa & McCrae, 1992)
 This is for the 60-item version
 }
 \details{
-Adds five columns, \code{NEO_neurot}, \code{NEO_extra}, \code{NEO_open}, \code{NEO_agree}, and \code{NEO_cons}, to \code{df} containing 
+Adds five columns, \code{NEO_neurot}, \code{NEO_extra}, \code{NEO_open}, \code{NEO_agree}, and \code{NEO_cons}, to \code{df} containing
 the NEO-FFI scales, respectively.
 
 Note: the default NEO scoring uses the mean of the items for the scales.

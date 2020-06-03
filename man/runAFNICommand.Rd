@@ -4,8 +4,14 @@
 \alias{runAFNICommand}
 \title{Wrapper for running an AFNI command safely within R}
 \usage{
-runAFNICommand(args, afnidir = NULL, stdout = NULL, stderr = NULL,
-  echo = TRUE, ...)
+runAFNICommand(
+  args,
+  afnidir = NULL,
+  stdout = NULL,
+  stderr = NULL,
+  echo = TRUE,
+  ...
+)
 }
 \arguments{
 \item{args}{AFNI command string to be run}

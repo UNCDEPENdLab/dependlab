@@ -4,7 +4,9 @@
 \name{example_nuisrun1}
 \alias{example_nuisrun1}
 \title{example nuisance regressors for run1 used in build_design_matrix}
-\format{An object of class \code{data.frame} with 300 rows and 2 columns.}
+\format{
+An object of class \code{data.frame} with 300 rows and 2 columns.
+}
 \usage{
 example_nuisrun1
 }

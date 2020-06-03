@@ -8,7 +8,7 @@
 #' @param pmin The highest correlation p-value that should be included in the output (e.g., to omit non-sig correlations)
 #' @param partial A character vector of variable names to partial out of the target correlations
 #' @param absrmin The minimum absolute r value to print
-#' @param digits The number of digits to print for correlations and p values
+#' @param digits The number of digits to return for correlations and p values
 #' @param prewhiten Whether to remove the temporal autocorrelation structure of each variable prior correlation (using ARIMA)
 #' @param orderbyr Whether to sort the correlation output by the magnitude of the correlation
 #'
@@ -16,6 +16,7 @@
 #' @return A list of correlations where each element is a vector of a target variable with all withvvars
 #' @importFrom forecast auto.arima Arima
 #' @importFrom Hmisc rcorr
+#' @importFrom dplyr arrange mutate select filter desc bind_rows
 #' @export
 
 cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, partial=NULL, absrmin=NULL, digits=3, prewhiten=FALSE, orderbyr=FALSE) {
@@ -31,53 +32,48 @@ cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, par
 
   if (!is.null(partial)) {
     df <- as.data.frame(lapply(df, function(col) {
-              residuals(lm(col ~ as.matrix(df[,partial])))
-            }))
+      residuals(lm(col ~ as.matrix(df[,partial])))
+    }))
   }
 
-  res <- sapply(target, function(tv) {
-        cvec <- sapply(withvars, function(wv) {
-              #prewhiten?
-              if (prewhiten) {
-                r <- residuals(lm(df[,tv] ~ df[,wv]))
-                a <- auto.arima(r)
-                x <- Arima(df[,wv], model=a)$residuals
-                y <- Arima(df[,tv], model=a)$residuals
-              } else {
-                x <- df[,wv]
-                y <- df[,tv]
-              }
+  res <- lapply(target, function(tv) {
+    corr_df <- lapply(withvars, function(wv) {
+      #prewhiten?
+      if (prewhiten) {
+        r <- residuals(lm(df[,tv] ~ df[,wv]))
+        a <- auto.arima(r)
+        x <- Arima(df[,wv], model=a)$residuals
+        y <- Arima(df[,tv], model=a)$residuals
+      } else {
+        x <- df[,wv]
+        y <- df[,tv]
+      }
 
-              tryCatch(rc <- Hmisc::rcorr(x, y), error=function(e) { print(e); browser() } )
-              list(r=round(rc$r[1,2], 3), p=round(rc$P[1,2], 3))
-            }
-        )
+      tryCatch(rc <- Hmisc::rcorr(x, y), error=function(e) { print(e); browser() } )
+      data.frame(targetvar=tv, withvar=wv, r=round(rc$r[1,2], digits), p=round(rc$P[1,2], digits), stringsAsFactors = FALSE)
+    })
 
-        if (!is.null(pmin)) {
-          sigr <- which(unlist(cvec["p",]) <= pmin)
-          if (length(sigr) == 0L) { cvec <- c()
-          } else { cvec <- cvec[,sigr, drop=FALSE] }
-        }
+    corr_df <- bind_rows(corr_df) #convert to single data.frame (not list of one-row dfs)
 
-        if (!is.null(absrmin)) {
-          goodr <- which(abs(unlist(cvec["r",])) >= absrmin)
-          if (length(goodr) == 0L) { cvec <- c()
-          } else { cvec <- cvec[,goodr, drop=FALSE] }
-        }
+    if (!is.null(pmin)) { #enforce maximum p-value
+      corr_df <- corr_df %>% dplyr::filter(p <= pmin)
+    }
 
-        #be sure that we never include the correlation of the variable with itself
-        selfmatch <- dimnames(cvec)[[2]] == tv
-        cvec <- cvec[,!selfmatch, drop=FALSE]
+    if (!is.null(absrmin)) { #enforce minimum |r|
+      corr_df <- corr_df %>% dplyr::mutate(abs_r=abs(r)) %>% dplyr::filter(abs_r >= absrmin) %>% dplyr::select(-abs_r)
+    }
 
-        #reorder by correlation size if requested
-        if (orderbyr == TRUE) {
-          cvec <- cvec[,order(unlist(cvec[1,]), decreasing=TRUE)]
-        }
+    #be sure that we never include the correlation of the variable with itself
+    corr_df <- corr_df %>% filter(targetvar != withvar)
 
-        return(cvec)
+    #reorder by correlation size if requested
+    if (orderbyr == TRUE) {
+      corr_df <- corr_df %>% dplyr::arrange(desc(r))
+    }
 
-        #print(cvec)
-      }, simplify=FALSE)
+    return(corr_df)
+  })
 
+  res <- bind_rows(res)
   return(res)
 }

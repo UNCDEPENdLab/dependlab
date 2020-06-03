@@ -5,9 +5,15 @@
 \title{Score the experiences in close relationships -- revised (ECR-R) scale (Fraley, Waller, & Brennan, 2000)
 This is for the 36-item version with odd (avoidance) / even (anxiety) item sorting.}
 \usage{
-score_ecr(df, item_prefix = "ECR", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 7)
+score_ecr(
+  df,
+  item_prefix = "ECR",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 7
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 36 ECR items to be scored}

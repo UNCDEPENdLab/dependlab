@@ -4,8 +4,14 @@
 \alias{score_sbpni}
 \title{Score the 12-item Super-Brief Pathological Narcissism Inventory (SB-PNI)}
 \usage{
-score_sbpni(df, item_prefix = "SBPNI", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 100)
+score_sbpni(
+  df,
+  item_prefix = "SBPNI",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 100
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 12-item SBPNI items to be scored}

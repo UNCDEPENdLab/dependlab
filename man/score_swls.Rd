@@ -4,8 +4,14 @@
 \alias{score_swls}
 \title{Score the Satisfaction with Life Scale (Diener, Emmons, Larsen, & Griffin, 1985)}
 \usage{
-score_swls(df, item_prefix = "SWLS", max_impute = 0.2,
-  drop_items = FALSE, min_value = 1, max_value = 7)
+score_swls(
+  df,
+  item_prefix = "SWLS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  min_value = 1,
+  max_value = 7
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 5 SWLS items to be scored}

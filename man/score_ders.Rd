@@ -4,9 +4,15 @@
 \alias{score_ders}
 \title{Score the Difficulties in Emotion Regulation Scale (DERS) (Gratz & Roemer, 2004)}
 \usage{
-score_ders(df, item_prefix = "DERS", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 1,
-  max_value = 5)
+score_ders(
+  df,
+  item_prefix = "DERS",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 1,
+  max_value = 5
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 36 DERS items to be scored}

@@ -5,9 +5,18 @@
 \title{This function correlates a set of target variables (target) with a set of other variables (withvars).
 The general goal is to avoid sifting through gargantuan correlation matrices when only some cells are of interest a priori.}
 \usage{
-cor_with_target(df, omit = NULL, target, withvars = NULL,
-  pmin = NULL, partial = NULL, absrmin = NULL, digits = 3,
-  prewhiten = FALSE, orderbyr = FALSE)
+cor_with_target(
+  df,
+  omit = NULL,
+  target,
+  withvars = NULL,
+  pmin = NULL,
+  partial = NULL,
+  absrmin = NULL,
+  digits = 3,
+  prewhiten = FALSE,
+  orderbyr = FALSE
+)
 }
 \arguments{
 \item{df}{The data.frame containing data to be correlated}
@@ -24,7 +33,7 @@ cor_with_target(df, omit = NULL, target, withvars = NULL,
 
 \item{absrmin}{The minimum absolute r value to print}
 
-\item{digits}{The number of digits to print for correlations and p values}
+\item{digits}{The number of digits to return for correlations and p values}
 
 \item{prewhiten}{Whether to remove the temporal autocorrelation structure of each variable prior correlation (using ARIMA)}
 

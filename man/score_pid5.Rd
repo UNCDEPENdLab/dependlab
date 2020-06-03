@@ -4,9 +4,15 @@
 \alias{score_pid5}
 \title{Score the Personality Inventory for DSM-5 Faceted Brief Form -- 100 items PID-5-BF (Maples et al., 2013)}
 \usage{
-score_pid5(df, item_prefix = "PID", max_impute = 0.2,
-  drop_items = FALSE, keep_reverse_codes = FALSE, min_value = 0,
-  max_value = 3)
+score_pid5(
+  df,
+  item_prefix = "PID",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  min_value = 0,
+  max_value = 3
+)
 }
 \arguments{
 \item{df}{a data.frame containing the 100 PID-5-BF items to be scored}

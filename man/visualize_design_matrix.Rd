@@ -4,8 +4,13 @@
 \alias{visualize_design_matrix}
 \title{Visualize design matrix, including event onset times and run boundaries}
 \usage{
-visualize_design_matrix(d, outfile = NULL, run_boundaries = NULL,
-  events = NULL, include_baseline = FALSE)
+visualize_design_matrix(
+  d,
+  outfile = NULL,
+  run_boundaries = NULL,
+  events = NULL,
+  include_baseline = FALSE
+)
 }
 \arguments{
 \item{d}{a concatenated design matrix created by \code{build_design_matrix} and passed to \code{concat_design_runs}}
