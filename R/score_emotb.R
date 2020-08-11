@@ -2,7 +2,8 @@
 #' This is for the raw score to t-score conversions for bank/fixed forms
 #'
 #' @param df a data.frame containing the TB Emotion Measures items to be scored
-#' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
+#' @param drop_items whether to remove the item-level data from the \code{
+#' df}. Default: FALSE
 #'
 #' @details
 #'
@@ -57,6 +58,7 @@ apathy_adult <- function(raw) {
 }
 
 # Perceived Hostility Bank/Fixed Form Ages 18+
+#' @export
 perchost_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.65,
@@ -97,6 +99,7 @@ perchost_adult <- function(raw) {
 }
 
 # Perceived Hostility Bank/Fixed Form Ages 8-17
+#' @export
 perchost_teen <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.9,
@@ -125,6 +128,7 @@ perchost_teen <- function(raw) {
 }
 
 # Anger - Physical Aggression Fixed Form Ages 18+
+#' @export
 angpa_adult <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -0.66,
@@ -163,6 +167,7 @@ angpa_adult <- function(raw) {
 }
 
 # Anger - Hostility Fixed Form Ages 18+
+#' @export
 anghost_adult <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.34,
@@ -201,6 +206,7 @@ anghost_adult <- function(raw) {
 }
 
 # Anger - Affect Fixed Form Ages 18+ (Anger FF Ages 18+)
+#' @export
 angaf_adult <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.71,
@@ -229,6 +235,7 @@ angaf_adult <- function(raw) {
 }
 
 # Anger - Affect Bank/Fixed Form Ages 8-17
+#' @export
 angaf_teen <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.85,
@@ -257,6 +264,7 @@ angaf_teen <- function(raw) {
 }
 
 # Emotional Support Bank/Fixed Form Ages 18+
+#' @export
 emosup_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -3.41,
@@ -297,6 +305,7 @@ emosup_adult <- function(raw) {
 }
 
 # Emotional Support Bank/Fixed Form Ages 8-17
+#' @export
 emosup_teen <- function(raw) {
   theta <- case_when(
     raw == 7 ~ -3.01,
@@ -331,6 +340,7 @@ emosup_teen <- function(raw) {
 }
 
 # Fear - Affect Fixed Form Ages 18+
+#' @export
 fearaf_adult <- function(raw) {
   theta <- case_when(
     raw == 7 ~ -1.37,
@@ -367,6 +377,7 @@ fearaf_adult <- function(raw) {
 }
 
 # Fear - Bank/Fixed Form Ages 8-17
+#' @export
 fearaf_teen <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.65,
@@ -407,6 +418,7 @@ fearaf_teen <- function(raw) {
 }
 
 # Fear - Somatic Arousal Bank/Fixed Form Ages 18+
+#' @export
 fearsoma_adult <- function(raw) {
   theta <- case_when(
     raw == 6 ~ -0.99,
@@ -439,6 +451,7 @@ fearsoma_adult <- function(raw) {
 }
 
 # Friendship Bank/Fixed Form Ages 18+
+#' @export
 friend_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -3.2,
@@ -479,6 +492,7 @@ friend_adult <- function(raw) {
 }
 
 # Friendship Fixed Form Ages 8-17
+#' @export
 friend_teen <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -3.34,
@@ -507,6 +521,7 @@ friend_teen <- function(raw) {
 }
 
 # Instrumental Support Bank/Fixed Form Ages 18+
+#' @export
 instrsup_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -2.79,
@@ -547,6 +562,7 @@ instrsup_adult <- function(raw) {
 }
 
 # Loneliness Bank/Fixed Form Ages 18+
+#' @export
 lone_adult <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.24,
@@ -575,6 +591,7 @@ lone_adult <- function(raw) {
 }
 
 # Loneliness Fixed Form Ages 8-17
+#' @export
 lone_teen <- function(raw) {
   theta <- case_when(
     raw == 7 ~ -1.12,
@@ -611,6 +628,7 @@ lone_teen <- function(raw) {
 }
 
 # Perceived Rejection Bank/Fixed Form Ages 18+
+#' @export
 percrej_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.41,
@@ -651,6 +669,7 @@ percrej_adult <- function(raw) {
 }
 
 # Perceived Rejection Bank/Fixed Form Ages 8-17
+#' @export
 percrej_teen <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -1.2,
@@ -679,6 +698,7 @@ percrej_teen <- function(raw) {
 }
 
 # Perceived Stress Bank/Fixed Form Ages 18+
+#' @export
 percstrs_adult <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -2.76,
@@ -727,6 +747,7 @@ percstrs_adult <- function(raw) {
 }
 
 # Perceived Stress Bank/Fixed Form Ages 13-17
+#' @export
 percstrs_teen <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -3.04,
@@ -775,6 +796,7 @@ percstrs_teen <- function(raw) {
 }
 
 # Self-Efficacy Bank/Fixed Form Ages 18+
+#' @export
 self_adult <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -3.26,
@@ -813,6 +835,7 @@ self_adult <- function(raw) {
 }
 
 # Self-Efficacy Bank/Fixed Form Ages 13-17
+#' @export
 self_teen <- function(raw) {
   theta <- case_when(
     raw == 10 ~ - 3.71,
@@ -861,6 +884,7 @@ self_teen <- function(raw) {
 }
 
 # Self-Efficacy Bank/Fixed Form Child 8-12
+#' @export
 self_child <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -3.23,
@@ -909,6 +933,7 @@ self_child <- function(raw) {
 }
 
 # Meaning and Purpose Fixed Form Ages 18+
+#' @export
 mp_adult <- function(raw) {
   theta <- case_when(
     raw == 7 ~ -3.57,
@@ -945,6 +970,7 @@ mp_adult <- function(raw) {
 }
 
 # Sadness Fixed Form Ages 18+
+#' @export
 sad_adult <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.29,
@@ -985,6 +1011,7 @@ sad_adult <- function(raw) {
 }
 
 # Sadness Fixed Form Ages 8-17
+#' @export
 sad_teen <- function(raw) {
   theta <- case_when(
     raw == 8 ~ -1.48,
@@ -1025,6 +1052,7 @@ sad_teen <- function(raw) {
 }
 
 # General Life Satisfaction Fixed Form A Ages 18+
+#' @export
 gls_adult <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -2.7,
@@ -1063,6 +1091,7 @@ gls_adult <- function(raw) {
 }
 
 # General Life Satisfaction Bank/Fixed Form Ages 13-17
+#' @export
 gls_teen <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -3.46,
@@ -1121,6 +1150,7 @@ gls_teen <- function(raw) {
 }
 
 # General Life Satisfaction Fixed Form Ages 8-12
+#' @export
 gls_child <- function(raw) {
   theta <- case_when(
     raw == 5 ~ -3.07,
@@ -1149,6 +1179,7 @@ gls_child <- function(raw) {
 }
 
 # Positive Affect Fixed Form Ages 18+
+#' @export
 posaf_adult <- function(raw) {
   theta <- case_when(
     raw == 15 ~ -3.56,
@@ -1217,6 +1248,7 @@ posaf_adult <- function(raw) {
 }
 
 # Positive Affect Fixed Form Ages 13-17
+#' @export
 posaf_teen <- function(raw) {
   theta <- case_when(
     raw == 10 ~ -3.41,
@@ -1265,6 +1297,7 @@ posaf_teen <- function(raw) {
 }
 
 # Positive Affect Fixed Form Ages 8-12
+#' @export
 posaf_child <- function(raw) {
   theta <- case_when(
     raw == 9 ~ -3.15,
@@ -1311,6 +1344,7 @@ posaf_child <- function(raw) {
 
 
 # Parent function to call sub functions and create variables (Theta and T)
+#' @export
 score_emotb <- function(df, drop_items=FALSE) {
   df <- df %>% mutate(Apathy_Theta = if_else(Age >= 18, apathy_adult(Apathy_Raw), NA_real_),
                       PercStrs_Theta = if_else(Age >= 18, percstrs_adult(PercStrs_Raw), percstrs_teen(PercStrs_Raw)),
