@@ -52,10 +52,11 @@ cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextS
   p <- ggplot(cormat.upper, aes(x=V1, y=V2, fill=corr)) + theme_bw(base_size=base_size) + geom_tile() #+ ggtitle(paste("EIFB Intercorrelations for month:", thisMonth))
   p <- p + geom_text(data=cormat.upper, aes(label=round(corr,2)), size=tileTextSize)
   p <- p + geom_text(data=cormat.ids, aes(x=V1, label=V1), colour="grey30", show.legend=FALSE, size=tileTextSize, hjust=0.13, vjust=0.5, angle=0)
+  
   if(is.null(viridis)){
     p <- p + scale_fill_gradient2(name="Correlation\n", low=muted("blue"), high=muted("red"))
-  } else{
-    if(!viridis %in% c("magma", "A", "inferno", "B", "plasma" "C")){
+  } else {
+    if(viridis %in% c("magma", "A", "inferno", "B", "plasma", "C")){
       p <- p + scale_fill_viridis() #default (viridis option)
     } else{
       p <- p + scale_fill_viridis(option = viridis)
