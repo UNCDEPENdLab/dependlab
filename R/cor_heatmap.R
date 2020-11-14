@@ -13,6 +13,7 @@
 #'   scale_x_discrete scale_y_discrete waiver element_blank xlab ylab
 #' @importFrom grid unit
 #' @importFrom scales muted
+#' @importFrom viridis scale_fill_viridis
 #'
 #' @examples
 #'   library(dplyr)
@@ -22,7 +23,7 @@
 #' 
 #' @export
 #' 
-cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextSize=3.8, title=NULL) {
+cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextSize=3.8, title=NULL, viridis = NULL) {
   #require(reshape2)
   #require(ggplot2)
   #require(scales)
@@ -51,7 +52,17 @@ cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextS
   p <- ggplot(cormat.upper, aes(x=V1, y=V2, fill=corr)) + theme_bw(base_size=base_size) + geom_tile() #+ ggtitle(paste("EIFB Intercorrelations for month:", thisMonth))
   p <- p + geom_text(data=cormat.upper, aes(label=round(corr,2)), size=tileTextSize)
   p <- p + geom_text(data=cormat.ids, aes(x=V1, label=V1), colour="grey30", show.legend=FALSE, size=tileTextSize, hjust=0.13, vjust=0.5, angle=0)
-  p <- p + scale_fill_gradient2(name="Correlation\n", low=muted("blue"), high=muted("red"))
+  
+  if(is.null(viridis)){
+    p <- p + scale_fill_gradient2(name="Correlation\n", low=muted("blue"), high=muted("red"))
+  } else {
+    if(viridis %in% c("magma", "A", "inferno", "B", "plasma", "C")){
+      p <- p + scale_fill_viridis() #default (viridis option)
+    } else{
+      p <- p + scale_fill_viridis(option = viridis)
+      }
+  }
+  
   #p <- p + scale_fill_gradientn(name="Correlation", colours= c("white", "red"), limits=c(0,1))
   
   if(!is.null(title)){
@@ -60,7 +71,12 @@ cor_heatmap <- function(df, cormat=NULL, alphaSort=TRUE, base_size=14, tileTextS
 
 
   #want matrix to run from upper left to lower right, so need to change limits of axes
-  facLevels <- sort(as.character(unique(molten.cormat$V1)))
+  if(alphaSort){
+    facLevels <- sort(as.character(unique(molten.cormat$V1)))
+  } else{
+    facLevels <- as.character(unique(molten.cormat$V1)) # retain ordering of input df
+  }
+  
   
   p <- p + scale_x_discrete(name="", limits=facLevels, labels=waiver()) + scale_y_discrete(name="", limits=rev(facLevels), labels=waiver()) + xlab("") + ylab("") +
       theme(legend.position=c(0.8, 0.8), plot.margin=unit(c(0.2,0.2,0.2,0.2), "lines"), axis.title.x=element_blank(), axis.title.y=element_blank()) +
