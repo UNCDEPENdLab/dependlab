@@ -10,7 +10,8 @@ cor_heatmap(
   alphaSort = TRUE,
   base_size = 14,
   tileTextSize = 3.8,
-  title = NULL
+  title = NULL,
+  viridis = NULL
 )
 }
 \arguments{
