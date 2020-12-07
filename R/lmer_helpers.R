@@ -8,7 +8,7 @@
 #' @author Michael Hallquist
 #' @author Nate Hall
 #' @importFrom bbmle AICtab
-#' @importFrom flextable flextable autofit
+#' @importFrom flextable flextable autofit as_paragraph
 #' @export
 
 
