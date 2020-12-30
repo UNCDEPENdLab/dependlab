@@ -4,7 +4,7 @@
 \alias{gmapply}
 \title{expand.grid-based multivariate apply (mapply) wrapper for fast implementation of nested looping structures}
 \usage{
-gmapply(mvars, FUN, SIMPLIFY = FALSE, ...)
+gmapply(mvars, FUN, SIMPLIFY = FALSE, ncores = NULL, ...)
 }
 \arguments{
 \item{mvars}{a named list of variables to be combined and mapped over. These are equivalent to the layers of a nested for loop.}
@@ -12,6 +12,8 @@ gmapply(mvars, FUN, SIMPLIFY = FALSE, ...)
 \item{FUN}{user-defined function to apply over variables in mvars. N.B. This function is written to use the names of mvars as formal arguments to FUN. Thus, the majority of FUNs need not require any arguments to be specified. As long as the variable object names in FUN match the names of mvars,  gmapply will handle the translation of names(mvars) to FUN.}
 
 \item{SIMPLIFY}{when set to TRUE, mimics the simplified output of Map to mapply.}
+
+\item{ncores}{number of cores to utilize if running in parallel. This has not been fully vetted as of yet.}
 
 \item{...}{}
 }

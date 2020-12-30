@@ -3,6 +3,7 @@
 #' @param mvars a named list of variables to be combined and mapped over. These are equivalent to the layers of a nested for loop.
 #' @param FUN user-defined function to apply over variables in mvars. N.B. This function is written to use the names of mvars as formal arguments to FUN. Thus, the majority of FUNs need not require any arguments to be specified. As long as the variable object names in FUN match the names of mvars,  gmapply will handle the translation of names(mvars) to FUN.
 #' @param SIMPLIFY when set to TRUE, mimics the simplified output of Map to mapply.
+#' @param ncores number of cores to utilize if running in parallel. This has not been fully vetted as of yet.
 #' @param ...
 #'
 #' @return compiled returns of FUN
@@ -40,9 +41,11 @@
 #'
 #' }
 #'
+#' @importFrom parallel mcmapply
+#'
 #' @export
 
-gmapply <- function(mvars, FUN, SIMPLIFY = FALSE, ...){
+gmapply <- function(mvars, FUN, SIMPLIFY = FALSE, ncores = NULL, ...){
 
   FUN <- match.fun(FUN)
   expand.dots <- list(...) # allows for expanded dot args to be passed as formal args to the user specified function
@@ -58,11 +61,24 @@ gmapply <- function(mvars, FUN, SIMPLIFY = FALSE, ...){
 
   formals(FUN) <- argdefs
 
-  if(SIMPLIFY) {
-    #standard mapply
-    do.call(mapply, c(FUN, c(unname(grid))))
-  } else{
-    #standard Map
-    do.call(mapply, c(FUN, c(unname(grid), SIMPLIFY = FALSE)))
+  if(is.null(ncores)){ # serial
+    if(SIMPLIFY) {
+      #standard mapply
+      do.call(mapply, c(FUN, c(unname(grid))))
+    } else{
+      #standard Map
+      do.call(mapply, c(FUN, c(unname(grid), SIMPLIFY = FALSE)))
+    }
+  } else{ # parallel. NOT FULLY VETTED.
+    if(SIMPLIFY) {
+      #standard mapply
+      do.call(mcmapply, c(FUN, c(unname(grid), mc.cores = ncores)))
+    } else{
+      #standard Map
+      do.call(mcmapply, c(FUN, c(unname(grid), SIMPLIFY = FALSE, mc.cores = ncores)))
+    }
   }
+
+
+
 }
