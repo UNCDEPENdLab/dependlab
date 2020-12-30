@@ -13,6 +13,7 @@ lmer_predict(
   n.cont = 20,
   cont.pts = NULL,
   fixat0 = NULL,
+  fixatmean = NULL,
   yoked = NULL
 )
 }
@@ -31,6 +32,8 @@ and +1SD. For 5, you get -2 SD, -1 SD, Mean, +1 SD, +2 SD. Useful for visualizin
 \item{cont.pts}{A list named by predictor where each element is a vector of values at which to compute an estimate}
 
 \item{fixat0}{Predictors that should be fixed at 0 in the estimates}
+
+\item{fixatmean}{Predictors that should be fixed at sample mean in the estimates}
 
 \item{yoked}{Useful when predictors are transformations of each other (need to document this better).}
 }

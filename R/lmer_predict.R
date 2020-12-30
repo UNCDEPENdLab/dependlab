@@ -16,6 +16,7 @@
 #' @param n.cont The number of points along the continuous predictor range at which to compute an estimate
 #' @param cont.pts A list named by predictor where each element is a vector of values at which to compute an estimate
 #' @param fixat0 Predictors that should be fixed at 0 in the estimates
+#' @param fixatmean Predictors that should be fixed at sample mean in the estimates
 #' @param yoked Useful when predictors are transformations of each other (need to document this better).
 #'
 #' @details
@@ -40,7 +41,7 @@
 #'
 #' @author Michael Hallquist
 #' @export
-lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n.cont=20, cont.pts=NULL, fixat0=NULL, yoked=NULL) {
+lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n.cont=20, cont.pts=NULL, fixat0=NULL, fixatmean=NULL, yoked=NULL) {
   #print cell means for lmer by expanding level combinations and multiplying against fixed effects
   predNames <- attr(terms(lmerObj), "term.labels")
 
@@ -60,8 +61,11 @@ lmer_predict <- function(lmerObj, divide=NULL, n.divide=3, divide.prefix=TRUE, n
   predData <- list()
   #divide into categorical and continuous predictors, determine which continuous predictors to discretize
   for (f in predNames) {
-    if (f %in% fixat0) { predData[[f]] <- 0 #compute model prediction when this term is 0
-      #} else if (attr(terms(lmerObj), "dataClasses")[f] == "factor") {
+    if (f %in% fixat0) {
+      predData[[f]] <- 0 #compute model prediction when this term is 0
+    } else if (f %in% fixatmean) {
+      fm <- mean(lmerObj@frame[[f]], na.rm=TRUE) #compute model prediction at the mean of this term (marginalizing)
+      predData[[f]] <- fm
     } else if (attr(attr(lmerObj@frame, "terms"), "dataClasses")[f] == "factor") {
       predData[[f]] <- levels(lmerObj@frame[[f]])
     } else if (attr(attr(lmerObj@frame, "terms"), "dataClasses")[f] == "character") {
