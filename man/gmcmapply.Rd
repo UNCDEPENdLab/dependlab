@@ -4,14 +4,14 @@
 \alias{gmcmapply}
 \title{expand.grid-based multi-core multivariate apply (mcmapply) wrapper for fast implementation of nested looping structures}
 \usage{
-gmcmapply(mvars, FUN, SIMPLIFY = FALSE, mc.cores = 1, ...)
+gmcmapply(mvars, FUN, SIMPLIFY = TRUE, mc.cores = 1, ...)
 }
 \arguments{
 \item{mvars}{a named list of variables to be combined and mapped over. These are equivalent to the layers of a nested for loop.}
 
 \item{FUN}{user-defined function to apply over variables in mvars. N.B. This function is written to use the names of mvars as formal arguments to FUN. Thus, the majority of FUNs need not require any arguments to be specified. As long as the variable object names in FUN match the names of mvars,  gmapply will handle the translation of names(mvars) to FUN.}
 
-\item{SIMPLIFY}{when set to TRUE, mimics the simplified output of Map to mapply.}
+\item{SIMPLIFY}{defaults to TRUE, which appends function output to a tibble of the expand.grid-ed mvars. FALSE exports a list, where length(list) = nrow(expand.grid(mvars)). TODO: implement an abstracted function that converts the list to a named, nested list when SIMPLIFY = FALSE.}
 
 \item{mc.cores}{number of cores to utilize if running in parallel. Defaults to 1, which implements mapply.}
 
@@ -33,29 +33,34 @@ expand.grid-based multi-core multivariate apply (mcmapply) wrapper for fast impl
        return(return_me)
      }
 
-     mvars <- list(l1 = 1:10,
+     mvars <- list(l1 = 1:3,
                    l2 = 1:5,
                    l3 = letters[1:3])
 
 
      ### list output (mapply)
-     lreturns <- gmcmapply(mvars, myfunc)
-
-     ### concatenated output (Map)
-     lreturns <- gmcmapply(mvars, myfunc, SIMPLIFY = TRUE)
+     outs_gmc <- gmcmapply(mvars, myfunc, SIMPLIFY = FALSE)
 
      ## N.B. This is equivalent to running:
-     lreturns <- c()
+     outs <- vector(mode = "list", length = nrow(expand.grid(mvars)))
+     step <- 1
      for(l1 in 1:10){
        for(l2 in 1:5){
          for(l3 in letters[1:3]){
-           lreturns <- c(lreturns,myfunc(l1,l2,l3))
+           outs[[step]] <- myfunc(l1,l2,l3)
+           step <- step +1
          }
        }
      }
 
-     ### concatenated outout run on 2 cores.
-     lreturns <- gmcmapply(mvars, myfunc, SIMPLIFY = TRUE, mc.cores = 2)
+     # identical(outs_gmc,outs) #TRUE
+
+     ### tibble output with returned value of FUN stored in fun_out. This is the tidy-preferred option.
+     outs <- gmcmapply(mvars, myfunc, SIMPLIFY = TRUE)
+
+
+     ### tibble output run on 3 cores.
+     outs <- gmcmapply(mvars, myfunc, SIMPLIFY = TRUE, mc.cores = 3)
 
     Example 2. Pass non-default args to FUN.
     ## Since the apply functions dont accept full calls as inputs (calls are internal), user can pass arguments to FUN through dots, which can overwrite a default option for FUN.
@@ -66,7 +71,8 @@ expand.grid-based multi-core multivariate apply (mcmapply) wrapper for fast impl
        return(return_me)
      }
 
-     lreturns <- gmcmapply(mvars, myfunc, rep_letters = 1)
+     outs_default <- gmcmapply(mvars, myfunc)
+     outs_not_default <- gmcmapply(mvars, myfunc, rep_letters = 1)
 
 }
 
