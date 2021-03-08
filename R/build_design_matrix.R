@@ -335,6 +335,10 @@ build_design_matrix <- function(
   additional_regressors = NULL #allow for additional regression text file to be implemented. need separate file for each
 ) {
 
+  checkmate::assert_character(write_timing_files, null.ok=TRUE)
+  if (!is.null(write_timing_files)) { write_timing_files <- tolower(write_timing_files) } #always use lower case internally
+  checkmate::assert_subset(write_timing_files, c("convolved", "fsl", "afni", "spm"))
+
   if (!is.null(run_4d_files)) { checkmate::assert_file_exists(run_4d_files) }
 
   #take a snapshot of arguments to build_design_matrix that we pass to subsidiary functions
@@ -687,7 +691,7 @@ build_design_matrix <- function(
 
     }
 
-    if ("FSL" %in% write_timing_files) {
+    if ("fsl" %in% write_timing_files) {
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
           regout <- dmat[[i,reg]][,c("onset", "duration", "value"), drop=FALSE]
@@ -718,7 +722,7 @@ build_design_matrix <- function(
       }
     }
 
-    if ("AFNI" %in% write_timing_files) {
+    if ("afni" %in% write_timing_files) {
       #TODO: Make this work for beta series outputs
       #use dmBLOCK-style regressors: time*modulation:duration. One line per run
 
@@ -888,8 +892,10 @@ build_design_matrix <- function(
   #just the onsets for each event
   concat_onsets <- lapply(design_concat, function(x) { x[,"onset"] })
 
-  to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
-                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr)
+  to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved,
+                    design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
+                    collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets,
+                    run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr, output_directory=output_directory)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
 
