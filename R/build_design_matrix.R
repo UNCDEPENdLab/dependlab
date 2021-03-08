@@ -415,7 +415,7 @@ build_design_matrix <- function(
 
   #extract whether to divide a given regressor into a beta series (one regressor per event)
   bdm_args$beta_series <- sapply(signals, function(s) {
-    ifelse(is.null(s$beta_series), FALSE, TRUE) #no beta series by default
+    ifelse(is.null(s$beta_series) || isFALSE(s$beta_series), FALSE, TRUE) #no beta series by default
   })
 
   #Extract whether to remove zero values from the regressor prior to convolution.
