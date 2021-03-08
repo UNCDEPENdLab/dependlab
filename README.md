@@ -8,4 +8,4 @@ Installation
 #install.packages("devtools")
 library(devtools)
 
-install_github("PennStateDEPENdLab/dependlab")
+install_github("UNCDEPENdLab/dependlab")
