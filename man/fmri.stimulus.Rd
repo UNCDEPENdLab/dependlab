@@ -21,7 +21,8 @@ fmri.stimulus(
   a2 = 12,
   b1 = 0.9,
   b2 = 0.9,
-  cc = 0.35
+  cc = 0.35,
+  method = "r"
 )
 }
 \arguments{

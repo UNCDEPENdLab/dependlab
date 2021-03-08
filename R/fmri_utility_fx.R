@@ -326,16 +326,16 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 #'
 #' @importFrom stats approx
 #' @export
-fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE, rm_zeros=TRUE, convolve=TRUE,
-                       tr=2, ts_multiplier=NULL, demean=TRUE, convmax_1=FALSE,
-                       a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+fmri.stimulus <- function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE,
+                          rm_zeros=TRUE, convolve=TRUE, tr=2, ts_multiplier=NULL, demean=TRUE, convmax_1=FALSE,
+                          a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, method="r") {
 
   #double gamma function
-  mygamma <- function(x, a1, a2, b1, b2, c) {
+  mygamma <- function(x, a1, a2, b1, b2, cc) {
     d1 <- a1 * b1
     d2 <- a2 * b2
     c1 <- ( x/d1 )^a1
-    c2 <- c * ( x/d2 )^a2
+    c2 <- cc * ( x/d2 )^a2
     res <- c1 * exp(-(x-d1)/b1) - c2 * exp(-(x-d2)/b2)
     res
   }
@@ -348,7 +348,7 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
     times <- cleaned$times; durations <- cleaned$durations; values <- cleaned$values
   } else {
     cleaned <- cleanup_regressor(onsets, durations, values, rm_zeros = rm_zeros)
-    onsets <- onsets$times; durations <- cleaned$durations; values <- cleaned$values
+    onsets <- cleaned$times; durations <- cleaned$durations; values <- cleaned$values
   }
 
   #handle mean centering of parametric values prior to convolution
@@ -430,7 +430,12 @@ fmri.stimulus=function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times
   #  zero pad stimulus vector to avoid bounding/edge effects in convolve
   stimulus <- c(rep(0,20*scale),stimulus,rep(0,20*scale))
 
-  hrf <- convolve(stimulus,mygamma(((40*scale)+n_vols):1, a1, a2, b1/tr, b2/tr, cc))/scale
+  if (method=="cpp") {
+    hrf <- convolve_double_gamma(stimulus, a1, a2, b1/tr, b2/tr, cc)/scale
+  } else if (method=="r") {
+    hrf <- convolve(stimulus,mygamma(((40*scale)+n_vols):1, a1, a2, b1/tr, b2/tr, cc))/scale
+  }
+
   hrf <- hrf[-(1:(20*scale))][1:n_vols]
   hrf <- hrf[unique((scale:n_vols)%/%scale)*scale]
   dim(hrf) <- c(n_vols/scale,1)

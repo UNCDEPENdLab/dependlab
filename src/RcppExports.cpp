@@ -6,6 +6,34 @@
 
 using namespace Rcpp;
 
+// convolve_cpp
+arma::vec convolve_cpp(const arma::vec& a, const arma::vec& b);
+RcppExport SEXP _dependlab_convolve_cpp(SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(convolve_cpp(a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
+// convolve_double_gamma
+arma::vec convolve_double_gamma(const arma::vec& stimulus, double a1, double a2, double b1, double b2, double cc);
+RcppExport SEXP _dependlab_convolve_double_gamma(SEXP stimulusSEXP, SEXP a1SEXP, SEXP a2SEXP, SEXP b1SEXP, SEXP b2SEXP, SEXP ccSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type stimulus(stimulusSEXP);
+    Rcpp::traits::input_parameter< double >::type a1(a1SEXP);
+    Rcpp::traits::input_parameter< double >::type a2(a2SEXP);
+    Rcpp::traits::input_parameter< double >::type b1(b1SEXP);
+    Rcpp::traits::input_parameter< double >::type b2(b2SEXP);
+    Rcpp::traits::input_parameter< double >::type cc(ccSEXP);
+    rcpp_result_gen = Rcpp::wrap(convolve_double_gamma(stimulus, a1, a2, b1, b2, cc));
+    return rcpp_result_gen;
+END_RCPP
+}
 // generate_feature
 NumericMatrix generate_feature(NumericVector encoding, int K);
 RcppExport SEXP _dependlab_generate_feature(SEXP encodingSEXP, SEXP KSEXP) {
@@ -32,6 +60,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_dependlab_convolve_cpp", (DL_FUNC) &_dependlab_convolve_cpp, 2},
+    {"_dependlab_convolve_double_gamma", (DL_FUNC) &_dependlab_convolve_double_gamma, 6},
     {"_dependlab_generate_feature", (DL_FUNC) &_dependlab_generate_feature, 2},
     {"_dependlab_generate_feature_armadillo", (DL_FUNC) &_dependlab_generate_feature_armadillo, 2},
     {NULL, NULL, 0}

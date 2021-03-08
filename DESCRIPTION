@@ -36,6 +36,8 @@ Imports:
     foreach,
     matlabr,
     iterators,
+    flextable,
+    bbmle,
     Rcpp (>= 1.0.1)
 LinkingTo:
     Rcpp,

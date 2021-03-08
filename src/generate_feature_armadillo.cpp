@@ -1,8 +1,4 @@
-#define ARMA_NO_DEBUG
-
-#include "RcppArmadillo.h"
-using namespace Rcpp;
-using namespace arma;
+#include "dependlab.h"
 
 //' This function creates K shifts of a neural events vector according to the kernel length, K.
 //'
