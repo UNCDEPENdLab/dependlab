@@ -323,15 +323,20 @@ convolve_regressor <- function(n_vols, reg, tr=1.0, normalization="none", rm_zer
 #' @param b1 The b1 parameter of the double gamma
 #' @param b2 The b2 parameter of the double gamma
 #' @param cc The cc parameter of the double gamma
+#' @param conv_method Method for convolving HRF with stimulus. Either "r" or "cpp". The "r" method uses an FFT-based
+#'   internal convolution with convolve(x, y, conj=TRUE). The "cpp" method uses an internal C++ function with a
+#'   loop-based convolution over the vectors. Unfortunately, at present, the C++ approach is noticeably slower since
+#'   it does not use FFT to obtain the filter.
+#' @param microtime_resolution The number of bins between TRs used for calculating regressor values in continuous time
 #'
-#' @importFrom stats approx
+#' @importFrom stats approx convolve
 #' @export
 fmri.stimulus <- function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), times=NULL, center_values=FALSE,
                           rm_zeros=TRUE, convolve=TRUE, tr=2, ts_multiplier=NULL, demean=TRUE, convmax_1=FALSE,
-                          a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, method="r") {
+                          a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35, conv_method="r", microtime_resolution=20) {
 
   #double gamma function
-  mygamma <- function(x, a1, a2, b1, b2, cc) {
+  double_gamma_hrf <- function(x, a1, a2, b1, b2, cc) {
     d1 <- a1 * b1
     d2 <- a2 * b2
     c1 <- ( x/d1 )^a1
@@ -359,7 +364,7 @@ fmri.stimulus <- function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), ti
 
   if (is.null(times)) {
     #onsets are specified in terms of scans (i.e., use onsets argument)
-    scale <- 1
+    microtime_resolution <- 1
   } else {
     #verify that there are events to be modeled in the time vector
     if (length(times) == 0L) {
@@ -370,12 +375,11 @@ fmri.stimulus <- function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), ti
       return(rep(0, n_vols))
     }
 
-    #upsample time grid by a factor of 100 to get best estimate of hrf at each volume
-    scale <- 100
-    onsets <- times/tr*scale
-    durations <- durations/tr*scale
-    tr <- tr/scale
-    n_vols <- n_vols*scale
+    #upsample time grid by a factor (default 20) to get best estimate of hrf at each volume
+    onsets <- times/tr*microtime_resolution
+    durations <- durations/tr*microtime_resolution
+    tr <- tr/microtime_resolution
+    n_vols <- n_vols*microtime_resolution
 
     if (!is.null(ts_multiplier)) {
       #upsample ts_multiplier using linear interpolation
@@ -427,32 +431,35 @@ fmri.stimulus <- function(n_vols=1, onsets=c(1), durations=c(1), values=c(1), ti
     stimulus <- stimulus * ts_multiplier
   }
 
-  #  zero pad stimulus vector to avoid bounding/edge effects in convolve
-  stimulus <- c(rep(0,20*scale),stimulus,rep(0,20*scale))
+  #  zero pad stimulus vector with 20 TRs on left and right to avoid bounding/edge effects in convolve
+  stimulus <- c(rep(0,20*microtime_resolution),stimulus,rep(0,20*microtime_resolution))
 
-  if (method=="cpp") {
-    hrf <- convolve_double_gamma(stimulus, a1, a2, b1/tr, b2/tr, cc)/scale
-  } else if (method=="r") {
-    hrf <- convolve(stimulus,mygamma(((40*scale)+n_vols):1, a1, a2, b1/tr, b2/tr, cc))/scale
+  if (conv_method=="cpp") {
+    regressor <- convolve_double_gamma(stimulus, a1, a2, b1/tr, b2/tr, cc)/microtime_resolution
+  } else if (conv_method=="r") {
+    #compute the double-gamma HRF for one event, scale to be as long as time series
+    #this goes from last-to-first volume since this is reversed in convolution
+    hrf_values <- double_gamma_hrf(((40*microtime_resolution)+n_vols):1, a1, a2, b1/tr, b2/tr, cc)
+    regressor <- convolve(stimulus, hrf_values)/microtime_resolution
   }
 
-  hrf <- hrf[-(1:(20*scale))][1:n_vols]
-  hrf <- hrf[unique((scale:n_vols)%/%scale)*scale]
-  dim(hrf) <- c(n_vols/scale,1)
+  regressor <- regressor[-(1:(20*microtime_resolution))][1:n_vols]
+  regressor <- regressor[unique((microtime_resolution:n_vols)%/%microtime_resolution)*microtime_resolution]
+  dim(regressor) <- c(n_vols/microtime_resolution,1)
 
   #rescale regressor to maximum height of 1.0 for scaling similarity across instances (see hrf_convolve_normalize for details)
   #only applicable to convolve regressors
-  if (convmax_1 && convolve) { hrf <- hrf/max(hrf) }
+  if (convmax_1 && convolve) { regressor <- regressor/max(regressor) }
 
   if (!convolve) {
     #just return the box car without convolving by HRF
-    stimulus <- stimulus[-(1:(20*scale))][1:n_vols] #remove zero padding
-    stimulus <- stimulus[unique((scale:n_vols)%/%scale)*scale] #subset the elements of the upsampled grid back onto the observed TRs
+    stimulus <- stimulus[-(1:(20*microtime_resolution))][1:n_vols] #remove zero padding
+    stimulus <- stimulus[unique((microtime_resolution:n_vols)%/%microtime_resolution)*microtime_resolution] #subset the elements of the upsampled grid back onto the observed TRs
     return(stimulus)
   } else if (demean) {
-    hrf - mean(hrf, na.rm=TRUE)
+    regressor - mean(regressor, na.rm=TRUE)
   } else {
-    hrf
+    regressor
   }
 }
 

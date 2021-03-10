@@ -38,6 +38,7 @@ Imports:
     iterators,
     flextable,
     bbmle,
+    checkmate,
     Rcpp (>= 1.0.1)
 LinkingTo:
     Rcpp,
