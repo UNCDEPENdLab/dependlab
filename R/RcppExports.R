@@ -39,6 +39,52 @@ convolve_double_gamma <- function(stimulus, a1 = 6.0, a2 = 12.0, b1 = 0.9, b2 = 
     .Call(`_dependlab_convolve_double_gamma`, stimulus, a1, a2, b1, b2, cc)
 }
 
+#' C++ port of Bush and Cisler 2013, Magnetic Resonance Imaging
+#' Adapted from the original provided by Keith Bush
+#' as well as C++ code from Jiang Bian
+#'
+#' @name deconvolve_nlreg
+#' @param BOLDobs matrix of observed BOLD timeseries (n_timepoints x n_signals)
+#' @param kernel  assumed kernel of the BOLD signal (e.g., from spm_hrf)
+#' @param nev_lr  learning rate for the assignment of neural events. Default: .01
+#' @param epsilon relative error change (termination condition). Default: .005
+#' @param beta slope of the sigmoid transfer function (higher = more nonlinear)
+#' @param normalize whether to unit-normalize (z-score) \code{BOLDobs} before deconvolution. Default: TRUE
+#' @param trim_kernel whether to remove the first K time points from the deconvolved vector, corresponding to
+#'            kernel leftovers from convolution. Default: TRUE
+#'
+#' @details
+#' This function deconvolves the BOLD signal using Bush 2011 method
+#'
+#' Author:      Keith Bush, PhD
+#' Institution: University of Arkansas at Little Rock
+#' Date:        Aug. 9, 2013
+#'
+#' The original code did not unit normalize the BOLD signal in advance, but in my testing, this
+#' proves useful in many cases (unless you want to mess with the learning rate a lot), especially
+#' when the time series has a non-zero mean (e.g., mean 100).
+#'
+#' @return A time series of the same length containing reconstructed neural events
+#' @author Michael Hallquist
+#' @export
+NULL
+
+deconvolve_nlreg <- function(BOLDobs, kernel, nev_lr = .01, epsilon = .005, beta = 40, normalize = TRUE, trim_kernel = TRUE) {
+    .Call(`_dependlab_deconvolve_nlreg`, BOLDobs, kernel, nev_lr, epsilon, beta, normalize, trim_kernel)
+}
+
+#' Dsigmoid transform
+#'
+#' @name dsigmoid
+#' @param x value to be transformed
+#' @param beta slope (steepness) of sigmoid transform
+#' @keywords internal
+NULL
+
+dsigmoid <- function(x, beta = 1) {
+    .Call(`_dependlab_dsigmoid`, x, beta)
+}
+
 #' This function creates K shifts of a neural events vector according to the kernel length, K.
 #'
 #' @name generate_feature
@@ -73,5 +119,18 @@ NULL
 
 generate_feature_armadillo <- function(encoding, K) {
     .Call(`_dependlab_generate_feature_armadillo`, encoding, K)
+}
+
+#' Sigmoid transform
+#'
+#' @name sigmoid
+#' @param x value to be transformed by sigmoid
+#' @param beta beta slope (steepness) of sigmoid transform
+#'
+#' @keywords internal
+NULL
+
+sigmoid <- function(x, beta = 1) {
+    .Call(`_dependlab_sigmoid`, x, beta)
 }
 
