@@ -531,7 +531,7 @@ build_design_matrix <- function(
     additional_regressors_df <- data.frame()
 
     for (i in 1:length(additional_regressors)) {
-      additional_regressors_currun <- read.table(additional_regressors[i])
+      additional_regressors_currun <- data.table::fread(additional_regressors[i], data.table = FALSE)
       additional_regressors_currun$run <- i
       rv = run_volumes[i]
       additional_regressors_currun <- dplyr::slice(additional_regressors_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
@@ -895,7 +895,8 @@ build_design_matrix <- function(
   to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved,
                     design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
                     collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets,
-                    run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr, output_directory=output_directory)
+                    run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr,
+                    output_directory=output_directory, additional_regressors=additional_regressors)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
 
