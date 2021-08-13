@@ -894,7 +894,7 @@ build_design_matrix <- function(
 
   to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved,
                     design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
-                    collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets,
+                    collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, runs_to_output=runs_to_output,
                     run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr, output_directory=output_directory)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
