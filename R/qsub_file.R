@@ -5,7 +5,7 @@
 #' The function returns the jobid of the scheduled job.
 #'
 #' @param script A script that should be executed by the PBS scheduler. This can contain PBS directives, but in the
-#'      case of conflicts, the directives passed with \code{pbs_args} will take precedence.#'    
+#'      case of conflicts, the directives passed with \code{pbs_args} will take precedence.
 #' @param pbs_args A character vector of arguments to be included in the qsub command. Typically these
 #'      will begin with '-l' such as '-l walltime=10:00:00'.
 #' @param env_variables A named character vector containing environment variables and their values to be passed
