@@ -235,6 +235,7 @@
 #' @importFrom stats as.formula cor lm residuals rnorm
 #' @importFrom utils read.table write.table
 #' @importFrom RNifti niftiHeader
+#' @importFrom checkmate assert_file_exists
 #'
 #' @author Michael Hallquist
 #' @author Alison Schreiber
@@ -320,6 +321,7 @@ build_design_matrix <- function(
   hrf_parameters=c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35),
   baseline_coef_order=-1L, #don't include baseline by default
   baseline_parameterization="Legendre",
+  run_4d_files=NULL, #names of 4d fMRI files (preferred)
   run_volumes=NULL, #vector of total fMRI volumes for each run (used for convolved regressors)
   drop_volumes=0L, #vector of how many volumes to drop from the beginning of a given run
   runs_to_output=NULL,
@@ -332,6 +334,12 @@ build_design_matrix <- function(
   ts_multipliers=NULL, #time series regressors that can be multiplied against signals prior to convolution
   additional_regressors = NULL #allow for additional regression text file to be implemented. need separate file for each
 ) {
+
+  checkmate::assert_character(write_timing_files, null.ok=TRUE)
+  if (!is.null(write_timing_files)) { write_timing_files <- tolower(write_timing_files) } #always use lower case internally
+  checkmate::assert_subset(write_timing_files, c("convolved", "fsl", "afni", "spm"))
+
+  if (!is.null(run_4d_files)) { checkmate::assert_file_exists(run_4d_files) }
 
   #take a snapshot of arguments to build_design_matrix that we pass to subsidiary functions
   bdm_args <- as.list(environment(), all.names = TRUE)
@@ -415,7 +423,7 @@ build_design_matrix <- function(
 
   #extract whether to divide a given regressor into a beta series (one regressor per event)
   bdm_args$beta_series <- sapply(signals, function(s) {
-    ifelse(is.null(s$beta_series), FALSE, TRUE) #no beta series by default
+    ifelse(isTRUE(s$beta_series), TRUE, FALSE) #no beta series by default
   })
 
   #Extract whether to remove zero values from the regressor prior to convolution.
@@ -460,8 +468,29 @@ build_design_matrix <- function(
 
   #define number of runs based off of the length of unique runs in the events data.frame
   nruns <- length(unique(events$run))
-  run_niftis <- NULL
-  if (is.null(run_volumes)) {
+
+  if (!is.null(run_4d_files)) {
+    message("Using NIfTI images to determine run lengths.")
+    run_volumes_detected <- sapply(run_4d_files, function(xx) {
+      oro.nifti::readNIfTI(xx, read_data = FALSE)@dim_[5L]
+    })
+
+    if (!is.null(run_volumes) && isFALSE(all.equal(run_volumes, run_volumes_detected))) {
+      print(cbind(run_volumes=run_volumes, run_volumes_detected=run_volumes_detected))
+      warning("Detected and provided run volumes do not match.")
+    }
+
+    #For NIfTI input, assume that the .nii.gz is already truncated. Therefore, the number of volumes detected in the NIfTI
+    #must be adjusted *upward* by drop_volumes so that the drop is carried out properly
+    if (any(drop_volumes > 0)) {
+      message("Assuming that NIfTIs already have drop_volumes removed. Adjusting run_volumes accordingly.")
+      run_volumes <- run_volumes_detected + drop_volumes
+      print(data.frame(nifti=run_4d_files, run_volumes_detected=run_volumes_detected, run_volumes=run_volumes))
+    } else {
+      run_volumes <- run_volumes_detected
+    }
+
+  } else if (is.null(run_volumes)) {
     #determine the last fMRI volume to be analyzed
     run_volumes <- rep(0, nruns)
 
@@ -478,17 +507,6 @@ build_design_matrix <- function(
     message("Assuming that last fMRI volume was 12 seconds after the onset of the last event.")
     message(paste0("Resulting volumes: ", paste(run_volumes, collapse=", ")))
 
-  } else if (is.character(run_volumes)) {
-    message("Using NIfTI images to determine run lengths.")
-    run_niftis <- run_volumes
-    run_volumes_list <- c()
-    for( i in 1:length(run_volumes)) {
-      currentNifti <- run_volumes[i]
-      out <- niftiHeader(currentNifti)
-      rv <- out$dim[5]
-      run_volumes_list <- c(run_volumes_list, rv)
-    }
-    run_volumes <- run_volumes_list
   } else if (is.numeric(run_volumes)) {
     #replicate volumes for each run if a scalar is passed
     if (length(run_volumes) == 1L) { run_volumes <- rep(run_volumes, nruns) }
@@ -500,7 +518,7 @@ build_design_matrix <- function(
   #determine which run fits should be output for fmri analysis
   if (is.null(runs_to_output)) {
     message("Assuming that all runs should be fit and run numbers are sequential ascending")
-    runs_to_output <- 1:length(run_volumes) #output each run
+    runs_to_output <- seq_along(run_volumes) #output each run
   }
 
   if (length(drop_volumes) < length(run_volumes)) {
@@ -508,20 +526,12 @@ build_design_matrix <- function(
     drop_volumes <- rep(drop_volumes[1L], length(run_volumes))
   }
 
-  #For NIfTI input, assume that the .nii.gz is already truncated. Therefore, the number of volumes detected in the NIfTI
-  #must be adjusted *upward* by drop_volumes so that the drop is carried out properly
-  if (!is.null(run_niftis) && any(drop_volumes > 0)) {
-    message("Assuming that NIfTIs already have drop_volumes removed. Adjusting run_volumes accordingly")
-    run_volumes <- run_volumes + drop_volumes
-    print(data.frame(nifti=run_niftis, detected_volumes=run_volumes_list, run_volumes=run_volumes))
-  }
-
   #handle additional regressors
   if (is.character(additional_regressors)) {
     additional_regressors_df <- data.frame()
 
     for (i in 1:length(additional_regressors)) {
-      additional_regressors_currun <- read.table(additional_regressors[i])
+      additional_regressors_currun <- data.table::fread(additional_regressors[i], data.table = FALSE)
       additional_regressors_currun$run <- i
       rv = run_volumes[i]
       additional_regressors_currun <- dplyr::slice(additional_regressors_currun, (drop_volumes[i]+1):rv) %>% as.data.frame()
@@ -598,7 +608,7 @@ build_design_matrix <- function(
   dmat <- dmat[runs_to_output,,drop=FALSE]
   run_volumes <- run_volumes[runs_to_output] #need to subset this, too, for calculations below to match
   drop_volumes <- drop_volumes[runs_to_output] #need to subset this, too, for calculations below to match
-  if (!is.null(run_niftis)) { run_niftis <- run_niftis[runs_to_output] }
+  if (!is.null(run_4d_files)) { run_4d_files <- run_4d_files[runs_to_output] }
 
   #run_volumes and drop_volumes are used by convolve_regressor to figure out the appropriate regressor length
   bdm_args$run_volumes <- run_volumes #copy into argument list
@@ -681,7 +691,7 @@ build_design_matrix <- function(
 
     }
 
-    if ("FSL" %in% write_timing_files) {
+    if ("fsl" %in% write_timing_files) {
       for (i in 1:dim(dmat)[1L]) {
         for (reg in 1:dim(dmat)[2L]) {
           regout <- dmat[[i,reg]][,c("onset", "duration", "value"), drop=FALSE]
@@ -712,7 +722,7 @@ build_design_matrix <- function(
       }
     }
 
-    if ("AFNI" %in% write_timing_files) {
+    if ("afni" %in% write_timing_files) {
       #TODO: Make this work for beta series outputs
       #use dmBLOCK-style regressors: time*modulation:duration. One line per run
 
@@ -882,8 +892,11 @@ build_design_matrix <- function(
   #just the onsets for each event
   concat_onsets <- lapply(design_concat, function(x) { x[,"onset"] })
 
-  to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved, design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
-                   collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, run_niftis=run_niftis, run_volumes=run_volumes, tr=tr)
+  to_return <- list(design=dmat, design_concat=design_concat, design_convolved=dmat_convolved,
+                    design_unconvolved=dmat_unconvolved, collin_raw=collinearityDiag.raw,
+                    collin_convolve=collinearityDiag.convolve, concat_onsets=concat_onsets, runs_to_output=runs_to_output,
+                    run_4d_files=run_4d_files, run_volumes=run_volumes, tr=tr,
+                    output_directory=output_directory, additional_regressors=additional_regressors)
 
   to_return$design_plot <- visualize_design_matrix(concat_design_runs(to_return))
 

@@ -28,7 +28,7 @@
 #' @author Keith Bush
 #' @importFrom stats runif
 #' @export
-deconvolve_nlreg <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005, beta=40, normalize=TRUE, trim_kernel=TRUE) {
+deconvolve_nlreg_r <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005, beta=40, normalize=TRUE, trim_kernel=TRUE) {
 
   if (normalize) { BOLDobs <- as.vector(scale(BOLDobs)) }
 
@@ -61,7 +61,7 @@ deconvolve_nlreg <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005, beta=40,
 
     ##Construct feature space
     #message("encoding is vec: ", is.vector(encoding), ", len:", length(encoding), ", K is: ", K)
-    feature = generate_feature_armadillo(encoding, K)
+    feature = dependlab:::generate_feature_armadillo(encoding, K)
 
     ##Generate virtual bold response by multiplying feature (N x K) by kernel (K x 1) to get N x 1 estimated response
     ytilde = feature[K:nrow(feature),] %*% kernel
@@ -204,7 +204,7 @@ deconvolve_nlreg_resample <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005,
   BOLDobs_scale <- as.vector(scale(BOLDobs))
 
   #Deconvolve observed BOLD
-  NEVdcv <- deconvolve_nlreg(BOLDobs, kernel, nev_lr, epsilon, beta, normalize = FALSE, trim_kernel = FALSE)
+  NEVdcv <- deconvolve_nlreg(matrix(BOLDobs, ncol=1), kernel, nev_lr, epsilon, beta, normalize = FALSE, trim_kernel = FALSE)
 
   #Reconvolve estimated true BOLD
   BOLDdcv_full <- convolve_dcv_hrf(t(NEVdcv), kernel)
@@ -235,7 +235,7 @@ deconvolve_nlreg_resample <- function(BOLDobs, kernel, nev_lr=.01, epsilon=.005,
     RNDobs <- BOLDdcv_scale + RND_residuals
 
     #Deconvolve the variant
-    NEVresidual <- deconvolve_nlreg(RNDobs, kernel, nev_lr, epsilon, beta, normalize = FALSE, trim_kernel = FALSE)
+    NEVresidual <- deconvolve_nlreg(matrix(RNDobs, ncol=1), kernel, nev_lr, epsilon, beta, normalize = FALSE, trim_kernel = FALSE)
 
     #Store encoding of this variant
     NEVvariants[z,] = NEVresidual

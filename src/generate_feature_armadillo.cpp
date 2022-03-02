@@ -1,8 +1,4 @@
-#define ARMA_NO_DEBUG
-
-#include "RcppArmadillo.h"
-using namespace Rcpp;
-using namespace arma;
+#include "dependlab.h"
 
 //' This function creates K shifts of a neural events vector according to the kernel length, K.
 //'
@@ -19,8 +15,11 @@ using namespace arma;
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-Rcpp::NumericMatrix generate_feature_armadillo(arma::vec encoding, int K) {
-  int n = encoding.size();
+
+arma::mat generate_feature_armadillo(const arma::vec& encoding, int K) {
+
+  //Rcpp::NumericMatrix generate_feature_armadillo(const arma::vec& encoding, int K) {
+  int n = encoding.n_elem;
   arma::mat fmatrix(n, K, fill::zeros); //preallocate matrix
 
   //fmatrix.col(0) = encoding; //unshifted variant placed in first column
@@ -51,7 +50,8 @@ Rcpp::NumericMatrix generate_feature_armadillo(arma::vec encoding, int K) {
 
   }
 
-  return wrap(fmatrix);
+  //return wrap(fmatrix); //if numeric matrix
+  return fmatrix;
 }
 
 // You can include R code blocks in C++ files processed with sourceCpp

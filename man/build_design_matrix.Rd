@@ -12,6 +12,7 @@ build_design_matrix(
   hrf_parameters = c(a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35),
   baseline_coef_order = -1L,
   baseline_parameterization = "Legendre",
+  run_4d_files = NULL,
   run_volumes = NULL,
   drop_volumes = 0L,
   runs_to_output = NULL,

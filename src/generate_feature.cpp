@@ -1,5 +1,6 @@
-#include <Rcpp.h>
-using namespace Rcpp;
+#include "dependlab.h"
+//#include <Rcpp.h>
+//using namespace Rcpp;
 
 //' This function creates K shifts of a neural events vector according to the kernel length, K.
 //'
