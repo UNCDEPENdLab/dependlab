@@ -16,7 +16,7 @@ qsub_file(
 }
 \arguments{
 \item{script}{A script that should be executed by the PBS scheduler. This can contain PBS directives, but in the
-case of conflicts, the directives passed with \code{pbs_args} will take precedence.#'}
+case of conflicts, the directives passed with \code{pbs_args} will take precedence.}
 
 \item{pbs_args}{A character vector of arguments to be included in the qsub command. Typically these
 will begin with '-l' such as '-l walltime=10:00:00'.}
