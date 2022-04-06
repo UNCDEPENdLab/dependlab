@@ -27,15 +27,15 @@ arma::vec convolve_double_gamma(const arma::vec& stimulus, double a1=6.0, double
   arma::vec x = regspace(1, stimulus.n_elem); //1-based seq_along stimulus
   //arma::vec c1 = pow(x/d1, a1);
   //arma::vec c2 = cc * pow(x/d2, a2);
-  arma::vec res = pow(x/d1, a1) % exp(-(x-d1)/b1) - (cc * pow(x/d2, a2)) % exp(-(x-d2)/b2);
+  arma::vec hrf = pow(x/d1, a1) % exp(-(x-d1)/b1) - (cc * pow(x/d2, a2)) % exp(-(x-d2)/b2);
 
   //Rcpp::Rcout << "c1 is: " << c1 << endl;
   //Rcpp::Rcout << "d1 is: " << d1 << endl;
   //Rcpp::Rcout << "d2 is: " << d2 << endl;
 
   //this is the equivalent of 'open' in R convolve()
-  //arma::vec cvector = conv(stimulus, res);
-  arma::vec cvector = convolve_cpp(stimulus, res);
+  //arma::vec cvector = conv(stimulus, hrf);
+  arma::vec cvector = convolve_cpp(stimulus, hrf);
 
   //need to subset down to just the first n_elem values post-convolution
   arma::vec central = join_cols(zeros(1), cvector.elem(regspace<uvec>(0, stimulus.n_elem - 2)));

@@ -10,6 +10,7 @@ using namespace arma;
 //function definitions
 
 arma::vec convolve_cpp(const arma::vec &a, const arma::vec &b);
+arma::vec convolve_fft_cpp(const arma::vec &a, const arma::vec &b);
 arma::vec convolve_double_gamma(const arma::vec &stimulus, double a1, double a2, double b1, double b2, double cc);
 //Rcpp::NumericMatrix generate_feature_armadillo(const arma::vec& encoding, int K);
 arma::mat generate_feature_armadillo(const arma::vec& encoding, int K);

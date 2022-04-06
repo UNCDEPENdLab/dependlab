@@ -39,6 +39,25 @@ convolve_double_gamma <- function(stimulus, a1 = 6.0, a2 = 12.0, b1 = 0.9, b2 = 
     .Call(`_dependlab_convolve_double_gamma`, stimulus, a1, a2, b1, b2, cc)
 }
 
+#' Internal function to convolve two vectors using FFT
+#'
+#' @name convolve_fft_cpp
+#' @param a A vector
+#' @param b A vector
+#' @return A vector containing the convolution of a and b
+#'
+#' @details This is an internal function
+#'       Same result as, in R:
+#'       convolve(a, b, conj=TRUE, type="open")
+NULL
+
+#' @author Michael Hallquist
+NULL
+
+convolve_fft_cpp <- function(a, b) {
+    .Call(`_dependlab_convolve_fft_cpp`, a, b)
+}
+
 #' C++ port of Bush and Cisler 2013, Magnetic Resonance Imaging
 #' Adapted from the original provided by Keith Bush
 #' as well as C++ code from Jiang Bian

@@ -34,6 +34,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// convolve_fft_cpp
+arma::fvec convolve_fft_cpp(const arma::fvec& a, const arma::fvec& b);
+RcppExport SEXP _dependlab_convolve_fft_cpp(SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::fvec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::fvec& >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(convolve_fft_cpp(a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 // deconvolve_nlreg
 arma::mat deconvolve_nlreg(arma::mat BOLDobs, const arma::vec& kernel, double nev_lr, double epsilon, double beta, bool normalize, bool trim_kernel);
 RcppExport SEXP _dependlab_deconvolve_nlreg(SEXP BOLDobsSEXP, SEXP kernelSEXP, SEXP nev_lrSEXP, SEXP epsilonSEXP, SEXP betaSEXP, SEXP normalizeSEXP, SEXP trim_kernelSEXP) {
@@ -103,6 +115,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_dependlab_convolve_cpp", (DL_FUNC) &_dependlab_convolve_cpp, 2},
     {"_dependlab_convolve_double_gamma", (DL_FUNC) &_dependlab_convolve_double_gamma, 6},
+    {"_dependlab_convolve_fft_cpp", (DL_FUNC) &_dependlab_convolve_fft_cpp, 2},
     {"_dependlab_deconvolve_nlreg", (DL_FUNC) &_dependlab_deconvolve_nlreg, 7},
     {"_dependlab_dsigmoid", (DL_FUNC) &_dependlab_dsigmoid, 2},
     {"_dependlab_generate_feature", (DL_FUNC) &_dependlab_generate_feature, 2},
