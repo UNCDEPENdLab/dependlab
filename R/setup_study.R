@@ -38,7 +38,7 @@
 #'  }
 #'
 #' @importFrom cabinets create_cabinet
-#' @importFrom checkmake assert_directory_exists test_directory_exists
+#' @importFrom checkmate assert_directory_exists test_directory_exists
 #' @import dplyr
 #'
 #' @export
