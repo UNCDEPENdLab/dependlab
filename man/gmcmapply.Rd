@@ -23,10 +23,6 @@ compiled returns of FUN
 \description{
 expand.grid-based multi-core multivariate apply (mcmapply) wrapper for fast implementation of nested looping structures
 }
-\section{TODO}{
- 1. edit body of FUN to create logs for all child processes using sink().2. For SIMPLIFY = FALSE add abstracted function from https://stackoverflow.com/questions/55264739/convert-nested-data-frame-to-a-hierarchical-list to create a hierarchical named list. 3. abstract grid.expand sorting into function and allow return on grid that is fed to mapply. 4. ensure list return when SIMPLIFY = TRUE. 5. Figure out flexible method for df passing (potentially leave empty and read from global envi).
-}
-
 \examples{
 
 \dontrun{

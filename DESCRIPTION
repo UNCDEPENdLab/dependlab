@@ -13,7 +13,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyLoad: yes
 LazyData: yes
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Imports:
     cabinets,
     car,
@@ -40,6 +40,13 @@ Imports:
     flextable,
     bbmle,
     checkmate,
+    Microsoft365R,
+    furrr,
+    magrittr,
+    readxl,
+    stringr,
+    tidyverse,
+    viridis,
     Rcpp (>= 1.0.1)
 LinkingTo:
     Rcpp,
