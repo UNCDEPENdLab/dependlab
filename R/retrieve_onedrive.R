@@ -116,7 +116,7 @@ retrieve_onedrive <- function(item_path, sheet = NULL, spn = 1, rm_file = TRUE){
       x <- read_excel(read_path, sheet = sheet)
     }
   } else if(ext == "csv"){
-    x <- read.csv(x)
+    x <- read.csv(read_path)
   } else{
     message("Currently only .csv and xls/xlsx files supported")
   }
