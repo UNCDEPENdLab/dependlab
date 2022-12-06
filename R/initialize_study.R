@@ -1,4 +1,4 @@
-#' setup a study-level directory structure
+#' initialize a study-level directory structure
 #'
 #' @description Create directory structure for a new study in the DEPENd lab
 
@@ -44,7 +44,7 @@
 #' @export
 
 
-setup_study <- function(name,
+initialize_study <- function(name,
                         loc,
                         sessions = 1,
                         data_modalities = list(),
@@ -149,48 +149,3 @@ setup_study <- function(name,
 
   return(study_dir)
 }
-
-
-
-## scratch below.
-
-# setwd("~/github_repos/dependlab/")
-# setwd("~/Desktop/")
-# usethis::create_from_github(curation_repo[2])
-
-
-# file_str <- list(
-#   'study_info' = NULL,
-#   'subj_management' = NULL,
-#   'subj_management/tracking' = NULL,
-#   'subj_management/recruitment' = NULL,
-#   'data_collection' = paste0("s",1:sessions),
-#   'data_raw' = paste0("s",1:sessions),
-#   'data_preproc' = paste0("s",1:sessions),
-#   'data_qa' = paste0("s",1:sessions)
-# )
-#
-#
-#   #
-#   # # paste0("data_collection/s",1:sessions)
-#   #
-#   #
-#   # study_cab <- create_cabinet(name = "study_cab",
-#   #                             directory = loc,
-#   #                             structure = file_str)
-#   #
-#   # new_cabinet_proj(cabinet = .study_cab,
-#   #                  project_name = name,
-#   #                  git = FALSE,
-#   #                  git_ignore = "data",
-#   #                  renv = TRUE)
-#   #
-#
-#
-# file.path(study_dir, i, "data_collection", "transfer") %>% dir.create(recursive = TRUE)
-# # 3.2 Raw Data
-# file.path(study_dir, i, "data_raw") %>% dir.create(recursive = TRUE)
-# # 3.3 Preprocessed Data
-# file.path(study_dir, i, "data_preproc") %>% dir.create(recursive = TRUE)
-# # 3.4 Data QA and report generation
-# file.path(study_dir, i, "data_qa") %>% dir.create(recursive = TRUE)
