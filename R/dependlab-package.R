@@ -1,4 +1,4 @@
-#' @title Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)
+#' @title Useful functions for the UNC DEPENd Lab (Director: Michael Hallquist)
 #' @docType package
 #' @name dependlab
 #'
