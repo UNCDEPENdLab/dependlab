@@ -43,7 +43,7 @@ Below this threshold, the person subscale mean will be imputed for missing items
 Score the Borderline Personality Questionnaire (BPQ)
 }
 \details{
-Adds nine columns, \code{BPQ_impulsivity}, \code{BPQ_instability}, \code{BPQ_abandonment}, \code{BPQ_relationships}, \code{BPQ_selfimage}, \code{BPQ_suicide}, \code{BPQ_emptiness}, \code{BPQ_anger}, \code{BPQ_psychotic}, and \code{BPQ_total}, to \code{df} containing
+Adds ten columns, \code{BPQ_impulsivity}, \code{BPQ_instability}, \code{BPQ_abandonment}, \code{BPQ_relationships}, \code{BPQ_selfimage}, \code{BPQ_suicide}, \code{BPQ_emptiness}, \code{BPQ_anger}, \code{BPQ_psychotic}, and \code{BPQ_total}, to \code{df} containing
 the different subscales, respectively.
 
 Note: the default BPQ scoring uses the mean of the items for the scales.
@@ -52,5 +52,5 @@ Note: the code assumes that pasting together the \code{item_prefix} and the numb
 will yield the 80 items from the test.
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

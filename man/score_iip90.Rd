@@ -6,7 +6,7 @@
 \usage{
 score_iip90(
   df,
-  item_prefix = "IIP",
+  item_prefix = "IIP_",
   max_impute = 0.2,
   drop_items = FALSE,
   keep_octants = TRUE,
@@ -34,14 +34,13 @@ Below this, the mean will be imputed for missing items.}
 Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex version
 }
 \details{
-UPDATE ME!
 Adds twenty columns, eight for octant scales, six for pd scales, and six for circumplex scales, to \code{df} containing
 the octant, pd, and additional scales, respectively.
 
-Note: the default ECR scoring uses the mean of the items for the scales.
+Note: the default IIP scoring uses the mean of the items for the scales.
 
-Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:36
-will yield the 36 items from the test.
+Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:90
+will yield the 90 items from the test.
 }
 \author{
 Michael Hallquist

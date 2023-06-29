@@ -6,12 +6,14 @@
 \usage{
 score_upps(
   df,
-  item_prefix = "UPPS",
+  item_prefix = "UPPS_",
   max_impute = 0.2,
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
   min_value = 1,
-  max_value = 4
+  max_value = 4,
+  bad_items = NULL,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 1}
 
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 4}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the UPPS-P Impulsive Behavior scale -- revised 59 item version (Lynam, Smith, Whiteside, & Cyders, 2007)
@@ -42,8 +48,8 @@ Note: the default UPPS scoring uses the mean of the items for the scales.
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:59
 will yield the 59 items from the test.
 
-See: \url{http://www.impulsivity.org/measurement/UPPS-P_59_item.pdf}
+See: \url{http://web.archive.org/web/20190710205448/http://www.impulsivity.org/measurement/UPPS-P_59_item.pdf}
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

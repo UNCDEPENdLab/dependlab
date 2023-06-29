@@ -9,8 +9,10 @@ score_panas(
   item_prefix = "PANAS",
   max_impute = 0.2,
   drop_items = FALSE,
+  bad_items = NULL,
   min_value = 1,
-  max_value = 5
+  max_value = 5,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -23,9 +25,13 @@ Below this threshold, the person subscale mean will be imputed for missing items
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
 \item{min_value}{the minimum value for the item anchors. Default: 1}
 
 \item{max_value}{the highest value for the item anchors. Default: 5}
+
+\item{add_alphas}{whether to compute coefficient alpha for the total scale and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Positive and Negative Affect Schedule (PANAS) scale
@@ -34,11 +40,11 @@ Score the Positive and Negative Affect Schedule (PANAS) scale
 Adds two columns, \code{PANAS_positive} and \code{PANAS_negative}, to \code{df} containing
 the positive and negative affect scales, respectively.
 
-Note: the default PANAS scoring uses the mean of the items for the scales.
+Note: the default PANAS scoring uses the sum of the items for the scales.
 
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:20
 will yield the 20 items from the test.
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

@@ -6,12 +6,14 @@
 \usage{
 score_ctq(
   df,
-  item_prefix = "CTQ",
+  item_prefix = "CTQ_",
   max_impute = 0.2,
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
   min_value = 1,
-  max_value = 5
+  max_value = 5,
+  bad_items = NULL,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 1}
 
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 5}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Childhood Trauma Questionnaire -- CTQ scale (Bernstein & Fink, 1998)
@@ -37,11 +43,11 @@ Score the Childhood Trauma Questionnaire -- CTQ scale (Bernstein & Fink, 1998)
 Adds six columns, \code{CTQ_emo_abuse}, \code{CTQ_phys_abuse}, \code{CTQ_sex_abuse}, \code{CTQ_emo_neglect}, \code{CTQ_phys_neglect}, and \code{CTQ_denial},  to \code{df} containing
 the different subscales, respectively.
 
-Note: the default CTQ scoring uses the mean of the items for the scales.
+Note: the default CTQ scoring uses the sum of the items for the scales.
 
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:28
 will yield the 28 items from the test.
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

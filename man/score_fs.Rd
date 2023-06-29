@@ -6,11 +6,13 @@
 \usage{
 score_fs(
   df,
-  item_prefix = "FS",
+  item_prefix = "FS_",
   max_impute = 0.2,
   drop_items = FALSE,
+  bad_items = NULL,
   min_value = 1,
-  max_value = 7
+  max_value = 7,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -18,14 +20,18 @@ score_fs(
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "FS"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per scale.
+\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per scale. Default: 0.2
 Below this threshold, the person subscale mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
 \item{min_value}{the minimum value for the item anchors. Default: 1}
 
 \item{max_value}{the highest value for the item anchors. Default: 7}
+
+\item{add_alphas}{whether to compute coefficient alpha for the total scale and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Flourishing Scale (Diener, Wirtz, Tov, Kim-Prieto, Choi, Oishi, & Biswas-Diener, 2009)
@@ -42,5 +48,5 @@ will yield the 8 items from the test.
 See: \url{http://labs.psychology.illinois.edu/~ediener/FS.html}
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

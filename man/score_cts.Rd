@@ -6,11 +6,13 @@
 \usage{
 score_cts(
   df,
-  item_prefix = "CTS",
+  item_prefix = "CTS_",
   max_impute = 0.2,
   drop_items = FALSE,
   min_value = 1,
-  max_value = 7
+  max_value = 7,
+  bad_items = NULL,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -18,7 +20,7 @@ score_cts(
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "CTS"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per subscale.
+\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per subscale. Default: 0.2
 Below this, the mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
@@ -26,14 +28,16 @@ Below this, the mean will be imputed for missing items.}
 \item{min_value}{the lowest value for the items anchors, used to check response validity. Default: 1}
 
 \item{max_value}{the highest value for the items anchors, used to check response validity. Default: 7}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Conflict Tactics Scale (CTS)
 }
 \details{
-UPDATE ME!
-Adds two columns, \code{ECR_anxiety} and \code{ECR_avoidance}, to \code{df} containing
-the anxiety and avoidance scales, respectively.
+Adds fifteen columns, twelve subscales, two domain scales, and one total, to \code{df}.
 
 Note: the default CTS scoring uses the mean of the items for the scales.
 
@@ -41,5 +45,5 @@ Note: the code assumes that pasting together the \code{item_prefix} and the numb
 will yield the 40 items from the test.
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }

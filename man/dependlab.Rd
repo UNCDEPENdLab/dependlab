@@ -3,7 +3,7 @@
 \docType{package}
 \name{dependlab}
 \alias{dependlab}
-\title{Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)}
+\title{Useful functions for the UNC DEPENd Lab (Director: Michael Hallquist)}
 \description{
 This package provides handy R functions for common tasks in the lab including
   obtaining predictions from multilevel models, computing targeted correlations, or building

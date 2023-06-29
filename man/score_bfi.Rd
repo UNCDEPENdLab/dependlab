@@ -6,12 +6,14 @@
 \usage{
 score_bfi(
   df,
-  item_prefix = "BFI",
+  item_prefix = "BFI_",
   max_impute = 0.2,
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
   min_value = 1,
-  max_value = 5
+  max_value = 5,
+  bad_items = NULL,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -19,7 +21,7 @@ score_bfi(
 
 \item{item_prefix}{a character prefix of the items names in \code{df} to be scored. Default: "BFI"}
 
-\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per scale.
+\item{max_impute}{the proportion of missingness [0..1) or number [1..n] of missing values per scale. Default: 0.2
 Below this threshold, the person subscale mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
@@ -29,12 +31,16 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 1}
 
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 5}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score The Big Five Inventory-2 -- 60 items BFI-2 (Soto & John, 2017)
 }
 \details{
-Adds twenty columns, fifteen for facet scales and five for domain scales, to \code{df} containing
+Adds twenty-one columns, fifteen for facet scales, five for domain scales, and one total, to \code{df} containing
 the BFI-2 subscales, respectively.
 
 Note: the default BFI-2 scoring uses the mean of the items for the scales.
@@ -42,8 +48,8 @@ Note: the default BFI-2 scoring uses the mean of the items for the scales.
 Note: the code assumes that pasting together the \code{item_prefix} and the numbers 1:60
 will yield the 60 items from the test.
 
-See: \url{http://www.colby.edu/psych/wp-content/uploads/sites/50/2013/08/bfi2-form.pdf}
+See: \url{https://www.colby.edu/wp-content/uploads/2013/08/bfi2-form.pdf}
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }
