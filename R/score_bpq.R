@@ -14,7 +14,7 @@
 #'
 #' @details
 #'
-#' Adds nine columns, \code{BPQ_impulsivity}, \code{BPQ_instability}, \code{BPQ_abandonment}, \code{BPQ_relationships}, \code{BPQ_selfimage}, \code{BPQ_suicide}, \code{BPQ_emptiness}, \code{BPQ_anger}, \code{BPQ_psychotic}, and \code{BPQ_total}, to \code{df} containing
+#' Adds ten columns, \code{BPQ_impulsivity}, \code{BPQ_instability}, \code{BPQ_abandonment}, \code{BPQ_relationships}, \code{BPQ_selfimage}, \code{BPQ_suicide}, \code{BPQ_emptiness}, \code{BPQ_anger}, \code{BPQ_psychotic}, and \code{BPQ_total}, to \code{df} containing
 #' the different subscales, respectively.
 #'
 #' Note: the default BPQ scoring uses the mean of the items for the scales.
@@ -24,21 +24,22 @@
 #'
 #'
 #' @export
-#' @author Michael Hallquist
+#' @author Michael Hallquist, Zach Vig
 #'
-#' @importFrom dplyr select mutate
+#' @importFrom dplyr select mutate setdiff
 #'
 score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
                       drop_items=FALSE, keep_reverse_codes=FALSE, input_codes=c(1,2),
                       min_value=0, max_value=1, bad_items = NULL,
                       add_alphas=TRUE) {
 
+  #validate data.frame and items
   orig_items <- paste0(item_prefix, 1:80) #expect item names
   stopifnot(is.data.frame(df))
   stopifnot(all(orig_items %in% names(df)))
 
   #convert values
-  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == input_codes[1], max_value,min_value))
+  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == max(input_codes),max_value,min_value))
 
   #validate item responses
   responses_valid <- apply(df[,orig_items], 1, function(row) { all(row >= min_value & row <= max_value, na.rm=TRUE) })
@@ -49,11 +50,10 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
     return(df)
   }
 
-
+  #set-up reverse coding
   reverse_keys <- c(4, 8, 10, 28, 32, 43, 45, 48, 52, 53, 54, 60, 67) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items
-
 
   #define variables and score items. add 'r' suffix to reverse items as needed
   impuls_items <- sapply(c(1, 10, 26, 34, 42, 57, 64, 68, 71), function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "r", "")) }) #impulsivity
@@ -70,25 +70,19 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
   #apply reverse scoring
   df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { max_value + min_value - x }) #1-5 scoring by default
 
-  #define all subscales to score
-  items_list <- list(impuls_items, instab_items, abandon_items, relations_items, self_items, suicide_items, empti_items, anger_items, psycho_items, total_items)
-  names(items_list) <- c("impuls_items", "instab_items", "abandon_items", "relations_items", "self_items", "suicide_items", "empti_items", "anger_items", "psycho_items", "total_items")
-
-  #if user wants to drop a bad item, best to drop before imputation or calculation of subscale
-  if(!is.null(bad_items)){
-    if(is.numeric(bad_items)){
-      items_list <- list(impuls_items, instab_items, abandon_items, relations_items, self_items, suicide_items, empti_items, anger_items, psycho_items, total_items)
-      names(items_list) <- c("impuls_items", "instab_items", "abandon_items", "relations_items", "self_items", "suicide_items", "empti_items", "anger_items", "psycho_items", "total_items")
-      for(i in 1:length(items_list)){
-        name <- names(items_list)[i]
-        subdf <- items_list[[i]]
-        if(any(paste0(item_prefix,bad_items) %in% subdf)){
-          subdf <- subdf[which(subdf!=paste0(item_prefix,bad_items))]
-          assign(name, subdf)
-          message("dropping ", bad_items, " from calculation of ", name)
-        }
-      }
-    }
+  #drop bad item(s), before imputation and calculation of scores
+  if(!is.null(bad_items) && is.numeric(bad_items)) {
+    bad_items <- sapply(bad_items, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "r", "")) })
+    impuls_items <- setdiff(impuls_items,bad_items)
+    instab_items <- setdiff(instab_items,bad_items)
+    abandon_items <- setdiff(abandon_items,bad_items)
+    relations_items <- setdiff(relations_items,bad_items)
+    self_items <- setdiff(self_items,bad_items)
+    suicide_items <- setdiff(suicide_items,bad_items)
+    empti_items <- setdiff(empti_items,bad_items)
+    anger_items <- setdiff(anger_items,bad_items)
+    psycho_items <- setdiff(psycho_items,bad_items)
+    total_items <- setdiff(total_items,bad_items)
   }
 
   #mean impute, if requested (after reverse scoring to get item direction correct)
@@ -102,37 +96,39 @@ score_bpq <- function(df, item_prefix="BPQ", max_impute=0.2,
     df <- mean_impute_items(df, empti_items, thresh=max_impute)
     df <- mean_impute_items(df, anger_items, thresh=max_impute)
     df <- mean_impute_items(df, psycho_items, thresh=max_impute)
-    df <- mean_impute_items(df, total_items, thresh=max_impute)
   }
 
-
-
-  #https://github.com/jennybc/row-oriented-workflows/blob/master/ex09_row-summaries.md
+  #compute row sums
   df <- df %>% mutate(
-    BPQ_impuls = rowSums(select(., all_of(impuls_items))),
-    BPQ_instab = rowSums(select(., all_of(instab_items))),
-    BPQ_abandon = rowSums(select(., all_of(abandon_items))),
-    BPQ_relations = rowSums(select(., all_of(relations_items))),
-    BPQ_self = rowSums(select(., all_of(self_items))),
-    BPQ_suicide = rowSums(select(., all_of(suicide_items))),
-    BPQ_empti = rowSums(select(., all_of(empti_items))),
-    BPQ_anger = rowSums(select(., all_of(anger_items))),
-    BPQ_psycho = rowSums(select(., all_of(psycho_items))),
-    BPQ_total = rowSums(select(., all_of(total_items))))
+    BPQ_impuls = rowSums(across(all_of(impuls_items))),
+    BPQ_instab = rowSums(across(all_of(instab_items))),
+    BPQ_abandon = rowSums(across(all_of(abandon_items))),
+    BPQ_relations = rowSums(across(all_of(relations_items))),
+    BPQ_self = rowSums(across(all_of(self_items))),
+    BPQ_suicide = rowSums(across(all_of(suicide_items))),
+    BPQ_empti = rowSums(across(all_of(empti_items))),
+    BPQ_anger = rowSums(across(all_of(anger_items))),
+    BPQ_psycho = rowSums(across(all_of(psycho_items))),
+    BPQ_total = rowSums(across(all_of(total_items)))
+    )
 
   #compute alphas
   if (add_alphas) {
-    items_list <- list(impuls_items, instab_items, abandon_items, relations_items, self_items, suicide_items, empti_items, anger_items, psycho_items, total_items)
-    names(items_list) <- c("BPQ_impuls", "BPQ_instab", "BPQ_abandon", "BPQ_relations", "BPQ_self", "BPQ_suicide", "BPQ_empti", "BPQ_anger", "BPQ_psycho", "BPQ_total")
-
-    for (i in 1:length(items_list)) {
-      thisvar <- names(items_list)[i]
-      attr(df[[thisvar]], "alpha") <- psych::alpha(df[,items_list[[i]]])
-    }
+    attr(df$BPQ_impuls,"alpha") <- psych::alpha(df[,impuls_items])
+    attr(df$BPQ_instab,"alpha") <- psych::alpha(df[,instab_items])
+    attr(df$BPQ_abandon,"alpha") <- psych::alpha(df[,abandon_items])
+    attr(df$BPQ_relations,"alpha") <- psych::alpha(df[,relations_items])
+    attr(df$BPQ_self,"alpha") <- psych::alpha(df[,self_items])
+    attr(df$BPQ_suicide,"alpha") <- psych::alpha(df[,suicide_items])
+    attr(df$BPQ_empti,"alpha") <- psych::alpha(df[,empti_items])
+    attr(df$BPQ_anger,"alpha") <- psych::alpha(df[,anger_items])
+    attr(df$BPQ_psycho,"alpha") <- psych::alpha(df[,psycho_items])
+    attr(df$BPQ_total,"alpha") <- psych::alpha(df[,total_items])
   }
 
-  if (drop_items) { df <- df %>% dplyr::select(-all_of(orig_items)) }
+  #drop reverse codes and item-level data
   if (!keep_reverse_codes) { df <- df %>% dplyr::select(-all_of(reverse_items_recode)) }
+  if (drop_items) { df <- df %>% dplyr::select(-all_of(orig_items)) }
 
   return(df)
 }
