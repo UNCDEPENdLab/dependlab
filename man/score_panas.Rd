@@ -6,7 +6,7 @@
 \usage{
 score_panas(
   df,
-  item_prefix = "PANAS",
+  item_prefix = "PANAS_",
   max_impute = 0.2,
   drop_items = FALSE,
   bad_items = NULL,

@@ -6,11 +6,11 @@
 \usage{
 score_bpq(
   df,
-  item_prefix = "BPQ",
+  item_prefix = "BPQ_",
   max_impute = 0.2,
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
-  input_codes = c(1, 2),
+  input_codes = c(0, 1),
   min_value = 0,
   max_value = 1,
   bad_items = NULL,
