@@ -26,7 +26,7 @@
 #'
 #' @importFrom dplyr select mutate
 #'
-score_panas <- function(df, item_prefix="PANAS", max_impute=0.2, drop_items=FALSE,
+score_panas <- function(df, item_prefix="PANAS_", max_impute=0.2, drop_items=FALSE,
                         bad_items=NULL, min_value=1, max_value=5, add_alphas=TRUE) {
 
   orig_items <- paste0(item_prefix, 1:20) #expect item names
