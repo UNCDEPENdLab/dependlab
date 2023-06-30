@@ -58,7 +58,7 @@ score_adult_emotb <- function(df, scales="all", max_impute=0.2,
   if("gls" %in% scales | "all" %in% scales)       gls <- TRUE       else  gls <- FALSE
   if("posaf" %in% scales | "all" %in% scales)     posaf <- TRUE     else  posaf <- FALSE
   if("angaf" %in% scales | "all" %in% scales)     angaf <- TRUE     else  angaf <- FALSE
-  if("angpa" %in% scales | "all" %in% scales)     angpa <<- TRUE    else  angpa <- FALSE
+  if("angpa" %in% scales | "all" %in% scales)     angpa <- TRUE    else  angpa <- FALSE
   if("anghost" %in% scales | "all" %in% scales)   anghost <- TRUE   else  anghost <- FALSE
   if("emosup" %in% scales | "all" %in% scales)    emosup <- TRUE    else  emosup <- FALSE
   if("fearaf" %in% scales | "all" %in% scales)    fearaf <- TRUE    else  fearaf <- FALSE
