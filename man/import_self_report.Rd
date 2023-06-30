@@ -48,10 +48,7 @@ will create the directories recursively. Default is the current working director
 \item{file_date}{Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
 Default is \code{FALSE}.}
 
-\item{add_to_envr}{Logical. If \code{TRUE}, adds data as data.frames to the global environment. Default is \code{FALSE}}
-}
-\value{
-Invisible \code{NULL}.
+\item{add_to_envr}{Logical. If \code{TRUE}, returns a list of requested data.frames. Default is \code{FALSE}}
 }
 \description{
 This function imports self report data from Qualtrics and saves it as separate CSV files based on the specified scales.

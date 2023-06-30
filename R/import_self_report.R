@@ -23,9 +23,8 @@
 #' @param file_suffix Character. A suffix to add to the output file names. Default is an empty string.
 #' @param file_date Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
 #'   Default is \code{FALSE}.
-#' @param add_to_envr Logical. If \code{TRUE}, adds data as data.frames to the global environment. Default is \code{FALSE}
+#' @param add_to_envr Logical. If \code{TRUE}, returns a list of requested data.frames. Default is \code{FALSE}
 #'
-#' @return Invisible \code{NULL}.
 #'
 #' @export
 #' @author Zach Vig
@@ -87,6 +86,7 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
   #validate _scales_ variable
   if(!(scales > 1)){
     warning("`scales` must include a class 'character' object or vector of class 'character' objects. Default: 'all' ")
+    return(invisible(NULL))
   }
 
   #generates date/timestamp
@@ -110,6 +110,9 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     return(ifelse(all(df >= min, na.rm = T) & all(df <= max, na.rm = T), FALSE, TRUE))
   }
 
+  #set-up list output
+  if(add_to_envr){ data.list<-list() }
+
   ###########################################################
 
   #IIP-90 -- Inventory for Interpersonal Problems (90 items)
@@ -124,7 +127,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(iip90, file = paste0(path,"/IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ IIP90 <<- read.csv(paste0(path,"/IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "IIP90"
+    }
   }
 
   #CTQ -- Childhood Trauma Questionnaire (28 items)
@@ -139,7 +145,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(ctq, file = paste0(path,"/CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ CTQ <<- read.csv(paste0(path,"/CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "CTQ"
+    }
   }
 
   #PANAS -- Positive and Negative Affect Schedule (20 items)
@@ -154,7 +163,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(panas, file = paste0(path,"/PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ PANAS <<- read.csv(paste0(path,"/PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "PANAS"
+    }
   }
 
   #PID-5 -- Personality Inventory for DSM-5 (100 items)
@@ -172,7 +184,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(pid5, file = paste0(path,"/PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ PID5 <<- read.csv(paste0(path,"/PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "PID5"
+    }
   }
 
   #ASR -- Adult Self Report [Ages 18-59] (126 items)
@@ -187,7 +202,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(asr, file = paste0(path,"/ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ ASR <<- read.csv(paste0(path,"/ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "ASR"
+    }
   }
 
   #BPQ -- Borderline Personality Questionnaire (80 items)
@@ -202,7 +220,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(bpq, file = paste0(path,"/BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ BPQ <<- read.csv(paste0(path,"/BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "BPQ"
+    }
   }
 
   #FS -- Flourishing Scale (8 items)
@@ -217,7 +238,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(fs, file = paste0(path,"/FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ FS <<- read.csv(paste0(path,"/FS",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "FS"
+    }
   }
 
   #DUSI-R -- Short Form Revised Drug Use Screening Inventory (15 items)
@@ -232,7 +256,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(dusi, file = paste0(path,"/DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ DUSI <<- read.csv(paste0(path,"/DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "DUSI"
+    }
   }
 
   #ISC -- Interpersonal Stressors Circumplex (64 items)
@@ -247,7 +274,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(isc, file = paste0(path,"/ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ ISC <<- read.csv(paste0(path,"/ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "ISC"
+    }
   }
 
   #UPPS-P -- Impulsive Behaviors Scale (59 items)
@@ -262,7 +292,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(upps, file = paste0(path,"/UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ UPPS <<- read.csv(paste0(path,"/UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "UPPS"
+    }
   }
 
   #BFI-2 -- Big Five Inventory-2 (60 items)
@@ -277,7 +310,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(bfi, file = paste0(path,"/BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ BFI <<- read.csv(paste0(path,"/BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "BFI"
+    }
   }
 
   #CTS -- Conflict Tactics Scale (40 items)
@@ -292,7 +328,10 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(cts, file = paste0(path,"/CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ CTS <<- read.csv(paste0(path,"/CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "CTS"
+    }
   }
 
   #NIH-EMOTB -- NIH Toolbox Emotions Battery (148 items)
@@ -307,7 +346,21 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     }
 
     write.csv(emotb, file = paste0(path,"/EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-    if(add_to_envr){ EMOTB <<- read.csv(paste0(path,"/EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+    if(add_to_envr){
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      names(data.list)[[length(data.list)]] <- "EMOTB"
+    }
+  }
+
+  ###########################################################
+
+  #return list object, if requested
+  if(add_to_envr){
+    if(length(data.list)==1){
+      return(data.list[[1]])
+    } else {
+      return(data.list)
+    }
   }
 }
 
@@ -332,5 +385,8 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
 #   }
 #
 #   write.csv(abc, file = paste0(path,"/ABC",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
-#   if(add_to_envr){ ABC <<- read.csv(paste0(path,"/ABC",file_suffix,ifelse(file_date, timestamp, ""),".csv")) }
+#   if(add_to_envr){
+#     data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/ABC",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+#     names(data.list)[[length(data.list)]] <- "ABC"
+#   }
 # }
