@@ -1,6 +1,6 @@
 Package: dependlab
 Type: Package
-Title: Useful functions for the Penn State DEPENd Lab (Director: Michael Hallquist)
+Title: Useful functions for the UNC Chapel Hill DEPENd Lab (Director: Michael Hallquist)
 Version: 0.1.5
 Date: 2019-05-18
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
