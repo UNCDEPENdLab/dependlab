@@ -13,6 +13,8 @@
 #'     demg_cleaned <- read_demg("s3", "K")
 #'  }
 #'
+#' @export
+#'
 #' @author Nidhi Desai
 
 read_neuromap_demg <- function(session = "s3", task = "N", all_cols = FALSE){
