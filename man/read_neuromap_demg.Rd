@@ -4,7 +4,12 @@
 \alias{read_neuromap_demg}
 \title{read and clean demographic data from Qualtrics}
 \usage{
-read_neuromap_demg(session = "s3", task = "N", all_cols = FALSE)
+read_neuromap_demg(
+  session = "s3",
+  task = "N",
+  demg_cols = "simple",
+  skip_age = FALSE
+)
 }
 \arguments{
 \item{session}{which session should the date the task was run be pulled from: "s3" or "s5"}
@@ -12,7 +17,12 @@ read_neuromap_demg(session = "s3", task = "N", all_cols = FALSE)
 \item{task}{name of the task whose session date will be pulled into the demographic data in s_date column, which is used to calculate age of the participant at the time the session was run.
 "N": neighborhood, "K": defend the kingdom, "S": sorting mushroom, "V": vending machine, "W": weather prediction, "B": vanilla  baseline}
 
-\item{all_cols}{should all columns from the demographic survey be included in the output? Default set to FALSE. Default will only include: ID, gender, date of birth, ethnicity, race, sex_orientation, work, education, house_income, and self_income.}
+\item{demg_cols}{character requesting a subset of columns to return. either "all", "detailed", or "simple". Defaults to "simple".
+simple: ID, gender, date of birth, ethnicity, race, sex_orientation, work, education, house_income, and self_income.
+detailed: simple + city of birth, more detailed relationship information, and more detailed sexuality information.
+all: detailed + all other columns}
+
+\item{skip_age}{logical defaults to FALSE. If TRUE, only returns the demographic data. If FALSE, returns the demographic data + age at the time of s3 or s5.}
 }
 \description{
 This function pulls the demographic data and S3 or S5 session report from Qualtrics. Cleans the demog data and adds the sessions date and age when the task was run.
@@ -27,4 +37,6 @@ This function pulls the demographic data and S3 or S5 session report from Qualtr
 }
 \author{
 Nidhi Desai
+
+Nate Hall
 }

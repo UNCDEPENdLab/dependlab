@@ -6,7 +6,12 @@
 #' @param session which session should the date the task was run be pulled from: "s3" or "s5"
 #' @param task name of the task whose session date will be pulled into the demographic data in s_date column, which is used to calculate age of the participant at the time the session was run.
 #'    "N": neighborhood, "K": defend the kingdom, "S": sorting mushroom, "V": vending machine, "W": weather prediction, "B": vanilla  baseline
-#' @param all_cols should all columns from the demographic survey be included in the output? Default set to FALSE. Default will only include: ID, gender, date of birth, ethnicity, race, sex_orientation, work, education, house_income, and self_income.
+#' @param demg_cols character requesting a subset of columns to return. either "all", "detailed", or "simple". Defaults to "simple".
+#'     simple: ID, gender, date of birth, ethnicity, race, sex_orientation, work, education, house_income, and self_income.
+#'     detailed: simple + city of birth, more detailed relationship information, and more detailed sexuality information.
+#'     all: detailed + all other columns
+#' @param skip_age logical defaults to FALSE. If TRUE, only returns the demographic data. If FALSE, returns the demographic data + age at the time of s3 or s5.
+#'
 #'
 #' @examples
 #'  \dontrun{
@@ -16,8 +21,9 @@
 #' @export
 #'
 #' @author Nidhi Desai
+#' @author Nate Hall
 
-read_neuromap_demg <- function(session = "s3", task = "N", all_cols = FALSE){
+read_neuromap_demg <- function(session = "s3", task = "N", demg_cols = "simple", skip_age = FALSE){
   pacman::p_load(dplyr, qualtRics, lubridate)
 
   # ---- pull demographics data from Qualtrics ----
@@ -25,20 +31,52 @@ read_neuromap_demg <- function(session = "s3", task = "N", all_cols = FALSE){
                        breakout_sets = FALSE, force_request = TRUE)
 
   # ---- clean the demg data table ----
-  if (!all_cols) { demg <- demg %>% select(Q1, Q3, Q5, Q7, Q8, Q11, Q16, Q17, Q18, Q19) }
   demg <- demg %>%
-    rename(ID = Q1, gender = Q3, dob = Q5, ethnicity = Q7, race = Q8,
-           sex_orientation = Q11, work = Q16, education = Q17,
-           house_income = Q18, self_income = Q19) %>%
+    rename(ID = Q1,
+           sex = Q3,
+           cob = Q32,
+           dob = Q5,
+           ethnicity = Q7,
+           race = Q8,
+           relat_status = Q9,
+           relat_length = Q12,
+           relat_living = Q13,
+           relat_living_length = Q14,
+           n_marriage = Q15,
+           sex_orientation_cont = Q10,
+           sex_orientation = Q11,
+           sex_orientation_other = Q11_4_TEXT,
+           work = Q16,
+           education = Q17,
+           house_income = Q18,
+           self_income = Q19) %>%
     mutate(ID = as.numeric(ID)) %>%
     arrange(ID) %>%
     mutate(dob = as.Date(dob, format = "%m/%d/%Y")) %>%
     filter(ID != 999) %>% filter(!is.na(ID))
 
 
-  # duplicate rows for subjectIDs
-  warning(paste("duplicate rows in demographic data for",
-                paste(demg$ID[duplicated(demg$ID)], collapse = ", ")))
+  if (demg_cols == "detailed") {
+    demg <- demg %>% select(ID, sex, cob, dob, ethnicity, race, relat_status, relat_length, relat_living, relat_living_length, n_marriage, sex_orientation_cont, sex_orientation, sex_orientation_other, work, education, house_income, self_income)
+    # TODO cleanup some of these variables.. eg. sex orientation_cont.
+  } else if (demg_cols == "simple") {
+    demg <- demg %>% select(ID, sex, dob, ethnicity, race, sex_orientation, work, education, house_income, self_income)
+  } else {
+    if (demg_cols != "all") {
+      warning("demg_cols must be one of: simple, detailed, or all. Defaulting to simple")
+    }
+    demg <- demg %>% select(ID, sex, dob, ethnicity, race, sex_orientation, work, education, house_income, self_income)
+  }
+
+  # send warning if there are duplicate rows for subjectIDs
+  if (any(duplicated(demg$ID))){
+    warning(paste("duplicate rows in demographic data for",
+                  paste(demg$ID[duplicated(demg$ID)], collapse = ", ")))
+  }
+
+
+  # ---- if skip_age is TRUE, return the demg data and forget reading in session reports to determine age at time of session ----
+  if (skip_age) { return(demg) }
 
   # ---- pull date of session 3 or session 5 from their respective qualtrics survey ----
   session_qualticsID <- ifelse(session == "s3", "SV_8ixbUxRgNWtxuHH",
