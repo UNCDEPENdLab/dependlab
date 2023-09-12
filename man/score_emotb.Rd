@@ -2,47 +2,69 @@
 % Please edit documentation in R/score_emotb.R
 \name{score_emotb}
 \alias{score_emotb}
-\title{Score the NIH Toolbox Emotion Measures (2019)}
+\title{Score Adult EMOTB}
 \usage{
-score_emotb(df, drop_items = FALSE)
+score_emotb(
+  df,
+  scales = "all",
+  max_impute = 0.2,
+  drop_items = FALSE,
+  keep_reverse_codes = FALSE,
+  add_alphas = TRUE
+)
 }
 \arguments{
-\item{df}{The input data frame containing item responses.}
+\item{df}{The data frame containing the assessment items.}
 
-\item{drop_items}{Logical indicating whether to drop item-level data from the output. Default is FALSE.}
+\item{scales}{A character vector specifying the scales to include in the scoring.
+The default is "all", which includes all scales. Other possible values are:
+"percstrs", "self", "mp", "sad", "gls", "posaf", "angaf", "angpa",
+"anghost", "emosup", "fearaf", "fearsoma", "friend", "instrsup",
+"lone", "perchost", "percrej", and "apathy".}
+
+\item{max_impute}{The threshold for mean imputation. Items with missing values
+below this threshold will be mean imputed. The default is 0.2.}
+
+\item{drop_items}{Logical indicating whether to drop the individual item columns
+from the resulting data frame. The default is FALSE.}
+
+\item{keep_reverse_codes}{Logical indicating whether to keep the reverse-coded
+items in the resulting data frame. The default is FALSE.}
+
+\item{add_alphas}{Logical indicating whether to compute Cronbach's alpha coefficients
+for the scales and append them to the resulting data frame. The default is TRUE.}
 }
 \value{
-The modified data frame with EMOTB scores.
+A data frame with the computed scores and optional alpha coefficients.
 }
 \description{
-This function calculates EMOTB scores based on the provided data frame and parameters.
+Computes scores for the NIH Toolbox Emotion Measures, Adult Forms (ages 18-52) (2019).
 }
 \details{
-This function adds two columns, `_Theta` and `_Theta_T`, to `df` containing the NIH Toolbox emotion measures, respectively.
-}
-\note{
-Scoring is based on the 2019 raw score to t-score conversion tables manual.
+The function scores the Adult EMOTB assessment based on the provided data frame.
+         It supports various scoring options, including selecting specific scales,
+         mean imputation of missing values, dropping individual item columns,
+         keeping reverse-coded items, and computing alpha coefficients.
 
-Some measures were omitted from the manual, in which case older versions were used.
+         The function adds three columns per scale to the data frame `df`, containing
+         the raw scores (\code{_Raw}), the theta scores (\code{_Theta}), and the
+         t-scores (\code{_T}) for the NIH Toolbox Emotion Measures, respectively.
 
-The following age group definitions are used:
-- TB_measure_adult: 18 years and older
-- TB_measure_teen: 13-17 years and 8-17 years
-- TB_measure_child: 8-12 years
+         Note: The scoring is based on the 2019 raw score to t-score conversion tables manual.
+         Note: Some measures were omitted from the manual, in which case older versions were used.
+         Note: The function assumes that pasting `TB_`, the subscale, and the item numbers
+         together yields the items from each of the tests.
+
+         See: \url{http://www.healthmeasures.net/images/nihtoolbox/Technical_Manuals/Emotion/NIH_TB_Emotion_Raw_Score_to_T-Score_Conversion_Tables_Manual_3.19.19.pdf}
 }
 \examples{
-df <- data.frame(
-  Age = c(20, 15, 25),
-  Apathy_Raw = c(1, 2, 3),
-  PercStrs_Raw = c(2, 1, 3),
-  Self_Raw = c(3, 2, 1)
-)
-score_emotb(df)
+# Score all scales with default options
+scores <- score_emotb(data_frame)
+
+# Score specific scales and keep reverse-coded items
+scores <- score_emotb(data_frame, scales = c("self", "angaf"), keep_reverse_codes = TRUE)
 
 }
-\seealso{
-For T-score conversion tables, see the [NIH TB Emotion Raw Score to T-Score Conversion Tables Manual](http://www.healthmeasures.net/images/nihtoolbox/Technical_Manuals/Emotion/NIH_TB_Emotion_Raw_Score_to_T-Score_Conversion_Tables_Manual_3.19.19.pdf).
-}
 \author{
-Michael Hallquist, Melanie Glatz
+Michael Hallquist, Melanie Glatz, Zach Vig
 }

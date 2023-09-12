@@ -2,7 +2,7 @@
 % Please edit documentation in R/import_self_report.R
 \name{import_self_report}
 \alias{import_self_report}
-\title{Import Self Report Data from Qualtrics}
+\title{Imports NeuroMAP Self Report Data from Qualtrics}
 \usage{
 import_self_report(
   info = FALSE,
@@ -51,7 +51,7 @@ Default is \code{FALSE}.}
 \item{add_to_envr}{Logical. If \code{TRUE}, returns a list of requested data.frames. Default is \code{FALSE}}
 }
 \description{
-This function imports self report data from Qualtrics and saves it as separate CSV files based on the specified scales.
+This function imports self report data for the NeuroMAP Study from Qualtrics and saves it as separate CSV files based on the specified scales.
 }
 \examples{
 import_self_report(info = TRUE)
