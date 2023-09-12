@@ -46,6 +46,7 @@ score_upps <- function(df, item_prefix="UPPS_", max_impute=0.2, drop_items=FALSE
     return(df)
   }
 
+  #set-up reverse coding
   reverse_keys <- c(2, 3, 5, 7, 8, 9, 10, 12, 13, 15, 17, 18, 20, 22, 23, 25, 26, 29, 30, 31, 34, 35, 36, 39, 40, 41, 44, 45, 46, 47, 50, 51, 52, 53, 55, 56, 57, 58, 59) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items

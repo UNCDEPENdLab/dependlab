@@ -30,6 +30,7 @@ score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2,
   # warning("This function is not complete yet. Just returning original data.frame for now.")
   # return(df)
 
+  #validate data.frame and items
   orig_items <- paste0(item_prefix, 1:90) #expect item names
   stopifnot(is.data.frame(df))
   stopifnot(all(orig_items %in% names(df)))
@@ -57,9 +58,11 @@ score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2,
 
   #PD scales
   bpd_items <- paste0(item_prefix, c(51, 53, 55, 66, 77, 80, 89, 90)) #Clifton BPD scale
+
   sensitivity_pd1_items <- paste0(item_prefix, c(1, 35, 36, 42, 51, 55, 60, 78, 79, 81, 86)) #Pilkonis PD1
   ambivalence_pd2_items <- paste0(item_prefix, c(13, 14, 26, 28, 32, 34, 38, 40, 41, 84)) #Pilkonis PD2
   aggression_pd3_items <- paste0(item_prefix, c(50, 53, 58, 63, 77, 80, 88)) #Pilkonis PD3
+
   approval_c1_items <- paste0(item_prefix, c(2, 9, 16, 48, 59, 66, 72, 74, 75)) #need for social approval
   lacksocial_c2_items <- paste0(item_prefix, c(3, 7, 17, 19, 22, 33, 43, 49, 71, 85)) #lack of sociability
 

@@ -1,6 +1,6 @@
-#' Import Self Report Data from Qualtrics
+#' Imports NeuroMAP Self Report Data from Qualtrics
 #'
-#' This function imports self report data from Qualtrics and saves it as separate CSV files based on the specified scales.
+#' This function imports self report data for the NeuroMAP Study from Qualtrics and saves it as separate CSV files based on the specified scales.
 #'
 #' @param info Logical. If \code{TRUE}, displays information about the function and the scales that can be extracted.
 #'   Additionally, it assigns the global variable \code{scales_to_score} with the names of all the scales available for scoring.
@@ -91,7 +91,7 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
 
   #generates date/timestamp
   if(file_date){
-    timestamp <- gsub(":","_",format(Sys.time(), "_%b_%d_%I_%M_%p"))
+    timestamp <- gsub(":","_",format(Sys.time(), "_%d_%b_%I_%M_%p"))
   }
 
   #creates new directory
@@ -365,12 +365,12 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
 }
 
 
-#######################################################################################
-# ADDING A NEW SCALE:                                                                 #
-# *Copy and paste the code below into the `import_self_report` function               #
-# *Replace any instances of `abc` or `ABC` with the shorthand code for the new scale  #
-# *Replace the min and max values with the corresponding min and max of the scale     #
-#######################################################################################
+########################################################################################################
+# ADDING A NEW SCALE:                                                                                  #
+# *Copy and paste the code below into the `import_self_report` function                                #
+# *Replace any instances of `abc` or `ABC` with the shorthand code for the new scale (case-sensitive)  #
+# *Replace the min and max values with the corresponding min and max of the scale                      #
+########################################################################################################
 
 
 # # ABC -- SCALE NAME HERE
