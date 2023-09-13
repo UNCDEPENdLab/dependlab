@@ -16,6 +16,11 @@
 #'                           items in the resulting data frame. The default is FALSE.
 #' @param add_alphas Logical indicating whether to compute Cronbach's alpha coefficients
 #'                   for the scales and append them to the resulting data frame. The default is TRUE.
+#' @param item_prefix A character vector specifying the item prefixes as they appear in the data.frame.
+#'                    The vector must be the same length as the `scales` parameter and prefixes must be in the
+#'                    same corresponding order. If `scales` is set to "all", the prefixes must appear in
+#'                    the order of possible values for the `scales` parameter provided above
+#'                    (Perceived Stress, Self Efficacy, etc.).
 #'
 #' @return A data frame with the computed scores and optional alpha coefficients.
 #'
@@ -39,56 +44,99 @@
 #' # Score all scales with default options
 #' scores <- score_emotb(data_frame)
 #'
-#' # Score specific scales and keep reverse-coded items
-#' scores <- score_emotb(data_frame, scales = c("self", "angaf"), keep_reverse_codes = TRUE)
+#' # Score specific scales and keep reverse-coded items, while specifying item-level prefixes as they appear in the data
+#' scores <- score_emotb(data_frame, scales = c("self", "angaf"), keep_reverse_codes = TRUE, item_prefix=c("Self_","AngAf_"))
 #'
 #' @importFrom dplyr case_when mutate
 #'
 #' @author Michael Hallquist, Melanie Glatz, Zach Vig
 #' @export
-score_emotb <- function(df, scales="all", max_impute=0.2,
-                              drop_items=FALSE, keep_reverse_codes=FALSE,
-                              add_alphas=TRUE) {
+score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
+                        keep_reverse_codes=FALSE, add_alphas=TRUE,
+                        item_prefix=c("TB_PercStrs_",
+                                      "TB_Self_",
+                                      "TB_MP_",
+                                      "TB_Sad_",
+                                      "TB_GLS_",
+                                      "TB_PosAf_",
+                                      "TB_AngAf_",
+                                      "TB_AngPA_",
+                                      "TB_AngHost_",
+                                      "TB_EmoSup_",
+                                      "TB_FearAf_",
+                                      "TB_FearSoma_",
+                                      "TB_Friend_",
+                                      "TB_InstrSup_",
+                                      "TB_Lone_",
+                                      "TB_PercHost_",
+                                      "TB_PercRej_",
+                                      "TB_Apathy_")) {
 
   #set-up logicals
-  if("percstrs" %in% scales | "all" %in% scales)  percstrs <- TRUE  else  percstrs <- FALSE
-  if("self" %in% scales | "all" %in% scales)      self <- TRUE      else  self <- FALSE
-  if("mp" %in% scales | "all" %in% scales)        mp <- TRUE        else  mp <- FALSE
-  if("sad" %in% scales | "all" %in% scales)       sad <- TRUE       else  sad <- FALSE
-  if("gls" %in% scales | "all" %in% scales)       gls <- TRUE       else  gls <- FALSE
-  if("posaf" %in% scales | "all" %in% scales)     posaf <- TRUE     else  posaf <- FALSE
-  if("angaf" %in% scales | "all" %in% scales)     angaf <- TRUE     else  angaf <- FALSE
-  if("angpa" %in% scales | "all" %in% scales)     angpa <- TRUE     else  angpa <- FALSE
-  if("anghost" %in% scales | "all" %in% scales)   anghost <- TRUE   else  anghost <- FALSE
-  if("emosup" %in% scales | "all" %in% scales)    emosup <- TRUE    else  emosup <- FALSE
-  if("fearaf" %in% scales | "all" %in% scales)    fearaf <- TRUE    else  fearaf <- FALSE
-  if("fearsoma" %in% scales | "all" %in% scales)  fearsoma <- TRUE  else  fearsoma <- FALSE
-  if("friend" %in% scales | "all" %in% scales)    friend <- TRUE    else  friend <- FALSE
-  if("instrsup" %in% scales | "all" %in% scales)  instrsup <- TRUE  else  instrsup <- FALSE
-  if("lone" %in% scales | "all" %in% scales)      lone <- TRUE      else  lone <- FALSE
-  if("perchost" %in% scales | "all" %in% scales)  perchost <- TRUE  else  perchost <- FALSE
-  if("percrej" %in% scales | "all" %in% scales)   percrej <- TRUE   else  percrej <- FALSE
-  if("apathy" %in% scales | "all" %in% scales)    apathy <- TRUE    else  apathy <- FALSE
+  if("all" %in% scales) {scales <- c("percstrs", "self", "mp", "sad", "gls", "posaf", "angaf", "angpa",
+                                      "anghost", "emosup", "fearaf", "fearsoma", "friend", "instrsup",
+                                      "lone", "perchost", "percrej", "apathy")}
+
+  if("percstrs" %in% scales)  percstrs <- TRUE  else  percstrs <- FALSE
+  if("self" %in% scales)      self <- TRUE      else  self <- FALSE
+  if("mp" %in% scales)        mp <- TRUE        else  mp <- FALSE
+  if("sad" %in% scales)       sad <- TRUE       else  sad <- FALSE
+  if("gls" %in% scales)       gls <- TRUE       else  gls <- FALSE
+  if("posaf" %in% scales)     posaf <- TRUE     else  posaf <- FALSE
+  if("angaf" %in% scales)     angaf <- TRUE     else  angaf <- FALSE
+  if("angpa" %in% scales)     angpa <- TRUE     else  angpa <- FALSE
+  if("anghost" %in% scales)   anghost <- TRUE   else  anghost <- FALSE
+  if("emosup" %in% scales)    emosup <- TRUE    else  emosup <- FALSE
+  if("fearaf" %in% scales)    fearaf <- TRUE    else  fearaf <- FALSE
+  if("fearsoma" %in% scales)  fearsoma <- TRUE  else  fearsoma <- FALSE
+  if("friend" %in% scales)    friend <- TRUE    else  friend <- FALSE
+  if("instrsup" %in% scales)  instrsup <- TRUE  else  instrsup <- FALSE
+  if("lone" %in% scales)      lone <- TRUE      else  lone <- FALSE
+  if("perchost" %in% scales)  perchost <- TRUE  else  perchost <- FALSE
+  if("percrej" %in% scales)   percrej <- TRUE   else  percrej <- FALSE
+  if("apathy" %in% scales)    apathy <- TRUE    else  apathy <- FALSE
+
+  #set-up prefixes
+  stopifnot(length(scales)==length(item_prefix))
+
+  if(percstrs)  PercStrs_prefix <- paste0(item_prefix[which(scales=="percstrs")])
+  if(self)      Self_prefix <- paste0(item_prefix[which(scales=="self")])
+  if(mp)        MP_prefix <- paste0(item_prefix[which(scales=="mp")])
+  if(sad)       Sad_prefix <- paste0(item_prefix[which(scales=="sad")])
+  if(gls)       GLS_prefix <- paste0(item_prefix[which(scales=="gls")])
+  if(posaf)     PosAf_prefix <- paste0(item_prefix[which(scales=="posaf")])
+  if(angaf)     AngAf_prefix <- paste0(item_prefix[which(scales=="angaf")])
+  if(angpa)     AngPA_prefix <- paste0(item_prefix[which(scales=="angpa")])
+  if(anghost)   AngHost_prefix <- paste0(item_prefix[which(scales=="anghost")])
+  if(emosup)    EmoSup_prefix <- paste0(item_prefix[which(scales=="emosup")])
+  if(fearaf)    FearAf_prefix <- paste0(item_prefix[which(scales=="fearaf")])
+  if(fearsoma)  FearSoma_prefix <- paste0(item_prefix[which(scales=="fearsoma")])
+  if(friend)    Friend_prefix <- paste0(item_prefix[which(scales=="friend")])
+  if(instrsup)  InstrSup_prefix <- paste0(item_prefix[which(scales=="instrsup")])
+  if(lone)      Lone_prefix <- paste0(item_prefix[which(scales=="lone")])
+  if(perchost)  PercHost_prefix <- paste0(item_prefix[which(scales=="perchost")])
+  if(percrej)   PercRej_prefix <- paste0(item_prefix[which(scales=="percrej")])
+  if(apathy)    Apathy_prefix <- paste0(item_prefix[which(scales=="apathy")])
 
   #set-up items
-  if(percstrs)  PercStrs_items <- paste0("TB_PercStrs_",1:10) else  PercStrs_items <- NULL
-  if(self)      Self_items <- paste0("TB_Self_",1:10)         else  Self_items <- NULL
-  if(mp)        MP_items <- paste0("TB_MP_",1:7)              else  MP_items <- NULL
-  if(sad)       Sad_items <- paste0("TB_Sad_",1:8)            else  Sad_items <- NULL
-  if(gls)       GLS_items <- paste0("TB_GLS_",1:5)            else  GLS_items <- NULL
-  if(posaf)     PosAf_items <- paste0("TB_PosAf_",1:15)       else  PosAf_items <- NULL
-  if(angaf)     AngAf_items <- paste0("TB_AngAf_",1:5)        else  AngAf_items <- NULL
-  if(angpa)     AngPA_items <- paste0("TB_AngPA_",1:5)        else  AngPA_items <- NULL
-  if(anghost)   AngHost_items <- paste0("TB_AngHost_",1:5)    else  AngHost_items <- NULL
-  if(emosup)    EmoSup_items <- paste0("TB_EmoSup_",1:8)      else  EmoSup_items <- NULL
-  if(fearaf)    FearAf_items <- paste0("TB_FearAf_",1:7)      else  FearAf_items <- NULL
-  if(fearsoma)  FearSoma_items <- paste0("TB_FearSoma_",1:6)  else  FearSoma_items <- NULL
-  if(friend)    Friend_items <- paste0("TB_Friend_",1:8)      else  Friend_items <- NULL
-  if(instrsup)  InstrSup_items <- paste0("TB_InstrSup_",1:8)  else  InstrSup_items <- NULL
-  if(lone)      Lone_items <- paste0("TB_Lone_",1:5)          else  Lone_items <- NULL
-  if(perchost)  PercHost_items <- paste0("TB_PercHost_",1:8)  else  PercHost_items <- NULL
-  if(percrej)   PercRej_items <- paste0("TB_PercRej_",1:8)    else  PercRej_items <- NULL
-  if(apathy)    Apathy_items <- paste0("TB_Apathy_",1:7)      else  Apathy_items <- NULL
+  if(percstrs)  PercStrs_items <- paste0(PercStrs_prefix,1:10) else  PercStrs_items <- NULL
+  if(self)      Self_items <- paste0(Self_prefix,1:10)         else  Self_items <- NULL
+  if(mp)        MP_items <- paste0(MP_prefix,1:7)              else  MP_items <- NULL
+  if(sad)       Sad_items <- paste0(Sad_prefix,1:8)            else  Sad_items <- NULL
+  if(gls)       GLS_items <- paste0(GLS_prefix,1:5)            else  GLS_items <- NULL
+  if(posaf)     PosAf_items <- paste0(PosAf_prefix,1:15)       else  PosAf_items <- NULL
+  if(angaf)     AngAf_items <- paste0(AngAf_prefix,1:5)        else  AngAf_items <- NULL
+  if(angpa)     AngPA_items <- paste0(AngPA_prefix,1:5)        else  AngPA_items <- NULL
+  if(anghost)   AngHost_items <- paste0(AngHost_prefix,1:5)    else  AngHost_items <- NULL
+  if(emosup)    EmoSup_items <- paste0(EmoSup_prefix,1:8)      else  EmoSup_items <- NULL
+  if(fearaf)    FearAf_items <- paste0(FearAf_prefix,1:7)      else  FearAf_items <- NULL
+  if(fearsoma)  FearSoma_items <- paste0(FearSoma_prefix,1:6)  else  FearSoma_items <- NULL
+  if(friend)    Friend_items <- paste0(Friend_prefix,1:8)      else  Friend_items <- NULL
+  if(instrsup)  InstrSup_items <- paste0(InstrSup_prefix,1:8)  else  InstrSup_items <- NULL
+  if(lone)      Lone_items <- paste0(Lone_prefix,1:5)          else  Lone_items <- NULL
+  if(perchost)  PercHost_items <- paste0(PercHost_prefix,1:8)  else  PercHost_items <- NULL
+  if(percrej)   PercRej_items <- paste0(PercRej_prefix,1:8)    else  PercRej_items <- NULL
+  if(apathy)    Apathy_items <- paste0(Apathy_prefix,1:7)      else  Apathy_items <- NULL
 
   total_items <- c(PercStrs_items, Self_items, MP_items, Sad_items, GLS_items, PosAf_items,
                   AngAf_items, AngPA_items, AngHost_items, EmoSup_items, FearAf_items, FearSoma_items,
@@ -174,28 +222,28 @@ score_emotb <- function(df, scales="all", max_impute=0.2,
 
   #compute alphas
   if (add_alphas) {
-    if(percstrs) attr(df[["PercStrs_Raw"]],"alpha") <- psych::alpha(df[,PercStrs_items])
-    if(self) attr(df[["Self_Raw"]],"alpha") <- psych::alpha(df[,Self_items])
-    if(mp) attr(df[["MP_Raw"]],"alpha") <- psych::alpha(df[,MP_items])
-    if(sad) attr(df[["Sad_Raw"]],"alpha") <- psych::alpha(df[,Sad_items])
-    if(gls) attr(df[["GLS_Raw"]],"alpha") <- psych::alpha(df[,GLS_items])
-    if(posaf) attr(df[["PosAf_Raw"]],"alpha") <- psych::alpha(df[,PosAf_items])
-    if(angaf) attr(df[["AngAf_Raw"]],"alpha") <- psych::alpha(df[,AngAf_items])
-    if(angpa) attr(df[["AngPA_Raw"]],"alpha") <- psych::alpha(df[,AngPA_items])
-    if(anghost) attr(df[["AngHost_Raw"]],"alpha") <- psych::alpha(df[,AngHost_items])
-    if(emosup) attr(df[["EmoSup_Raw"]],"alpha") <- psych::alpha(df[,EmoSup_items])
-    if(fearaf) attr(df[["FearAf_Raw"]],"alpha") <- psych::alpha(df[,FearAf_items])
-    if(fearsoma) attr(df[["FearSoma_Raw"]],"alpha") <- psych::alpha(df[,FearSoma_items])
-    if(friend) attr(df[["Friend_Raw"]],"alpha") <- psych::alpha(df[,Friend_items])
-    if(instrsup) attr(df[["InstrSup_Raw"]],"alpha") <- psych::alpha(df[,InstrSup_items])
-    if(lone) attr(df[["Lone_Raw"]],"alpha") <- psych::alpha(df[,Lone_items])
-    if(perchost) attr(df[["PercHost_Raw"]],"alpha") <- psych::alpha(df[,PercHost_items])
-    if(percrej) attr(df[["PercRej_Raw"]],"alpha") <- psych::alpha(df[,PercRej_items])
-    if(apathy) attr(df[["Apathy_Raw"]],"alpha") <- psych::alpha(df[,Apathy_items])
+    if(percstrs) attr(df[["PercStrs_Raw"]],"alpha") <- psych::alpha(df[,PercStrs_items],max=100,warnings = F)
+    if(self) attr(df[["Self_Raw"]],"alpha") <- psych::alpha(df[,Self_items],max=100,warnings = F)
+    if(mp) attr(df[["MP_Raw"]],"alpha") <- psych::alpha(df[,MP_items],max=100,warnings = F)
+    if(sad) attr(df[["Sad_Raw"]],"alpha") <- psych::alpha(df[,Sad_items],max=100,warnings = F)
+    if(gls) attr(df[["GLS_Raw"]],"alpha") <- psych::alpha(df[,GLS_items],max=100,warnings = F)
+    if(posaf) attr(df[["PosAf_Raw"]],"alpha") <- psych::alpha(df[,PosAf_items],max=100,warnings = F)
+    if(angaf) attr(df[["AngAf_Raw"]],"alpha") <- psych::alpha(df[,AngAf_items],max=100,warnings = F)
+    if(angpa) attr(df[["AngPA_Raw"]],"alpha") <- psych::alpha(df[,AngPA_items],max=100,warnings = F)
+    if(anghost) attr(df[["AngHost_Raw"]],"alpha") <- psych::alpha(df[,AngHost_items],max=100,warnings = F)
+    if(emosup) attr(df[["EmoSup_Raw"]],"alpha") <- psych::alpha(df[,EmoSup_items],max=100,warnings = F)
+    if(fearaf) attr(df[["FearAf_Raw"]],"alpha") <- psych::alpha(df[,FearAf_items],max=100,warnings = F)
+    if(fearsoma) attr(df[["FearSoma_Raw"]],"alpha") <- psych::alpha(df[,FearSoma_items],max=100,warnings = F)
+    if(friend) attr(df[["Friend_Raw"]],"alpha") <- psych::alpha(df[,Friend_items],max=100,warnings = F)
+    if(instrsup) attr(df[["InstrSup_Raw"]],"alpha") <- psych::alpha(df[,InstrSup_items],max=100,warnings = F)
+    if(lone) attr(df[["Lone_Raw"]],"alpha") <- psych::alpha(df[,Lone_items],max=100,warnings = F)
+    if(perchost) attr(df[["PercHost_Raw"]],"alpha") <- psych::alpha(df[,PercHost_items],max=100,warnings = F)
+    if(percrej) attr(df[["PercRej_Raw"]],"alpha") <- psych::alpha(df[,PercRej_items],max=100,warnings = F)
+    if(apathy) attr(df[["Apathy_Raw"]],"alpha") <- psych::alpha(df[,Apathy_items],max=100,warnings = F)
   }
 
   #drop reverse codes and item-level data
-  if (!keep_reverse_codes) { df <- df %>% select(-all_of(reverse_items_recode)) }
+  if (!keep_reverse_codes & percstrs) { df <- df %>% select(-all_of(reverse_items_recode)) }
   if (drop_items) { df <- df %>% select(-starts_with("TB_")) }
 
   return(df)

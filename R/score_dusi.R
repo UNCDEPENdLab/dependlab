@@ -5,9 +5,10 @@
 #' @param max_impute the proportion of missingness [0..1) or number [1..n] of missing values per scale. Default: 0.2
 #'           Below this threshold, the person subscale mean will be imputed for missing items.
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
-#' @param input_codes the original T/F coding scheme of the input data.frame. These are converted to the specified min and max value.
-#' @param min_value the minimum value for the item anchors, used in score validation. Default: 0
-#' @param max_value the highest value for the item anchors, used in score validation. Default: 1
+#' @param input_codes the original T/F coding scheme of the input data.frame in the form c(False Code, True Code).
+#'            These are converted to the specified min and max value.
+#' @param false_value the 'False' value for the item anchors, used in score validation. Default: 0
+#' @param true_value the 'True' value for the item anchors, used in score validation. Default: 1
 #' @param bad_items numeric value or vector of the items that need to be dropped before imputation or calculation of subscales
 #' @param add_alphas whether to compute coefficient alpha for the total scale and return a column attribute. Default: TRUE
 #'
@@ -23,10 +24,10 @@
 #' @export
 #' @author Michael Hallquist, Zach Vig
 #'
-#' @importFrom dplyr select mutate setdiff
+#' @importFrom dplyr select mutate
 #'
 score_dusi <- function(df, item_prefix="DUSI_", max_impute=0.2, drop_items=FALSE,
-                       input_codes=c(0,1), min_value=0, max_value=1, bad_items=NULL,
+                       input_codes=c(0,1), false_value=0, true_value=1, bad_items=NULL,
                        add_alphas=TRUE) {
 
   #validate data.frame and items
@@ -34,15 +35,21 @@ score_dusi <- function(df, item_prefix="DUSI_", max_impute=0.2, drop_items=FALSE
   stopifnot(is.data.frame(df))
   stopifnot(all(orig_items %in% names(df)))
   stopifnot(length(input_codes)==2)
+  input_codes_valid <- apply(df[,orig_items], 1, function(row) { all(row >= min(input_codes) & row <= max(input_codes), na.rm=TRUE) })
+
+  if(any(!input_codes_valid)) {
+    warning("Check your input_codes as some values fall outside of this range. \n  Returning data.frame unchanged")
+    return(df)
+  }
 
   #convert values, if applicable
-  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == max(input_codes),max_value,min_value))
+  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == input_codes[1],false_value,true_value))
 
   #validate item responses
-  responses_valid <- apply(df[,orig_items], 1, function(row) { all(row >= min_value & row <= max_value, na.rm=TRUE) })
+  responses_valid <- apply(df[,orig_items], 1, function(row) { all(row >= false_value & row <= true_value, na.rm=TRUE) })
 
   if (any(!responses_valid)) {
-    warning("Some responses fall outside of the allowable range: ", min_value, " -- ", max_value, "\n  Returning data.frame unchanged")
+    warning("Some responses fall outside of the allowable range: F = ", false_value, ", T = ", true_value, "\n  Returning data.frame unchanged")
     print(df[!responses_valid, orig_items])
     return(df)
   }
@@ -71,7 +78,7 @@ score_dusi <- function(df, item_prefix="DUSI_", max_impute=0.2, drop_items=FALSE
 
   #compute alpha
   if (add_alphas) {
-    attr(df[["DUSI_total"]], "alpha") <- psych::alpha(df[,total_items])
+    attr(df[["DUSI_total"]], "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
   }
 
   #drop item-level data

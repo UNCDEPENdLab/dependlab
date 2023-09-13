@@ -5,9 +5,10 @@
 #' @param max_impute the proportion of missingness [0..1] or number [1..n] of missing values per subscale.
 #'            Below this, the mean will be imputed for missing items.
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
-#' @param keep_octants whether to retain the IIP octant scores. Default: FALSE
+#' @param drop_octants whether to remove the IIP octant scores. Default: FALSE
 #' @param min_value the lowest value for the items anchors, used to check response validity. Default: 0
 #' @param max_value the highest value for the items anchors, used to check response validity. Default: 4
+#' @param add_alphas whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE
 #'
 #' @details
 #'
@@ -24,8 +25,8 @@
 #'
 #' @importFrom dplyr select mutate
 #'
-score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2,
-                      drop_items=FALSE, keep_octants=TRUE, min_value=0, max_value=4) {
+score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2, drop_items=FALSE,
+                        drop_octants=FALSE, min_value=0, max_value=4, add_alphas=TRUE) {
 
   # warning("This function is not complete yet. Just returning original data.frame for now.")
   # return(df)
@@ -58,11 +59,9 @@ score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2,
 
   #PD scales
   bpd_items <- paste0(item_prefix, c(51, 53, 55, 66, 77, 80, 89, 90)) #Clifton BPD scale
-
   sensitivity_pd1_items <- paste0(item_prefix, c(1, 35, 36, 42, 51, 55, 60, 78, 79, 81, 86)) #Pilkonis PD1
   ambivalence_pd2_items <- paste0(item_prefix, c(13, 14, 26, 28, 32, 34, 38, 40, 41, 84)) #Pilkonis PD2
   aggression_pd3_items <- paste0(item_prefix, c(50, 53, 58, 63, 77, 80, 88)) #Pilkonis PD3
-
   approval_c1_items <- paste0(item_prefix, c(2, 9, 16, 48, 59, 66, 72, 74, 75)) #need for social approval
   lacksocial_c2_items <- paste0(item_prefix, c(3, 7, 17, 19, 22, 33, 43, 49, 71, 85)) #lack of sociability
 
@@ -90,43 +89,63 @@ score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2,
     df <- mean_impute_items(df, bpd_items, thresh=max_impute) #Mostly non-overlapping. Only iip80 overlaps octants
     df <- mean_impute_items(df, sensitivity_pd1_items, thresh=max_impute) #Mostly non-overlapping. On iip1 and iip78 overlap octants
 
-    if (any(which_miss <- sapply(df[,pd_uniq], function(col) { any(is.na(col)) }))) {
-      message("Missing data in items that are unique to PD scales, but where other subscale items overlap octants.")
-      message("We will not impute these. Check columns: ", paste(pd_uniq[which_miss], collapse=", "))
-    }
+    # if (any(which_miss <- sapply(df[,pd_uniq], function(col) { any(is.na(col)) }))) {
+    #   message("Missing data in items that are unique to PD scales, but where other subscale items overlap octants.")
+    #   message("We will not impute these. Check columns: ", paste(pd_uniq[which_miss], collapse=", "))
+    # }
   }
 
   pd_scales <- c("IIP_sensitivity_pd1", "IIP_ambivalence_pd2", "IIP_aggression_pd3")
   c_scales <- c("IIP_approval_c1", "IIP_lacksocial_c2")
 
   #compute row means
-  df <- df %>% mutate(
-    IIP_pa = rowMeans(across(all_of(pa_items))),
-    IIP_bc = rowMeans(across(all_of(bc_items))),
-    IIP_de = rowMeans(across(all_of(de_items))),
-    IIP_fg = rowMeans(across(all_of(fg_items))),
-    IIP_hi = rowMeans(across(all_of(hi_items))),
-    IIP_jk = rowMeans(across(all_of(jk_items))),
-    IIP_lm = rowMeans(across(all_of(lm_items))),
-    IIP_no = rowMeans(across(all_of(no_items))),
-    IIP_bpd = rowMeans(across(all_of(bpd_items))),
-    IIP_sensitivity_pd1 = rowMeans(across(all_of(sensitivity_pd1_items))),
-    IIP_ambivalence_pd2 = rowMeans(across(all_of(ambivalence_pd2_items))),
-    IIP_aggression_pd3 = rowMeans(across(all_of(aggression_pd3_items))),
-    IIP_approval_c1 = rowMeans(across(all_of(approval_c1_items))), #need for social approval
-    IIP_lacksocial_c2 = rowMeans(across(all_of(lacksocial_c2_items))), #lack of sociability
-    #THESE MAY NEED TO USE apply(., 1, function(row)) type syntax: https://community.rstudio.com/t/calculate-mean-over-a-subset-of-multiple-specific-variables-but-without-stating-variables-names/7686/6
-    IIP_agency = .25*(IIP_pa - IIP_hi + .707*(IIP_bc + IIP_no - IIP_fg - IIP_jk)), #agency axis
-    IIP_communion = .25*(IIP_lm - IIP_de + .707*(IIP_no + IIP_jk - IIP_bc - IIP_fg)), #communion axis
-    IIP_elevation = (IIP_pa + IIP_bc + IIP_de + IIP_fg + IIP_hi + IIP_jk + IIP_lm + IIP_no)/8 #overall severity (mean of octants)
-    ) %>% mutate(  #can't run within same mutate call, since the relevant vars have not been defined yet.
-      IIP_c = rowMeans(across(all_of(c_scales))),
-      IIP_pd = rowMeans(across(all_of(pd_scales))) #overall pd mean
-    ) %>% mutate(
-      IIP_havePD = as.numeric(select(.,IIP_pd) > 1.1) # Pilkonis 1996 cutoff: IIP_havePD > 1.1
+  df <- df %>% mutate(IIP_pa = rowMeans(across(all_of(pa_items))),
+                      IIP_bc = rowMeans(across(all_of(bc_items))),
+                      IIP_de = rowMeans(across(all_of(de_items))),
+                      IIP_fg = rowMeans(across(all_of(fg_items))),
+                      IIP_hi = rowMeans(across(all_of(hi_items))),
+                      IIP_jk = rowMeans(across(all_of(jk_items))),
+                      IIP_lm = rowMeans(across(all_of(lm_items))),
+                      IIP_no = rowMeans(across(all_of(no_items))),
+                      IIP_bpd = rowMeans(across(all_of(bpd_items))),
+                      IIP_sensitivity_pd1 = rowMeans(across(all_of(sensitivity_pd1_items))),
+                      IIP_ambivalence_pd2 = rowMeans(across(all_of(ambivalence_pd2_items))),
+                      IIP_aggression_pd3 = rowMeans(across(all_of(aggression_pd3_items))),
+                      IIP_approval_c1 = rowMeans(across(all_of(approval_c1_items))), #need for social approval
+                      IIP_lacksocial_c2 = rowMeans(across(all_of(lacksocial_c2_items))), #lack of sociability
+                      IIP_agency = .25*(IIP_pa - IIP_hi + .707*(IIP_bc + IIP_no - IIP_fg - IIP_jk)), #agency axis
+                      IIP_communion = .25*(IIP_lm - IIP_de + .707*(IIP_no + IIP_jk - IIP_bc - IIP_fg)), #communion axis
+                      IIP_elevation = (IIP_pa + IIP_bc + IIP_de + IIP_fg + IIP_hi + IIP_jk + IIP_lm + IIP_no)/8 #overall severity (mean of octants)
+                      ) %>%
+    mutate(IIP_c = rowMeans(across(all_of(c_scales))),
+           IIP_pd = rowMeans(across(all_of(pd_scales))) #overall pd mean
+           ) %>%
+    mutate(
+      IIP_havePD = as.numeric(select(.,IIP_pd) > 1.1) # Pilkonis (1996) cutoff: IIP_havePD > 1.1
     )
 
-  if (!keep_octants) { df <- df %>% select(-IIP_pa, -IIP_bc, -IIP_de, -IIP_fg, -IIP_hi, -IIP_jk, -IIP_lm, -IIP_no) }
+  #compute alphas
+  if(add_alphas) {
+    attr(df$IIP_pa,"alpha") <- psych::alpha(df[,pa_items],max=100,warnings = F)
+    attr(df$IIP_bc,"alpha") <- psych::alpha(df[,bc_items],max=100,warnings = F)
+    attr(df$IIP_de,"alpha") <- psych::alpha(df[,de_items],max=100,warnings = F)
+    attr(df$IIP_fg,"alpha") <- psych::alpha(df[,fg_items],max=100,warnings = F)
+    attr(df$IIP_hi,"alpha") <- psych::alpha(df[,hi_items],max=100,warnings = F)
+    attr(df$IIP_jk,"alpha") <- psych::alpha(df[,jk_items],max=100,warnings = F)
+    attr(df$IIP_lm,"alpha") <- psych::alpha(df[,lm_items],max=100,warnings = F)
+    attr(df$IIP_no,"alpha") <- psych::alpha(df[,no_items],max=100,warnings = F)
+    attr(df$IIP_bpd,"alpha") <- psych::alpha(df[,bpd_items],max=100,warnings = F)
+    attr(df$IIP_sensitivity_pd1,"alpha") <- psych::alpha(df[,sensitivity_pd1_items],max=100,warnings = F)
+    attr(df$IIP_ambivalence_pd2,"alpha") <- psych::alpha(df[,ambivalence_pd2_items],max=100,warnings = F)
+    attr(df$IIP_aggression_pd3,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_approval_c1,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_lacksocial_c2,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_c,"alpha") <- psych::alpha(df[,c_scales],max=100,warnings = F)
+    attr(df$IIP_pd,"alpha") <- psych::alpha(df[,pd_scales],max=100,warnings = F)
+  }
+
+  #drop octants and item-level data
+  if (drop_octants) { df <- df %>% select(-IIP_pa, -IIP_bc, -IIP_de, -IIP_fg, -IIP_hi, -IIP_jk, -IIP_lm, -IIP_no) }
   if (drop_items) { df <- df %>% select(-all_of(orig_items)) }
 
   return(df)

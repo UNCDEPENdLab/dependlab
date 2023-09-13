@@ -27,7 +27,7 @@
 #' @importFrom dplyr select mutate
 #'
 score_panas <- function(df, item_prefix="PANAS_", max_impute=0.2, drop_items=FALSE,
-                        bad_items=NULL, min_value=1, max_value=5, add_alphas=TRUE) {
+                        min_value=1, max_value=5, bad_items=NULL, add_alphas=TRUE) {
 
   orig_items <- paste0(item_prefix, 1:20) #expect item names
   stopifnot(is.data.frame(df))
@@ -68,8 +68,8 @@ score_panas <- function(df, item_prefix="PANAS_", max_impute=0.2, drop_items=FAL
 
   #compute alphas
   if (add_alphas) {
-    attr(df$PANAS_pos, "alpha") <- psych::alpha(df[,pos_items])
-    attr(df$PANAS_neg, "alpha") <- psych::alpha(df[,neg_items])
+    attr(df$PANAS_pos, "alpha") <- psych::alpha(df[,pos_items],max=100,warnings = F)
+    attr(df$PANAS_neg, "alpha") <- psych::alpha(df[,neg_items],max=100,warnings = F)
   }
 
   #drop item-level data

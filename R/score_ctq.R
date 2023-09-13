@@ -25,7 +25,7 @@
 #' @export
 #' @author Michael Hallquist, Zach Vig
 #'
-#' @importFrom dplyr select mutate setdiff
+#' @importFrom dplyr select mutate
 #'
 score_ctq <- function(df, item_prefix="CTQ_", max_impute=0.2, drop_items=FALSE,
                       keep_reverse_codes=FALSE, min_value=1, max_value=5, bad_items=NULL,
@@ -49,7 +49,6 @@ score_ctq <- function(df, item_prefix="CTQ_", max_impute=0.2, drop_items=FALSE,
   reverse_keys <- c(2, 5, 7, 13, 19, 26, 28) #numeric values of items to reverse key
   reverse_items <- paste0(item_prefix, reverse_keys) #names of items to reverse key
   reverse_items_recode <- sub("$", "r", reverse_items, perl=TRUE) #output name for reversed items
-
 
   #subscales
   emo_abuse_items <- sapply(c(3, 8, 14, 18, 25), function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "r", "")) }) #emotional abuse
@@ -101,13 +100,13 @@ score_ctq <- function(df, item_prefix="CTQ_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$CTQ_emo_abuse, "alpha") <- psych::alpha(df[,emo_abuse_items])
-    attr(df$CTQ_phys_abuse, "alpha") <- psych::alpha(df[,phys_abuse_items])
-    attr(df$CTQ_sex_abuse, "alpha") <- psych::alpha(df[,sex_abuse_items])
-    attr(df$CTQ_emo_neglect, "alpha") <- psych::alpha(df[,emo_neglect_items])
-    attr(df$CTQ_phys_neglect, "alpha") <- psych::alpha(df[,phys_neglect_items])
-    attr(df$CTQ_total, "alpha") <- psych::alpha(df[,total_items])
-    attr(df$CTQ_denial, "alpha") <- psych::alpha(df[,denial_items])
+    attr(df$CTQ_emo_abuse, "alpha") <- psych::alpha(df[,emo_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_phys_abuse, "alpha") <- psych::alpha(df[,phys_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_sex_abuse, "alpha") <- psych::alpha(df[,sex_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_emo_neglect, "alpha") <- psych::alpha(df[,emo_neglect_items],max=100,warnings = F)
+    attr(df$CTQ_phys_neglect, "alpha") <- psych::alpha(df[,phys_neglect_items],max=100,warnings = F)
+    attr(df$CTQ_total, "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
+    attr(df$CTQ_denial, "alpha") <- psych::alpha(df[,denial_items],max=100,warnings = F)
   }
 
   #drop reverse codes and item-level data

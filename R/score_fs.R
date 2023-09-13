@@ -28,7 +28,7 @@
 #' @importFrom dplyr select mutate setdiff
 #'
 score_fs <- function(df, item_prefix="FS_", max_impute=0.2, drop_items=FALSE,
-                     bad_items=NULL, min_value=1, max_value=7, add_alphas=TRUE) {
+                     min_value=1, max_value=7, bad_items=NULL, add_alphas=TRUE) {
 
   #validate data.frame and items
   orig_items <- paste0(item_prefix, 1:8) #expected item names
@@ -66,9 +66,10 @@ score_fs <- function(df, item_prefix="FS_", max_impute=0.2, drop_items=FALSE,
 
   #compute alpha
   if (add_alphas) {
-    attr(df[["FS_total"]], "alpha") <- psych::alpha(df[,total_items])
+    attr(df[["FS_total"]], "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
   }
 
+  #drop item-level data
   if (drop_items) { df <- df %>% select(-all_of(orig_items)) }
 
   return(df)

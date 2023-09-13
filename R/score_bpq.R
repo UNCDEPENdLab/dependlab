@@ -6,9 +6,10 @@
 #'           Below this threshold, the person subscale mean will be imputed for missing items.
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
 #' @param keep_reverse_codes whether to retain the reverse coded items (suffix "r")
-#' @param input_codes the original T/F coding scheme of the input dataframe. These are converted to the specified min and max value.
-#' @param min_value the minimum value for the item anchors, used in reverse scoring. Default: 0
-#' @param max_value the highest value for the item anchors, used in reverse scoring. Default: 1
+#' @param input_codes the original T/F coding scheme of the input data.frame in the form c(False Code, True Code).
+#'            These are converted to the specified min and max value.
+#' @param false_value the 'False' value for the item anchors, used in score validation. Default: 0
+#' @param true_value the 'True' value for the item anchors, used in score validation. Default: 1
 #' @param bad_items numeric value or vector of the items that need to be dropped before imputation or calculation of subscales
 #' @param add_alphas whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE
 #'
@@ -26,26 +27,33 @@
 #' @export
 #' @author Michael Hallquist, Zach Vig
 #'
-#' @importFrom dplyr select mutate setdiff
+#' @importFrom dplyr select mutate
 #'
 score_bpq <- function(df, item_prefix="BPQ_", max_impute=0.2,
                       drop_items=FALSE, keep_reverse_codes=FALSE, input_codes=c(0,1),
-                      min_value=0, max_value=1, bad_items = NULL,
+                      false_value=0, true_value=1, bad_items = NULL,
                       add_alphas=TRUE) {
 
   #validate data.frame and items
   orig_items <- paste0(item_prefix, 1:80) #expect item names
   stopifnot(is.data.frame(df))
   stopifnot(all(orig_items %in% names(df)))
+  stopifnot(length(input_codes)==2)
+  input_codes_valid <- apply(df[,orig_items], 1, function(row) { all(row >= min(input_codes) & row <= max(input_codes), na.rm=TRUE) })
 
-  #convert values
-  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == max(input_codes),max_value,min_value))
+  if(any(!input_codes_valid)) {
+    warning("Check your input_codes as some values fall outside of this range. \n  Returning data.frame unchanged")
+    return(df)
+  }
+
+  #convert values, if applicable
+  df[,orig_items] <-  data.frame(ifelse(df[,orig_items] == input_codes[1],false_value,true_value))
 
   #validate item responses
-  responses_valid <- apply(df[,orig_items], 1, function(row) { all(row >= min_value & row <= max_value, na.rm=TRUE) })
+  responses_valid <- apply(df[,orig_items], 1, function(row) { all(row >= false_value & row <= true_value, na.rm=TRUE) })
 
   if (any(!responses_valid)) {
-    warning("Some responses fall outside of the allowable range: ", min_value, " -- ", max_value, "\n  Returning data.frame unchanged")
+    warning("Some responses fall outside of the allowable range: F = ", false_value, ", T = ", true_value, "\n  Returning data.frame unchanged")
     print(df[!responses_valid, orig_items])
     return(df)
   }
@@ -68,7 +76,7 @@ score_bpq <- function(df, item_prefix="BPQ_", max_impute=0.2,
   total_items <- sapply(1:80, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "r", "")) }) #total
 
   #apply reverse scoring
-  df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { max_value + min_value - x }) #1-5 scoring by default
+  df[,reverse_items_recode] <- lapply(df[,reverse_items], function(x) { true_value + false_value - x }) #1-5 scoring by default
 
   #drop bad item(s), before imputation and calculation of scores
   if(!is.null(bad_items) && is.numeric(bad_items)) {
@@ -114,16 +122,16 @@ score_bpq <- function(df, item_prefix="BPQ_", max_impute=0.2,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$BPQ_impuls,"alpha") <- psych::alpha(df[,impuls_items])
-    attr(df$BPQ_instab,"alpha") <- psych::alpha(df[,instab_items])
-    attr(df$BPQ_abandon,"alpha") <- psych::alpha(df[,abandon_items])
-    attr(df$BPQ_relations,"alpha") <- psych::alpha(df[,relations_items])
-    attr(df$BPQ_self,"alpha") <- psych::alpha(df[,self_items])
-    attr(df$BPQ_suicide,"alpha") <- psych::alpha(df[,suicide_items])
-    attr(df$BPQ_empti,"alpha") <- psych::alpha(df[,empti_items])
-    attr(df$BPQ_anger,"alpha") <- psych::alpha(df[,anger_items])
-    attr(df$BPQ_psycho,"alpha") <- psych::alpha(df[,psycho_items])
-    attr(df$BPQ_total,"alpha") <- psych::alpha(df[,total_items])
+    attr(df$BPQ_impuls,"alpha") <- psych::alpha(df[,impuls_items],max=100,warnings = F)
+    attr(df$BPQ_instab,"alpha") <- psych::alpha(df[,instab_items],max=100,warnings = F)
+    attr(df$BPQ_abandon,"alpha") <- psych::alpha(df[,abandon_items],max=100,warnings = F)
+    attr(df$BPQ_relations,"alpha") <- psych::alpha(df[,relations_items],max=100,warnings = F)
+    attr(df$BPQ_self,"alpha") <- psych::alpha(df[,self_items],max=100,warnings = F)
+    attr(df$BPQ_suicide,"alpha") <- psych::alpha(df[,suicide_items],max=100,warnings = F)
+    attr(df$BPQ_empti,"alpha") <- psych::alpha(df[,empti_items],max=100,warnings = F)
+    attr(df$BPQ_anger,"alpha") <- psych::alpha(df[,anger_items],max=100,warnings = F)
+    attr(df$BPQ_psycho,"alpha") <- psych::alpha(df[,psycho_items],max=100,warnings = F)
+    attr(df$BPQ_total,"alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
   }
 
   #drop reverse codes and item-level data
