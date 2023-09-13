@@ -33,15 +33,15 @@
 #' @importFrom dplyr bind_cols filter mutate rename select starts_with
 #'
 #' @examples
-#' import_self_report(info = TRUE)
-#' import_self_report(scales = c("ctq", "asr"), include_dem = TRUE)
-#' import_self_report(stats = TRUE)
-#' import_self_report(path = "~/my_output_files")
-#' import_self_report(file_suffix = "_v2", file_date = TRUE)
+#' import_neuromap_self_reports(info = TRUE)
+#' import_neuromap_self_reports(scales = c("ctq", "asr"), include_dem = TRUE)
+#' import_neuromap_self_reports(stats = TRUE)
+#' import_neuromap_self_reports(path = "~/my_output_files")
+#' import_neuromap_self_reports(file_suffix = "_v2", file_date = TRUE)
 
-import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
-                               scales = "all", include_id = TRUE, include_dem = FALSE, path = getwd(),
-                               file_suffix = "", file_date = FALSE, add_to_envr = FALSE){
+import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
+                                         scales = "all", include_id = TRUE, include_dem = FALSE, path = getwd(),
+                                         file_suffix = "", file_date = FALSE, add_to_envr = FALSE){
 
   #function info
   if(info){
@@ -372,7 +372,7 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
 
 ########################################################################################################
 # ADDING A NEW SCALE:                                                                                  #
-# *Copy and paste the code below into the `import_self_report` function                                #
+# *Copy and paste the code below into the `import_neuromap_self_reports` function                                #
 # *Replace any instances of `abc` or `ABC` with the shorthand code for the new scale (case-sensitive)  #
 # *Replace the min and max values with the corresponding min and max of the scale                      #
 ########################################################################################################
