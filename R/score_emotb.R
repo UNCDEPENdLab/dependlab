@@ -222,24 +222,24 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    if(percstrs) attr(df[["PercStrs_Raw"]],"alpha") <- summary(psych::alpha(df[,PercStrs_items],max=100,warnings = F))
-    if(self) attr(df[["Self_Raw"]],"alpha") <- summary(psych::alpha(df[,Self_items],max=100,warnings = F))
-    if(mp) attr(df[["MP_Raw"]],"alpha") <- summary(psych::alpha(df[,MP_items],max=100,warnings = F))
-    if(sad) attr(df[["Sad_Raw"]],"alpha") <- summary(psych::alpha(df[,Sad_items],max=100,warnings = F))
-    if(gls) attr(df[["GLS_Raw"]],"alpha") <- summary(psych::alpha(df[,GLS_items],max=100,warnings = F))
-    if(posaf) attr(df[["PosAf_Raw"]],"alpha") <- summary(psych::alpha(df[,PosAf_items],max=100,warnings = F))
-    if(angaf) attr(df[["AngAf_Raw"]],"alpha") <- summary(psych::alpha(df[,AngAf_items],max=100,warnings = F))
-    if(angpa) attr(df[["AngPA_Raw"]],"alpha") <- summary(psych::alpha(df[,AngPA_items],max=100,warnings = F))
-    if(anghost) attr(df[["AngHost_Raw"]],"alpha") <- summary(psych::alpha(df[,AngHost_items],max=100,warnings = F))
-    if(emosup) attr(df[["EmoSup_Raw"]],"alpha") <- summary(psych::alpha(df[,EmoSup_items],max=100,warnings = F))
-    if(fearaf) attr(df[["FearAf_Raw"]],"alpha") <- summary(psych::alpha(df[,FearAf_items],max=100,warnings = F))
-    if(fearsoma) attr(df[["FearSoma_Raw"]],"alpha") <- summary(psych::alpha(df[,FearSoma_items],max=100,warnings = F))
-    if(friend) attr(df[["Friend_Raw"]],"alpha") <- summary(psych::alpha(df[,Friend_items],max=100,warnings = F))
-    if(instrsup) attr(df[["InstrSup_Raw"]],"alpha") <- summary(psych::alpha(df[,InstrSup_items],max=100,warnings = F))
-    if(lone) attr(df[["Lone_Raw"]],"alpha") <- summary(psych::alpha(df[,Lone_items],max=100,warnings = F))
-    if(perchost) attr(df[["PercHost_Raw"]],"alpha") <- summary(psych::alpha(df[,PercHost_items],max=100,warnings = F))
-    if(percrej) attr(df[["PercRej_Raw"]],"alpha") <- summary(psych::alpha(df[,PercRej_items],max=100,warnings = F))
-    if(apathy) attr(df[["Apathy_Raw"]],"alpha") <- summary(psych::alpha(df[,Apathy_items],max=100,warnings = F))
+    if(percstrs) attr(df[["PercStrs_Raw"]],"alpha") <- psych::alpha(df[,PercStrs_items],max=100,warnings = F)$total
+    if(self) attr(df[["Self_Raw"]],"alpha") <- psych::alpha(df[,Self_items],max=100,warnings = F)$total
+    if(mp) attr(df[["MP_Raw"]],"alpha") <- psych::alpha(df[,MP_items],max=100,warnings = F)$total
+    if(sad) attr(df[["Sad_Raw"]],"alpha") <- psych::alpha(df[,Sad_items],max=100,warnings = F)$total
+    if(gls) attr(df[["GLS_Raw"]],"alpha") <- psych::alpha(df[,GLS_items],max=100,warnings = F)$total
+    if(posaf) attr(df[["PosAf_Raw"]],"alpha") <- psych::alpha(df[,PosAf_items],max=100,warnings = F)$total
+    if(angaf) attr(df[["AngAf_Raw"]],"alpha") <- psych::alpha(df[,AngAf_items],max=100,warnings = F)$total
+    if(angpa) attr(df[["AngPA_Raw"]],"alpha") <- psych::alpha(df[,AngPA_items],max=100,warnings = F)$total
+    if(anghost) attr(df[["AngHost_Raw"]],"alpha") <- psych::alpha(df[,AngHost_items],max=100,warnings = F)$total
+    if(emosup) attr(df[["EmoSup_Raw"]],"alpha") <- psych::alpha(df[,EmoSup_items],max=100,warnings = F)$total
+    if(fearaf) attr(df[["FearAf_Raw"]],"alpha") <- psych::alpha(df[,FearAf_items],max=100,warnings = F)$total
+    if(fearsoma) attr(df[["FearSoma_Raw"]],"alpha") <- psych::alpha(df[,FearSoma_items],max=100,warnings = F)$total
+    if(friend) attr(df[["Friend_Raw"]],"alpha") <- psych::alpha(df[,Friend_items],max=100,warnings = F)$total
+    if(instrsup) attr(df[["InstrSup_Raw"]],"alpha") <- psych::alpha(df[,InstrSup_items],max=100,warnings = F)$total
+    if(lone) attr(df[["Lone_Raw"]],"alpha") <- psych::alpha(df[,Lone_items],max=100,warnings = F)$total
+    if(perchost) attr(df[["PercHost_Raw"]],"alpha") <- psych::alpha(df[,PercHost_items],max=100,warnings = F)$total
+    if(percrej) attr(df[["PercRej_Raw"]],"alpha") <- psych::alpha(df[,PercRej_items],max=100,warnings = F)$total
+    if(apathy) attr(df[["Apathy_Raw"]],"alpha") <- psych::alpha(df[,Apathy_items],max=100,warnings = F)$total
   }
 
   #drop reverse codes and item-level data

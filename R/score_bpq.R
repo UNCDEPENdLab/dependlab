@@ -122,16 +122,16 @@ score_bpq <- function(df, item_prefix="BPQ_", max_impute=0.2,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$BPQ_impuls,"alpha") <- summary(psych::alpha(df[,impuls_items],max=100,warnings = F))
-    attr(df$BPQ_instab,"alpha") <- summary(psych::alpha(df[,instab_items],max=100,warnings = F))
-    attr(df$BPQ_abandon,"alpha") <- summary(psych::alpha(df[,abandon_items],max=100,warnings = F))
-    attr(df$BPQ_relations,"alpha") <- summary(psych::alpha(df[,relations_items],max=100,warnings = F))
-    attr(df$BPQ_self,"alpha") <- summary(psych::alpha(df[,self_items],max=100,warnings = F))
-    attr(df$BPQ_suicide,"alpha") <- summary(psych::alpha(df[,suicide_items],max=100,warnings = F))
-    attr(df$BPQ_empti,"alpha") <- summary(psych::alpha(df[,empti_items],max=100,warnings = F))
-    attr(df$BPQ_anger,"alpha") <- summary(psych::alpha(df[,anger_items],max=100,warnings = F))
-    attr(df$BPQ_psycho,"alpha") <- summary(psych::alpha(df[,psycho_items],max=100,warnings = F))
-    attr(df$BPQ_total,"alpha") <- summary(psych::alpha(df[,total_items],max=100,warnings = F))
+    attr(df$BPQ_impuls,"alpha") <- psych::alpha(df[,impuls_items],max=100,warnings = F)$total
+    attr(df$BPQ_instab,"alpha") <- psych::alpha(df[,instab_items],max=100,warnings = F)$total
+    attr(df$BPQ_abandon,"alpha") <- psych::alpha(df[,abandon_items],max=100,warnings = F)$total
+    attr(df$BPQ_relations,"alpha") <- psych::alpha(df[,relations_items],max=100,warnings = F)$total
+    attr(df$BPQ_self,"alpha") <- psych::alpha(df[,self_items],max=100,warnings = F)$total
+    attr(df$BPQ_suicide,"alpha") <- psych::alpha(df[,suicide_items],max=100,warnings = F)$total
+    attr(df$BPQ_empti,"alpha") <- psych::alpha(df[,empti_items],max=100,warnings = F)$total
+    attr(df$BPQ_anger,"alpha") <- psych::alpha(df[,anger_items],max=100,warnings = F)$total
+    attr(df$BPQ_psycho,"alpha") <- psych::alpha(df[,psycho_items],max=100,warnings = F)$total
+    attr(df$BPQ_total,"alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)$total
   }
 
   #drop reverse codes and item-level data

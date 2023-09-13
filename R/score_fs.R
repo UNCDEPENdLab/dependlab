@@ -66,7 +66,7 @@ score_fs <- function(df, item_prefix="FS_", max_impute=0.2, drop_items=FALSE,
 
   #compute alpha
   if (add_alphas) {
-    attr(df[["FS_total"]], "alpha") <- summary(psych::alpha(df[,total_items],max=100,warnings = F))
+    attr(df[["FS_total"]], "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)$total
   }
 
   #drop item-level data
