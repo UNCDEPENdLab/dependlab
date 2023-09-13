@@ -123,21 +123,21 @@ score_cts <- function(df, item_prefix="CTS_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$CTS_PsychAggV, "alpha") <- psych::alpha(df[,PsychAggV_items],max=100,warnings = F)
-    attr(df$CTS_PsychAggP, "alpha") <- psych::alpha(df[,PsychAggP_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssV, "alpha") <- psych::alpha(df[,PhysAssV_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssP, "alpha") <- psych::alpha(df[,PhysAssP_items],max=100,warnings = F)
-    attr(df$CTS_PsychAggVM, "alpha") <- psych::alpha(df[,PsychAggVM_items],max=100,warnings = F)
-    attr(df$CTS_PsychAggPM, "alpha") <- psych::alpha(df[,PsychAggPM_items],max=100,warnings = F)
-    attr(df$CTS_PsychAggVS, "alpha") <- psych::alpha(df[,PsychAggVS_items],max=100,warnings = F)
-    attr(df$CTS_PsychAggPS, "alpha") <- psych::alpha(df[,PsychAggPS_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssVM, "alpha") <- psych::alpha(df[,PhysAssVM_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssPM, "alpha") <- psych::alpha(df[,PhysAssPM_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssVS, "alpha") <- psych::alpha(df[,PhysAssVS_items],max=100,warnings = F)
-    attr(df$CTS_PhysAssPS, "alpha") <- psych::alpha(df[,PhysAssPS_items],max=100,warnings = F)
-    attr(df$CTS_Victim, "alpha") <- psych::alpha(df[,Victim_items],max=100,warnings = F)
-    attr(df$CTS_Perp, "alpha") <- psych::alpha(df[,Perp_items],max=100,warnings = F)
-    attr(df$CTS_total, "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
+    attr(df$CTS_PsychAggV, "alpha") <- summary(psych::alpha(df[,PsychAggV_items],max=100,warnings = F))
+    attr(df$CTS_PsychAggP, "alpha") <- summary(psych::alpha(df[,PsychAggP_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssV, "alpha") <- summary(psych::alpha(df[,PhysAssV_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssP, "alpha") <- summary(psych::alpha(df[,PhysAssP_items],max=100,warnings = F))
+    attr(df$CTS_PsychAggVM, "alpha") <- summary(psych::alpha(df[,PsychAggVM_items],max=100,warnings = F))
+    attr(df$CTS_PsychAggPM, "alpha") <- summary(psych::alpha(df[,PsychAggPM_items],max=100,warnings = F))
+    attr(df$CTS_PsychAggVS, "alpha") <- summary(psych::alpha(df[,PsychAggVS_items],max=100,warnings = F))
+    attr(df$CTS_PsychAggPS, "alpha") <- summary(psych::alpha(df[,PsychAggPS_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssVM, "alpha") <- summary(psych::alpha(df[,PhysAssVM_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssPM, "alpha") <- summary(psych::alpha(df[,PhysAssPM_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssVS, "alpha") <- summary(psych::alpha(df[,PhysAssVS_items],max=100,warnings = F))
+    attr(df$CTS_PhysAssPS, "alpha") <- summary(psych::alpha(df[,PhysAssPS_items],max=100,warnings = F))
+    attr(df$CTS_Victim, "alpha") <- summary(psych::alpha(df[,Victim_items],max=100,warnings = F))
+    attr(df$CTS_Perp, "alpha") <- summary(psych::alpha(df[,Perp_items],max=100,warnings = F))
+    attr(df$CTS_total, "alpha") <- summary(psych::alpha(df[,total_items],max=100,warnings = F))
   }
 
 

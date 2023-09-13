@@ -78,7 +78,7 @@ score_dusi <- function(df, item_prefix="DUSI_", max_impute=0.2, drop_items=FALSE
 
   #compute alpha
   if (add_alphas) {
-    attr(df[["DUSI_total"]], "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
+    attr(df[["DUSI_total"]], "alpha") <- summary(psych::alpha(df[,total_items],max=100,warnings = F))
   }
 
   #drop item-level data

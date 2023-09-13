@@ -96,12 +96,12 @@ score_upps <- function(df, item_prefix="UPPS_", max_impute=0.2, drop_items=FALSE
 
   #compute alphas
   if (add_alphas) {
-    attr(df$UPPS_negurg,"alpha") <- psych::alpha(df[,negurg_items],max=100,warnings = F)
-    attr(df$UPPS_lackprem,"alpha") <- psych::alpha(df[,lackprem_items],max=100,warnings = F)
-    attr(df$UPPS_lackpers,"alpha") <- psych::alpha(df[,lackpers_items],max=100,warnings = F)
-    attr(df$UPPS_senseek,"alpha") <- psych::alpha(df[,senseek_items],max=100,warnings = F)
-    attr(df$UPPS_posurg,"alpha") <- psych::alpha(df[,posurg_items],max=100,warnings = F)
-    attr(df$UPPS_total,"alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
+    attr(df$UPPS_negurg,"alpha") <- summary(psych::alpha(df[,negurg_items],max=100,warnings = F))
+    attr(df$UPPS_lackprem,"alpha") <- summary(psych::alpha(df[,lackprem_items],max=100,warnings = F))
+    attr(df$UPPS_lackpers,"alpha") <- summary(psych::alpha(df[,lackpers_items],max=100,warnings = F))
+    attr(df$UPPS_senseek,"alpha") <- summary(psych::alpha(df[,senseek_items],max=100,warnings = F))
+    attr(df$UPPS_posurg,"alpha") <- summary(psych::alpha(df[,posurg_items],max=100,warnings = F))
+    attr(df$UPPS_total,"alpha") <- summary(psych::alpha(df[,total_items],max=100,warnings = F))
   }
 
   #drop reverse codes and item-level data

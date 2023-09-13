@@ -68,8 +68,8 @@ score_panas <- function(df, item_prefix="PANAS_", max_impute=0.2, drop_items=FAL
 
   #compute alphas
   if (add_alphas) {
-    attr(df$PANAS_pos, "alpha") <- psych::alpha(df[,pos_items],max=100,warnings = F)
-    attr(df$PANAS_neg, "alpha") <- psych::alpha(df[,neg_items],max=100,warnings = F)
+    attr(df$PANAS_pos, "alpha") <- summary(psych::alpha(df[,pos_items],max=100,warnings = F))
+    attr(df$PANAS_neg, "alpha") <- summary(psych::alpha(df[,neg_items],max=100,warnings = F))
   }
 
   #drop item-level data

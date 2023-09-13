@@ -94,14 +94,14 @@ score_isc <- function(df, item_prefix="ISC_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$ISC_c1, "alpha") <- psych::alpha(df[,c1_items],max=100,warnings = F)
-    attr(df$ISC_c2, "alpha") <- psych::alpha(df[,c2_items],max=100,warnings = F)
-    attr(df$ISC_c3, "alpha") <- psych::alpha(df[,c3_items],max=100,warnings = F)
-    attr(df$ISC_c4, "alpha") <- psych::alpha(df[,c4_items],max=100,warnings = F)
-    attr(df$ISC_c5, "alpha") <- psych::alpha(df[,c5_items],max=100,warnings = F)
-    attr(df$ISC_c6, "alpha") <- psych::alpha(df[,c6_items],max=100,warnings = F)
-    attr(df$ISC_c7, "alpha") <- psych::alpha(df[,c7_items],max=100,warnings = F)
-    attr(df$ISC_c8, "alpha") <- psych::alpha(df[,c8_items],max=100,warnings = F)
+    attr(df$ISC_c1, "alpha") <- summary(psych::alpha(df[,c1_items],max=100,warnings = F))
+    attr(df$ISC_c2, "alpha") <- summary(psych::alpha(df[,c2_items],max=100,warnings = F))
+    attr(df$ISC_c3, "alpha") <- summary(psych::alpha(df[,c3_items],max=100,warnings = F))
+    attr(df$ISC_c4, "alpha") <- summary(psych::alpha(df[,c4_items],max=100,warnings = F))
+    attr(df$ISC_c5, "alpha") <- summary(psych::alpha(df[,c5_items],max=100,warnings = F))
+    attr(df$ISC_c6, "alpha") <- summary(psych::alpha(df[,c6_items],max=100,warnings = F))
+    attr(df$ISC_c7, "alpha") <- summary(psych::alpha(df[,c7_items],max=100,warnings = F))
+    attr(df$ISC_c8, "alpha") <- summary(psych::alpha(df[,c8_items],max=100,warnings = F))
   }
 
   #drop item-level data
