@@ -286,6 +286,11 @@ import_self_report <- function(info = FALSE, stats = FALSE, survey_name = "Neuro
     if(include_dem){ upps <- bind_cols(dem,upps) }
     if(include_id){ upps <- bind_cols(ids,upps) }
 
+    upps <- upps %>% rename(UPPS_55=UPPS_49,UPPS_49=UPPS_50,UPPS_50=UPPS_51,UPPS_51=UPPS_52,
+                            UPPS_52=UPPS_53,UPPS_53=UPPS_54,UPPS_54=UPPS_55) %>%
+                      select(everything(),paste0("UPPS_",1:59))
+
+
     upps_items <- paste0("UPPS_",1:59)
     if(check_range(df=upps[,upps_items],min=1,max=4)){
       warning("Some UPPS scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
