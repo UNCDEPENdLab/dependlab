@@ -27,7 +27,7 @@ Below this threshold, the person subscale mean will be imputed for missing items
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
 \item{input_codes}{the original T/F coding scheme of the input data.frame in the form c(False Code, True Code).
-These are converted to the specified min and max value.}
+These are converted to the specified false and true value.}
 
 \item{false_value}{the 'False' value for the item anchors, used in score validation. Default: 0}
 

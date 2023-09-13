@@ -7,7 +7,7 @@
 #' @param drop_items whether to remove the item-level data from the \code{df}. Default: FALSE
 #' @param keep_reverse_codes whether to retain the reverse coded items (suffix "r")
 #' @param input_codes the original T/F coding scheme of the input data.frame in the form c(False Code, True Code).
-#'            These are converted to the specified min and max value.
+#'            These are converted to the specified false and true values.
 #' @param false_value the 'False' value for the item anchors, used in score validation. Default: 0
 #' @param true_value the 'True' value for the item anchors, used in score validation. Default: 1
 #' @param bad_items numeric value or vector of the items that need to be dropped before imputation or calculation of subscales
