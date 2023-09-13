@@ -11,8 +11,8 @@ score_bpq(
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
   input_codes = c(0, 1),
-  min_value = 0,
-  max_value = 1,
+  false_value = 0,
+  true_value = 1,
   bad_items = NULL,
   add_alphas = TRUE
 )
@@ -29,11 +29,12 @@ Below this threshold, the person subscale mean will be imputed for missing items
 
 \item{keep_reverse_codes}{whether to retain the reverse coded items (suffix "r")}
 
-\item{input_codes}{the original T/F coding scheme of the input dataframe. These are converted to the specified min and max value.}
+\item{input_codes}{the original T/F coding scheme of the input data.frame in the form c(False Code, True Code).
+These are converted to the specified min and max value.}
 
-\item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 0}
+\item{false_value}{the 'False' value for the item anchors, used in score validation. Default: 0}
 
-\item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 1}
+\item{true_value}{the 'True' value for the item anchors, used in score validation. Default: 1}
 
 \item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
 

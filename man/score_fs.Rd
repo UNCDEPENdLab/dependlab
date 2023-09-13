@@ -9,9 +9,9 @@ score_fs(
   item_prefix = "FS_",
   max_impute = 0.2,
   drop_items = FALSE,
-  bad_items = NULL,
   min_value = 1,
   max_value = 7,
+  bad_items = NULL,
   add_alphas = TRUE
 )
 }
@@ -25,11 +25,11 @@ Below this threshold, the person subscale mean will be imputed for missing items
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
-\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
-
 \item{min_value}{the minimum value for the item anchors. Default: 1}
 
 \item{max_value}{the highest value for the item anchors. Default: 7}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
 
 \item{add_alphas}{whether to compute coefficient alpha for the total scale and return a column attribute. Default: TRUE}
 }

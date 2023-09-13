@@ -9,9 +9,10 @@ score_iip90(
   item_prefix = "IIP_",
   max_impute = 0.2,
   drop_items = FALSE,
-  keep_octants = TRUE,
+  drop_octants = FALSE,
   min_value = 0,
-  max_value = 4
+  max_value = 4,
+  add_alphas = TRUE
 )
 }
 \arguments{
@@ -24,11 +25,13 @@ Below this, the mean will be imputed for missing items.}
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
-\item{keep_octants}{whether to retain the IIP octant scores. Default: FALSE}
+\item{drop_octants}{whether to remove the IIP octant scores. Default: FALSE}
 
 \item{min_value}{the lowest value for the items anchors, used to check response validity. Default: 0}
 
 \item{max_value}{the highest value for the items anchors, used to check response validity. Default: 4}
+
+\item{add_alphas}{whether to compute coefficient alpha for subscales and return a column attribute. Default: TRUE}
 }
 \description{
 Score the Inventory for Interpersonal Problems -- 90 items PD + circumplex version

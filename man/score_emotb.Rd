@@ -10,7 +10,11 @@ score_emotb(
   max_impute = 0.2,
   drop_items = FALSE,
   keep_reverse_codes = FALSE,
-  add_alphas = TRUE
+  add_alphas = TRUE,
+  item_prefix = c("TB_PercStrs_", "TB_Self_", "TB_MP_", "TB_Sad_", "TB_GLS_",
+    "TB_PosAf_", "TB_AngAf_", "TB_AngPA_", "TB_AngHost_", "TB_EmoSup_", "TB_FearAf_",
+    "TB_FearSoma_", "TB_Friend_", "TB_InstrSup_", "TB_Lone_", "TB_PercHost_",
+    "TB_PercRej_", "TB_Apathy_")
 )
 }
 \arguments{
@@ -33,6 +37,12 @@ items in the resulting data frame. The default is FALSE.}
 
 \item{add_alphas}{Logical indicating whether to compute Cronbach's alpha coefficients
 for the scales and append them to the resulting data frame. The default is TRUE.}
+
+\item{item_prefix}{A character vector specifying the item prefixes as they appear in the data.frame.
+The vector must be the same length as the `scales` parameter and prefixes must be in the
+same corresponding order. If `scales` is set to "all", the prefixes must appear in
+the order of possible values for the `scales` parameter provided above
+(Perceived Stress, Self Efficacy, etc.).}
 }
 \value{
 A data frame with the computed scores and optional alpha coefficients.
@@ -61,8 +71,8 @@ The function scores the Adult EMOTB assessment based on the provided data frame.
 # Score all scales with default options
 scores <- score_emotb(data_frame)
 
-# Score specific scales and keep reverse-coded items
-scores <- score_emotb(data_frame, scales = c("self", "angaf"), keep_reverse_codes = TRUE)
+# Score specific scales and keep reverse-coded items, while specifying item-level prefixes as they appear in the data
+scores <- score_emotb(data_frame, scales = c("self", "angaf"), keep_reverse_codes = TRUE, item_prefix=c("Self_","AngAf_"))
 
 }
 \author{

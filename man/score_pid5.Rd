@@ -9,9 +9,9 @@ score_pid5(
   item_prefix = "PID_",
   max_impute = 0.2,
   drop_items = FALSE,
-  bad_items = NULL,
   min_value = 0,
   max_value = 3,
+  bad_items = NULL,
   add_alphas = TRUE
 )
 }
@@ -25,11 +25,11 @@ Below this threshold, the person subscale mean will be imputed for missing items
 
 \item{drop_items}{whether to remove the item-level data from the \code{df}. Default: FALSE}
 
-\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
-
 \item{min_value}{the minimum value for the item anchors, used in reverse scoring. Default: 0}
 
 \item{max_value}{the highest value for the item anchors, used in reverse scoring. Default: 3}
+
+\item{bad_items}{numeric value or vector of the items that need to be dropped before imputation or calculation of subscales}
 
 \item{add_alphas}{whether to compute coefficient alpha for the total scale and return a column attribute. Default: TRUE}
 }
@@ -45,5 +45,5 @@ Note: the code assumes that pasting together the \code{item_prefix} and the numb
 will yield the 100 items from the test.
 }
 \author{
-Michael Hallquist
+Michael Hallquist, Zach Vig
 }
