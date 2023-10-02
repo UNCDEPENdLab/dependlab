@@ -6,14 +6,18 @@
 \usage{
 import_score_neuromap_self_reports(
   split_output = TRUE,
-  path = paste0(getwd(), "/neuromap_self_reports_repo")
+  path = paste0(getwd(), "/neuromap_self_reports_repo"),
+  file_date = FALSE
 )
 }
 \arguments{
 \item{split_output}{if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively. Default: /code{TRUE}}
 
 \item{path}{string containing path to house csv data exports. Creates a new directory if it doesn't already exist.
-         Default creates a new folder called "neuromap_self_reports_repo" in the working directory.
+Default creates a new folder called "neuromap_self_reports_repo" in the working directory.}
+
+\item{file_date}{Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
+  Default is \code{FALSE}.
 
 Note: the embedded `import_neuromap_self_reports` exports new csvs into the data repo with a date/time stamp every time the function is run}
 }

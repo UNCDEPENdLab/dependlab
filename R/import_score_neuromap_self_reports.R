@@ -6,17 +6,19 @@
 #' @param split_output if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively. Default: /code{TRUE}
 #' @param path string containing path to house csv data exports. Creates a new directory if it doesn't already exist.
 #'          Default creates a new folder called "neuromap_self_reports_repo" in the working directory.
+#' @param file_date Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
+#'   Default is \code{FALSE}.
 #'
 #' Note: the embedded `import_neuromap_self_reports` exports new csvs into the data repo with a date/time stamp every time the function is run
 #'
 #' @export
 #' @author Zach Vig
 
-import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo")) {
+import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE) {
 
   self_report_data <- import_neuromap_self_reports(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
                                                    scales = "all", include_id = TRUE, include_dem = FALSE, path = path,
-                                                   file_suffix = "_neuromap_self_reports", file_date = TRUE, add_to_envr = TRUE)
+                                                   file_suffix = "_neuromap_self_reports", file_date = file_date, add_to_envr = TRUE)
 
   score_all <- function(df, drop_items=logical()) {
 
