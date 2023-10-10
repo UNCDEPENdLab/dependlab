@@ -27,8 +27,12 @@ read_neuromap_demg <- function(session = "s3", task = "N", demg_cols = "simple",
   pacman::p_load(dplyr, qualtRics, lubridate)
 
   # ---- pull demographics data from Qualtrics ----
-  demg <- fetch_survey(surveyID = "SV_1X0lNvy1O3QWPNb", verbose = TRUE,
+  options(readr.num_columns = 0)
+  demg <- fetch_survey(surveyID = "SV_1X0lNvy1O3QWPNb", verbose = FALSE,
                        breakout_sets = FALSE, force_request = TRUE)
+
+
+
 
   # ---- clean the demg data table ----
   demg <- demg %>%
@@ -82,7 +86,7 @@ read_neuromap_demg <- function(session = "s3", task = "N", demg_cols = "simple",
   session_qualticsID <- ifelse(session == "s3", "SV_8ixbUxRgNWtxuHH",
                                ifelse(session == "s5", "SV_8bScWE5H4PGBgX4",
                                       stop("session input needs be either s3 or s5")))
-  s_report <- fetch_survey(surveyID = session_qualticsID, verbose = TRUE,
+  s_report <- fetch_survey(surveyID = session_qualticsID, verbose = FALSE,
                            breakout_sets = FALSE, force_request = TRUE)
   date_colname <- ifelse(session == "s3", "s3_sessioninfo_1", "s5_sessioninfo_1")
   subid_colname <- ifelse(session == "s3", "s3_sessioninfo_4", "s5_sessioninfo_4")
