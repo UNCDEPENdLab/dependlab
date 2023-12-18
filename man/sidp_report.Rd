@@ -23,7 +23,7 @@ Detailed summaries for each personality disorder are also provided.
 }
 \examples{
 # Example usage:
-# sidp_report(420)
+# sidp_report(710)
 
 
 }

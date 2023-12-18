@@ -11,7 +11,7 @@
 #' @importFrom janitor clean_names
 #' @importFrom tidyr pivot_longer
 #' @importFrom stringr str_replace str_replace_all str_extract
-#' @importFrom purrr map_dfr
+#' @importFrom magrittr %>%
 #'
 #' @param ... Additional arguments passed to `qualtRics::fetch_survey`.
 #'
