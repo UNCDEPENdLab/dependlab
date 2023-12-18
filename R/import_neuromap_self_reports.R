@@ -65,7 +65,7 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
 
   #import all self report data from Qualtrics
   survey_info <- all_surveys %>% filter(name == survey_name)
-  self_report_data <- suppressMessages(fetch_survey(survey_info$id, force_request=TRUE, convert=FALSE, label=FALSE))
+  self_report_data <- suppressMessages(fetch_survey(survey_info$id, force_request=TRUE, convert=FALSE, label=FALSE, verbose = FALSE))
 
   #self-report data stats
   if(stats){
