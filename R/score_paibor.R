@@ -37,7 +37,7 @@ score_paibor <- function(df, item_prefix="PAIBOR_", max_impute=0.2, min_value=0,
     # apply reverse scoring
     reverse_keys <- c(7, 12, 14, 19, 20, 24)
     for(i in reverse_keys){
-        df[,paste0("PAIBOR_", toString(i), "_r")] <- 3 - df[,paste0("PAIBOR_", toString(i))]
+        df[,paste0(item_prefix, toString(i), "_r")] <- 3 - df[,paste0(item_prefix, toString(i))]
     }
 
     # define items within each subscale
@@ -46,10 +46,10 @@ score_paibor <- function(df, item_prefix="PAIBOR_", max_impute=0.2, min_value=0,
     negrel_items <- c(3, 6, 9, 12, 16, 20) # PAI negative relationships subscale items
     selfharm_items <- c(13, 17, 21, 22, 23, 24) # PAI self-harm subscale items
     
-    ai_items <- sapply(ai_items, function(x) { paste0("PAIBOR_", x, ifelse(x %in% reverse_keys, "_r", "")) })
-    ip_items <- sapply(ip_items, function(x) { paste0("PAIBOR_", x, ifelse(x %in% reverse_keys, "_r", "")) })
-    negrel_items <- sapply(negrel_items, function(x) { paste0("PAIBOR_", x, ifelse(x %in% reverse_keys, "_r", "")) })
-    selfharm_items <- sapply(selfharm_items, function(x) { paste0("PAIBOR_", x, ifelse(x %in% reverse_keys, "_r", "")) })
+    ai_items <- sapply(ai_items, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "_r", "")) })
+    ip_items <- sapply(ip_items, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "_r", "")) })
+    negrel_items <- sapply(negrel_items, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "_r", "")) })
+    selfharm_items <- sapply(selfharm_items, function(x) { paste0(item_prefix, x, ifelse(x %in% reverse_keys, "_r", "")) })
     
     # mean impute, if requested (after reverse scoring to get item direction correct)
     if (max_impute > 0) {
