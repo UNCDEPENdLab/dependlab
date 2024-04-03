@@ -29,7 +29,7 @@ read_neuromap_demg <- function(session = "s3", task = "N", demg_cols = "simple",
   # ---- pull demographics data from Qualtrics ----
   options(readr.num_columns = 0)
   demg <- fetch_survey(surveyID = "SV_1X0lNvy1O3QWPNb", verbose = FALSE,
-                       breakout_sets = FALSE, force_request = TRUE)
+                       breakout_sets = FALSE)
 
 
 
