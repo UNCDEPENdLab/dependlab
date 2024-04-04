@@ -87,7 +87,7 @@ read_neuromap_demg <- function(session = "s3", task = "N", demg_cols = "simple",
                                ifelse(session == "s5", "SV_8bScWE5H4PGBgX4",
                                       stop("session input needs be either s3 or s5")))
   s_report <- fetch_survey(surveyID = session_qualticsID, verbose = FALSE,
-                           breakout_sets = FALSE, force_request = TRUE)
+                           breakout_sets = FALSE)
   date_colname <- ifelse(session == "s3", "s3_sessioninfo_1", "s5_sessioninfo_1")
   subid_colname <- ifelse(session == "s3", "s3_sessioninfo_4", "s5_sessioninfo_4")
   s_report <- s_report %>%

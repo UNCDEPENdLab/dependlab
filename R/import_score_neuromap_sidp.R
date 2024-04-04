@@ -34,7 +34,7 @@ import_score_neuromap_sidp <- function(...){
 
   sidp_id <- my_surveys %>% filter(name == "NeuroMAP S1 - SIDP (outside of the pipe - use this one)") %>% pull(id)
 
-  sidp_items <- qualtRics::fetch_survey(sidp_id, force_request = FALSE)
+  sidp_items <- qualtRics::fetch_survey(sidp_id)
   colnames(sidp_items)
 
   ##----------------------
