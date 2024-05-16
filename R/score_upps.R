@@ -27,6 +27,7 @@
 #' @author Michael Hallquist, Zach Vig
 #'
 #' @importFrom dplyr select mutate
+#' @importFrom psych alpha
 #'
 score_upps <- function(df, item_prefix="UPPS_", max_impute=0.2, drop_items=FALSE,
                        keep_reverse_codes=FALSE, min_value=1, max_value=4, bad_items=NULL,

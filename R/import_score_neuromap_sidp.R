@@ -21,9 +21,11 @@
 #'
 #' @examples
 #' # Example usage:
+#' \dontrun{
 #' result <- import_score_neuromap_sidp()
 #' summary_data <- result$summary
 #' item_data <- result$items
+#' }
 #'
 #' @author Nate Hall
 #' @export

@@ -21,9 +21,13 @@
 #'
 #' @examples
 #' # Assuming you have set up Qualtrics API credentials
+#' \dontrun{
 #' scid_data <- get_scid_dx()
+#' }
 #' # To save the processed data to a specific path
+#' \dontrun{
 #' scid_data <- get_scid_dx(scid_path = "path/to/save/scid_data.RData")
+#' }
 
 get_scid_dx <- function(scid_path = NULL,...){
 

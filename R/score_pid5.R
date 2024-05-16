@@ -24,6 +24,7 @@
 #' @author Michael Hallquist, Zach Vig
 #'
 #' @importFrom dplyr select mutate
+#' @importFrom psych alpha
 #'
 score_pid5 <- function(df, item_prefix="PID_", max_impute=0.2, drop_items=FALSE,
                        min_value=0, max_value=3, bad_items=NULL, add_alphas=TRUE) {

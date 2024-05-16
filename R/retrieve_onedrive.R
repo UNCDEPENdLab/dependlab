@@ -18,19 +18,18 @@
 #' }
 #'
 #' @import Microsoft365R
-#' @import readxl
-#' @import furrr
-#' @import magrittr
-#' @import stringr
+#' @importFrom readxl excel_sheets read_excel
+#' @importFrom furrr future_map_dfr
+#' @importFrom magrittr %>%
+#' @importFrom stringr str_detect
 #' @import tidyverse
 #'
 #' @export
 
 retrieve_onedrive <- function(item_path, sheet = NULL, spn = 1, rm_file = TRUE){
 
-  suppressMessages(devtools::install_github("Azure/Microsoft365R")) # if already installed with no updates to repo will skip unless force = TRUE
-  require("Microsoft365R")
-  require("readxl")
+  # suppressMessages(devtools::install_github("Azure/Microsoft365R")) # if already installed with no updates to repo will skip unless force = TRUE
+  # require("Microsoft365R")
 
   sps <- list_sharepoint_sites()
   depend_sharepoint <- sps[[spn]]
@@ -41,13 +40,8 @@ retrieve_onedrive <- function(item_path, sheet = NULL, spn = 1, rm_file = TRUE){
   item <- depend$get_item(item_path)
   item$download(overwrite = TRUE)#, dest = dest)
 
-
   sort_files_by_date <- function(folder_path = '.', search_pattern = NULL, by = 'mtime'){
     # Retreived from https://stackoverflow.com/questions/13762224/how-to-sort-files-list-by-date
-    require(furrr)
-    require(magrittr)
-    require(stringr)
-    require(tidyverse)
 
     if (!by %>% str_detect('^(m|a|c)time$')) {
       stop('Argument `by` must be one of "mtime", "atime", or "ctime".')
