@@ -29,7 +29,7 @@
 #' scid_data <- get_scid_dx(scid_path = "path/to/save/scid_data.RData")
 #' }
 
-get_scid_dx <- function(scid_path = NULL,...){
+get_scid_dx <- function(scid_path = NULL, ...) {
 
   ### check api setup.
 
@@ -42,7 +42,7 @@ get_scid_dx <- function(scid_path = NULL,...){
   scid5_current <- scid5_current |> dplyr::select(RecordedDate, subID, 19:141)
 
   scid5_df <- rbind(scid5_old, scid5_current) # bind old and new surveys
-  scid5_df <- scid5_df[!is.na(scid5_df$subID),] # remove blank surveys
+  scid5_df <- scid5_df[!is.na(scid5_df$subID), ] # remove blank surveys
 
   scid5_df <- scid5_df |> rename( # rename columns to be more descriptive
     # schizophrenia spectrum and other psychotic disorders
@@ -166,25 +166,52 @@ get_scid_dx <- function(scid_path = NULL,...){
     illness_anxiety = DxsScreenedDx_15,
     intermittent_explosive = DxsScreenedDx_16,
     gambling = DxsScreenedDx_17
-  ) |> dplyr::select(
+  )
+
+  for (i in seq_len(nrow(scid5_df))) {
+    if (scid5_df$anySchizo[i] == "No") {
+      scid5_df[i, 5:23] <- NA
+    }
+    if (scid5_df$anyBipolar[i] == "No") {
+      scid5_df[i, 25:45] <- NA
+    }
+    if (scid5_df$anyDepression[i] == "No") {
+      scid5_df[i, 47:60] <- NA
+    }
+    if (scid5_df$anySUD[i] == "No") {
+      scid5_df[i, 62:84] <- NA
+    }
+    if (scid5_df$anyOtherDx[i] == "No") {
+      scid5_df[i, 86:105] <- NA
+    }
+    if (scid5_df$anyScreenedDx[i] == "No") {
+      scid5_df[i, 107:124] <- NA
+    }
+  }
+
+  scid5_df <- scid5_df |> dplyr::select(
     -matches("anySchizo|anyBipolar|anyDepression|anySUD|anyOtherDx|anyScreenedDx|checklistyn|_text")
-  ) |> mutate_all(as.character) |> mutate_at(
-    vars(4:76),
-    ~recode(.,
-            "0 Undetermined" = 0,
-            "1 Not Present" = 1,
-            "2 Subthreshold" = 2,
-            "3 Present" = 3,
-            "4 Strongly Present" = 4)
-  ) |> mutate_at(
-    vars(77:93), # scoring for screened disorders only
-    ~recode(.,
-            "0 Undetermined" = 0,
-            "1 Not Present" = 1,
-            "2 Likely Present" = 2))
+  ) |>
+    mutate_all(as.character) |>
+    mutate_at(
+      vars(4:76),
+      ~recode(.,
+              "0 Undetermined" = 0,
+              "1 Not Present" = 1,
+              "2 Subthreshold" = 2,
+              "3 Present" = 3,
+              "4 Strongly Present" = 4)
+    ) |>
+    mutate_at(
+              vars(77:93), # scoring for screened disorders only
+              ~recode(.,
+                      "0 Undetermined" = 0,
+                      "1 Not Present" = 1,
+                      "2 Likely Present" = 2))
 
 
-  if(!is.null(scid_path)){
+
+  if (!is.null(scid_path)) {
     save(scid5_df, file = scid_path)
   }
 
