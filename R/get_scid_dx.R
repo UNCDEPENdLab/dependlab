@@ -31,7 +31,11 @@
 
 get_scid_dx <- function(scid_path = NULL, ...) {
 
-  ### check api setup.
+  # checks if Qualtrics API Key is defined in environment
+  if (Sys.getenv("QUALTRICS_API_KEY") <= 1 | Sys.getenv("QUALTRICS_BASE_URL") <= 1) {
+    warning("Qualtrics API Key and/or Base URL has/have not been set up. \n Use 'qualtrics_api_credentials()' to configure.")
+    return(invisible(NULL))
+  }
 
   scid5_current <- qualtRics::fetch_survey(surveyID = "SV_0uK8MWvnEMcBgsC", verbose = TRUE, breakout_sets = FALSE)
 
