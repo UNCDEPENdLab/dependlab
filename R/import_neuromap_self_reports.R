@@ -42,7 +42,7 @@
 import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
                                          scales = "all", include_id = TRUE, include_dem = FALSE, path = getwd(),
                                          file_suffix = "", file_date = FALSE, add_to_envr = FALSE){
-
+# browser()
   #function info
   if(info){
     message("Current version extracts the following scales: \n 'iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb' \n Version 0.0.4 -- upd. June 26, 2023")
@@ -192,7 +192,7 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
 
   #ASR -- Adult Self Report [Ages 18-59] (126 items)
   if("asr" %in% scales | "all" %in% scales) {
-    asr <- self_report_data %>% select(starts_with(c("ASR_","Q8.2","Q8.3","Q8.4"))) %>% rename(ASR_124=Q8.2) %>% rename(ASR_125=Q8.3) %>% rename(ASR_126=Q8.4)
+    asr <- self_report_data %>% select(starts_with(c("ASR_")))#,"Q8.2","Q8.3","Q8.4"))) %>% rename(ASR_124=Q8.2) %>% rename(ASR_125=Q8.3) %>% rename(ASR_126=Q8.4)
     if(include_dem){ asr <- bind_cols(dem,asr) }
     if(include_id){ asr <- bind_cols(ids,asr) }
 
