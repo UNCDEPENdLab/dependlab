@@ -47,6 +47,8 @@ import_score_neuromap_sidp <- function(...){
     dplyr::rename(id = session_info_4,
                   interviewer = session_info_6) %>%
     select(id, interviewer, StartDate, EndDate, ends_with("_rating")) %>%
+    mutate(StartDate = lubridate::as_date(StartDate),
+           EndDate = lubridate::as_date(EndDate)) %>%
     janitor::clean_names() %>%
     rename_with(~ str_replace_all(., "_rating", "")) %>%
     rename_with(~ str_replace(., "^[xX]", "")) %>%
@@ -60,13 +62,71 @@ import_score_neuromap_sidp <- function(...){
                                TRUE ~ NA
     ))
 
+  #--------------------------------------------------------
+  ##  Explore archival SIDP interviews and attempt to merge
+  ##--------------------------------------------------------
+
+  all_sidp <- my_surveys %>% filter(grepl("SIDP", name))
+  og_sidp_id <- all_sidp %>% filter(name == "NeuroMAP S1 - SIDP") %>% pull(id)
+
+  og_sidp_items <- qualtRics::fetch_survey(og_sidp_id)
+
+  # View(og_sidp_items)
+
+  og_sidp_df <- og_sidp_items %>% select(subID, RecipientFirstName, RecipientLastName,  StartDate, EndDate, ends_with("_rating")) %>%
+    dplyr::filter(!is.na(subID)) %>%
+    mutate(interviewer = paste0(substr(RecipientFirstName, 1, 1), substr(RecipientLastName, 1, 1)), .after = subID) %>%
+    rename(id = subID) %>%
+    select(-RecipientFirstName, - RecipientLastName) %>%
+    mutate(StartDate = lubridate::as_date(StartDate),
+           EndDate = lubridate::as_date(EndDate)
+    ) %>% janitor::clean_names() %>%
+    rename_with(~ str_replace_all(., "_rating", "")) %>%
+    rename_with(~ str_replace(., "^[xX]", "")) %>%
+    rename_with(~ str_replace(., "^(\\d+)_([a-z]+)$", "\\2_\\1")) %>%
+    rename(antso_c = c_antso) %>%
+    # for some reason, this is the only item that needs to be manually formatted
+    mutate(avoid_7 = case_when(avoid_7 == 0 ~ "1 - Not Present",
+                               avoid_7 == 1 ~ "2 - Subthreshold",
+                               avoid_7 == 2 ~ "3 - Present",
+                               avoid_7 == 3 ~ "4 - Strongly Present",
+                               TRUE ~ NA
+    ))
+
+
+  btw_sidp_id <- all_sidp %>% filter(name == "NeuroMAP S1 - SIDP (between)") %>% pull(id)
+
+  btw_sidp_items <- qualtRics::fetch_survey(btw_sidp_id)
+
+  btw_sidp_df <- btw_sidp_items %>% select(Q1_1, Q1_3,  StartDate, EndDate, ends_with("_rating")) %>% rename(subID = Q1_1, interviewer = Q1_3) %>%
+    dplyr::filter(!is.na(subID) & !substr(subID, 1,3) == 999) %>%
+    rename(id = subID) %>%
+    mutate(StartDate = lubridate::as_date(StartDate),
+           EndDate = lubridate::as_date(EndDate)
+    ) %>% janitor::clean_names() %>%
+    rename_with(~ str_replace_all(., "_rating", "")) %>%
+    rename_with(~ str_replace(., "^[xX]", "")) %>%
+    rename_with(~ str_replace(., "^(\\d+)_([a-z]+)$", "\\2_\\1")) %>%
+    rename(antso_c = c_antso) %>%
+    # for some reason, this is the only item that needs to be manually formatted
+    mutate(avoid_7 = case_when(avoid_7 == 0 ~ "1 - Not Present",
+                               avoid_7 == 1 ~ "2 - Subthreshold",
+                               avoid_7 == 2 ~ "3 - Present",
+                               avoid_7 == 3 ~ "4 - Strongly Present",
+                               TRUE ~ NA
+    ))
+
+
+  sidp_df <- bind_rows(og_sidp_df, btw_sidp_df, sidp_df) %>% arrange(id)
+
+
+
   # names(sidp_df)
   # sidp_df %>% select(contains("avoid"))
 
   ##----------------------------------------------------------------------
   ##  Rearrange columns to be grouped by disorder and sorted numerically
   ##----------------------------------------------------------------------
-
 
   sort_columns <- function(df, prefix_order) {
     cols <- names(df)
@@ -102,7 +162,6 @@ import_score_neuromap_sidp <- function(...){
   ##------------------------------------------------------------------
   ##  Count Symptoms of Each Diagnosis and Compute Dimensional Score
   ##------------------------------------------------------------------
-
 
   count_responses <- function(data, prefix) {
     pd_columns <- grep(prefix, names(data), value = TRUE)
