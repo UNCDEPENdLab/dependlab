@@ -31,13 +31,14 @@
 #' @export
 
 import_score_neuromap_sidp <- function(...){
+  # library(tidyverse)
   # peek at surveys available
   my_surveys <- qualtRics::all_surveys() #%>% print(n = 100)
 
   sidp_id <- my_surveys %>% filter(name == "NeuroMAP S1 - SIDP (outside of the pipe - use this one)") %>% pull(id)
 
   sidp_items <- qualtRics::fetch_survey(sidp_id)
-  colnames(sidp_items)
+  # colnames(sidp_items)
 
   ##----------------------
   ##  Clean-up dataframe
@@ -71,13 +72,17 @@ import_score_neuromap_sidp <- function(...){
 
   og_sidp_items <- qualtRics::fetch_survey(og_sidp_id)
 
+  # missing <- c(92, 137, 169, 261, 264)
+  # x <- og_sidp_items %>% dplyr::filter(as.numeric(SubjectID.SIDP) %in% missing) %>% select(SubjectID.SIDP, everything())
+
   # View(og_sidp_items)
 
-  og_sidp_df <- og_sidp_items %>% select(subID, RecipientFirstName, RecipientLastName,  StartDate, EndDate, ends_with("_rating")) %>%
-    dplyr::filter(!is.na(subID)) %>%
-    mutate(interviewer = paste0(substr(RecipientFirstName, 1, 1), substr(RecipientLastName, 1, 1)), .after = subID) %>%
-    rename(id = subID) %>%
-    select(-RecipientFirstName, - RecipientLastName) %>%
+  og_sidp_df <- og_sidp_items %>% select(SubjectID.SIDP, RecipientFirstName, RecipientLastName,  StartDate, EndDate, ends_with("_rating")) %>%
+    mutate(id = as.numeric(SubjectID.SIDP), .before = SubjectID.SIDP) %>%
+    dplyr::filter(!is.na(id)) %>%
+    mutate(interviewer = paste0(substr(RecipientFirstName, 1, 1), substr(RecipientLastName, 1, 1)), .after = id) %>%
+    # rename(id = subID) %>%
+    select(-RecipientFirstName, - RecipientLastName, -SubjectID.SIDP) %>%
     mutate(StartDate = lubridate::as_date(StartDate),
            EndDate = lubridate::as_date(EndDate)
     ) %>% janitor::clean_names() %>%
@@ -91,7 +96,7 @@ import_score_neuromap_sidp <- function(...){
                                avoid_7 == 2 ~ "3 - Present",
                                avoid_7 == 3 ~ "4 - Strongly Present",
                                TRUE ~ NA
-    ))
+    )) %>% arrange(id)
 
 
   btw_sidp_id <- all_sidp %>% filter(name == "NeuroMAP S1 - SIDP (between)") %>% pull(id)
