@@ -103,8 +103,8 @@ import_score_neuromap_sidp <- function(...){
 
   btw_sidp_items <- qualtRics::fetch_survey(btw_sidp_id)
 
-  btw_sidp_df <- btw_sidp_items %>% select(Q1_1, Q1_3,  StartDate, EndDate, ends_with("_rating")) %>% rename(subID = Q1_1, interviewer = Q1_3) %>%
-    dplyr::filter(!is.na(subID) & !substr(subID, 1,3) == 999) %>%
+  btw_sidp_df <- btw_sidp_items %>% select(Q1_1, Q1_3,  StartDate, EndDate, ends_with("_rating")) %>% rename(id = Q1_1, interviewer = Q1_3) %>%
+    dplyr::filter(!is.na(id) & !substr(id, 1,3) == 999) %>%
     rename(id = subID) %>%
     mutate(StartDate = lubridate::as_date(StartDate),
            EndDate = lubridate::as_date(EndDate)
