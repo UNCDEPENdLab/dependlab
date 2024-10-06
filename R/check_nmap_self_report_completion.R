@@ -1,4 +1,4 @@
-#' Check NMAP Self Report Completion
+#' Check Completion of NeuroMAP Self-Report Surveys
 #'
 #' This function retrieves self-report data from Qualtrics, processes it to calculate the percentage of completion for various psychological measures, and returns a summary data frame with the calculated completion percentages.
 #'
@@ -31,8 +31,7 @@
 #'
 #' @importFrom qualtRics fetch_survey
 #' @importFrom dplyr rename select mutate arrange matches
-#' @author
-#' Rachel Velasquez
+#' @author Rachel Velasquez
 #'
 #' @export
 
@@ -61,19 +60,19 @@ check_nmap_self_report_completion <- function(...) {
 
   # calculate % completion per measure and total # of missing items per ID
   self_report_complete <- self_report |> dplyr::mutate(
-    iip_percent      = 1 - rowSums(is.na(self_report[,  6:95])) / 100,
-    ctq_percent     = 1 - rowSums(is.na(self_report[, 96:123])) /  28,
-    panas_percent  = 1 - rowSums(is.na(self_report[, 124:143])) /  20,
-    pid_percent    = 1 - rowSums(is.na(self_report[, 144:243])) / 100,
-    asr_percent    = 1 - rowSums(is.na(self_report[, 244:377])) / 134,
-    bpq_percent    = 1 - rowSums(is.na(self_report[, 378:457])) /  80,
-    fs_percent     = 1 - rowSums(is.na(self_report[, 458:465])) /   8,
-    dusi_percent   = 1 - rowSums(is.na(self_report[, 466:480])) /  15,
-    isc_percent    = 1 - rowSums(is.na(self_report[, 481:544])) /  64,
-    upps_percent   = 1 - rowSums(is.na(self_report[, 545:603])) /  59,
-    bfi_percent    = 1 - rowSums(is.na(self_report[, 604:663])) /  60,
-    cts_percent    = 1 - rowSums(is.na(self_report[, 664:703])) /  40,
-    nih_tb_percent = 1 - rowSums(is.na(self_report[, 704:851])) / 148,
+    iip_percent   = 1 - rowSums(is.na(self_report[,   6: 95])) / 100,
+    ctq_percent   = 1 - rowSums(is.na(self_report[,  96:123])) /  28,
+    panas_percent = 1 - rowSums(is.na(self_report[, 124:143])) /  20,
+    pid_percent   = 1 - rowSums(is.na(self_report[, 144:243])) / 100,
+    asr_percent   = 1 - rowSums(is.na(self_report[, 244:377])) / 134,
+    bpq_percent   = 1 - rowSums(is.na(self_report[, 378:457])) /  80,
+    fs_percent    = 1 - rowSums(is.na(self_report[, 458:465])) /   8,
+    dusi_percent  = 1 - rowSums(is.na(self_report[, 466:480])) /  15,
+    isc_percent   = 1 - rowSums(is.na(self_report[, 481:544])) /  64,
+    upps_percent  = 1 - rowSums(is.na(self_report[, 545:603])) /  59,
+    bfi_percent   = 1 - rowSums(is.na(self_report[, 604:663])) /  60,
+    cts_percent   = 1 - rowSums(is.na(self_report[, 664:703])) /  40,
+    emotb_percent = 1 - rowSums(is.na(self_report[, 704:851])) / 148,
   ) |>
     dplyr::select(id, 852:864)
 

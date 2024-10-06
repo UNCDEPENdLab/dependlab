@@ -193,7 +193,7 @@ get_scid_dx <- function(scid_path = NULL, ...) {
     }
   }
 
-  scid5_df <- scid5_df |> dplyr::select(
+  scid5_df <- scid5_df |> arrange(subID) |> dplyr::select(
     -matches("anySchizo|anyBipolar|anyDepression|anySUD|anyOtherDx|anyScreenedDx|checklistyn|_text")
   ) |>
     mutate_all(as.character) |>
