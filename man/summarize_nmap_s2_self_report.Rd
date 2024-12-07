@@ -2,37 +2,41 @@
 % Please edit documentation in R/summarize_nmap_s2_self_report.R
 \name{summarize_nmap_s2_self_report}
 \alias{summarize_nmap_s2_self_report}
-\title{Check Completion of NeuroMAP Self-Report Surveys}
+\title{Summarize Self-Report Completion for NMAP Session 2}
 \usage{
-check_nmap_self_report_completion(...)
+summarize_nmap_s2_self_report(...)
 }
 \value{
-A data frame containing the `id` and the percentage of completion for various psychological measures.
+A data frame containing the following columns for each participant:
+- `id`: Participant ID.
+- Completion metrics for each measure:
+  - Number of complete items (`*_complete`).
+  - Number of missing items (`*_missing`).
+  - Percentage of completion (`*_percent`).
 }
 \description{
-This function retrieves self-report data from Qualtrics, processes it to calculate the percentage of completion for various psychological measures, and returns a summary data frame with the calculated completion percentages.
+This function processes and summarizes self-report data for NMAP session 2. It calculates
+the number of complete items, missing items, and the percentage of completion for each
+psychological measure per participant. The function integrates data from Qualtrics, 
+filters based on session-specific criteria, and excludes certain IDs as specified.
 }
 \details{
-The function checks if the Qualtrics API key and base URL are set in the environment variables. If they are not set, the function issues a warning and exits. If the credentials are set, the function proceeds to:
-\itemize{
-  \item Import all self-report data from Qualtrics.
-  \item Convert `Intro_ID` to a three-digit format.
-  \item Rename `Intro_ID` to `id`.
-  \item Remove specific columns related to attention checks and text fields.
-  \item Arrange the data by `id` and select relevant columns.
-  \item Calculate the percentage of completion for each psychological measure.
-  \item Return a summary data frame with the calculated completion percentages.
+The function performs the following operations:
+- Checks for the presence of Qualtrics API credentials.
+- Fetches raw self-report and session 3 data from Qualtrics.
+- Excludes specific IDs based on predefined criteria (e.g., PSU IDs).
+- Calculates completion metrics (# complete, # missing, % completion) for various measures 
+  such as IIP, CTQ, PANAS, PID, and others.
+- Returns a cleaned dataset with summarized completion metrics per participant.
 }
+\note{
+Ensure that Qualtrics API credentials are set in the environment using `qualtrics_api_credentials()`.
 }
 \examples{
 \dontrun{
-# Set your Qualtrics API credentials
-Sys.setenv(QUALTRICS_API_KEY = "your_api_key")
-Sys.setenv(QUALTRICS_BASE_URL = "your_base_url")
-
-# Check the self report completion
-completion_data <- check_nmap_self_report_completion()
-print(completion_data)
+# Run the function to summarize self-report completion:
+results <- summarize_nmap_s2_self_report()
+head(results)
 }
 
 }
