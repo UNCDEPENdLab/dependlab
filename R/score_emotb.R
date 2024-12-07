@@ -63,6 +63,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
                                       "TB_AngPA_",
                                       "TB_AngHost_",
                                       "TB_EmoSup_",
+                                      "TB_DLS_",
                                       "TB_FearAf_",
                                       "TB_FearSoma_",
                                       "TB_Friend_",
@@ -74,7 +75,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
 
   #set-up logicals
   if("all" %in% scales) {scales <- c("percstrs", "self", "mp", "sad", "gls", "posaf", "angaf", "angpa",
-                                      "anghost", "emosup", "fearaf", "fearsoma", "friend", "instrsup",
+                                      "anghost", "emosup", "dls", "fearaf", "fearsoma", "friend", "instrsup",
                                       "lone", "perchost", "percrej", "apathy")}
 
   if("percstrs" %in% scales)  percstrs <- TRUE  else  percstrs <- FALSE
@@ -87,6 +88,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if("angpa" %in% scales)     angpa <- TRUE     else  angpa <- FALSE
   if("anghost" %in% scales)   anghost <- TRUE   else  anghost <- FALSE
   if("emosup" %in% scales)    emosup <- TRUE    else  emosup <- FALSE
+  if("dls" %in% scales)       dls <- TRUE       else  dls <- FALSE
   if("fearaf" %in% scales)    fearaf <- TRUE    else  fearaf <- FALSE
   if("fearsoma" %in% scales)  fearsoma <- TRUE  else  fearsoma <- FALSE
   if("friend" %in% scales)    friend <- TRUE    else  friend <- FALSE
@@ -109,6 +111,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if(angpa)     AngPA_prefix <- paste0(item_prefix[which(scales=="angpa")])
   if(anghost)   AngHost_prefix <- paste0(item_prefix[which(scales=="anghost")])
   if(emosup)    EmoSup_prefix <- paste0(item_prefix[which(scales=="emosup")])
+  if(dls)       DLS_prefix <- paste0(item_prefix[which(scales=="dls")])
   if(fearaf)    FearAf_prefix <- paste0(item_prefix[which(scales=="fearaf")])
   if(fearsoma)  FearSoma_prefix <- paste0(item_prefix[which(scales=="fearsoma")])
   if(friend)    Friend_prefix <- paste0(item_prefix[which(scales=="friend")])
@@ -129,6 +132,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if(angpa)     AngPA_items <- paste0(AngPA_prefix,1:5)        else  AngPA_items <- NULL
   if(anghost)   AngHost_items <- paste0(AngHost_prefix,1:5)    else  AngHost_items <- NULL
   if(emosup)    EmoSup_items <- paste0(EmoSup_prefix,1:8)      else  EmoSup_items <- NULL
+  if(dls)       DLS_items <- paste0(DLS_prefix,1:13)            else  EmoSup_items <- NULL
   if(fearaf)    FearAf_items <- paste0(FearAf_prefix,1:7)      else  FearAf_items <- NULL
   if(fearsoma)  FearSoma_items <- paste0(FearSoma_prefix,1:6)  else  FearSoma_items <- NULL
   if(friend)    Friend_items <- paste0(Friend_prefix,1:8)      else  Friend_items <- NULL
@@ -139,7 +143,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if(apathy)    Apathy_items <- paste0(Apathy_prefix,1:7)      else  Apathy_items <- NULL
 
   total_items <- c(PercStrs_items, Self_items, MP_items, Sad_items, GLS_items, PosAf_items,
-                  AngAf_items, AngPA_items, AngHost_items, EmoSup_items, FearAf_items, FearSoma_items,
+                  AngAf_items, AngPA_items, AngHost_items, EmoSup_items, DLS_items, FearAf_items, FearSoma_items,
                   Friend_items, InstrSup_items, Lone_items, PercHost_items, PercRej_items, Apathy_items)
 
   #validate data.frame and items
@@ -166,6 +170,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
     if(angpa) df <- mean_impute_items(df, AngPA_items, thresh=max_impute)
     if(anghost) df <- mean_impute_items(df, AngHost_items, thresh=max_impute)
     if(emosup) df <- mean_impute_items(df, EmoSup_items, thresh=max_impute)
+    if(dls) df <- mean_impute_items(df, DLS_items, thresh=max_impute)
     if(fearaf) df <- mean_impute_items(df, FearAf_items, thresh=max_impute)
     if(fearsoma) df <- mean_impute_items(df, FearSoma_items, thresh=max_impute)
     if(friend) df <- mean_impute_items(df, Friend_items, thresh=max_impute)
@@ -187,6 +192,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if(angpa) df <- df %>% mutate(AngPA_Raw = rowSums(across(all_of(AngPA_items))))
   if(anghost) df <- df %>% mutate(AngHost_Raw = rowSums(across(all_of(AngHost_items))))
   if(emosup) df <- df %>% mutate(EmoSup_Raw = rowSums(across(all_of(EmoSup_items))))
+  if(dls) df <- df %>% mutate(DLS_Raw = rowSums(across(all_of(DLS_items))))
   if(fearaf) df <- df %>% mutate(FearAf_Raw = rowSums(across(all_of(FearAf_items))))
   if(fearsoma) df <- df %>% mutate(FearSoma_Raw = rowSums(across(all_of(FearSoma_items))))
   if(friend) df <- df %>% mutate(Friend_Raw = rowSums(across(all_of(Friend_items))))
@@ -207,6 +213,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
   if(angpa) df <- df %>% mutate(AngPA_Theta = case_when(AngPA_Raw%%1==0~angpa_adult(AngPA_Raw),AngPA_Raw%%1!=0~angpa_adult_approx(AngPA_Raw)))
   if(anghost) df <- df %>% mutate(AngHost_Theta = case_when(AngHost_Raw%%1==0~anghost_adult(AngHost_Raw),AngHost_Raw%%1!=0~anghost_adult_approx(AngHost_Raw)))
   if(emosup) df <- df %>% mutate(EmoSup_Theta = case_when(EmoSup_Raw%%1==0~emosup_adult(EmoSup_Raw),EmoSup_Raw%%1!=0~emosup_adult_approx(EmoSup_Raw)))
+  if(dls) df <- df %>% mutate(DLS_Theta = case_when(DLS_Raw%%1==0~emosup_adult(DLS_Raw),DLS_Raw%%1!=0~dls_adult_approx(DLS_Raw)))
   if(fearaf) df <- df %>% mutate(FearAf_Theta = case_when(FearAf_Raw%%1==0~fearaf_adult(FearAf_Raw),FearAf_Raw%%1!=0~fearaf_adult_approx(FearAf_Raw)))
   if(fearsoma) df <- df %>% mutate(FearSoma_Theta = case_when(FearSoma_Raw%%1==0~fearsoma_adult(FearSoma_Raw),FearSoma_Raw%%1!=0~fearsoma_adult_approx(FearSoma_Raw)))
   if(friend) df <- df %>% mutate(Friend_Theta = case_when(Friend_Raw%%1==0~friend_adult(Friend_Raw),Friend_Raw%%1!=0~friend_adult_approx(Friend_Raw)))
@@ -232,6 +239,7 @@ score_emotb <- function(df, scales="all", max_impute=0.2, drop_items=FALSE,
     if(angpa) attr(df[["AngPA_Raw"]],"alpha") <- psych::alpha(df[,AngPA_items],max=100,warnings = F)$total
     if(anghost) attr(df[["AngHost_Raw"]],"alpha") <- psych::alpha(df[,AngHost_items],max=100,warnings = F)$total
     if(emosup) attr(df[["EmoSup_Raw"]],"alpha") <- psych::alpha(df[,EmoSup_items],max=100,warnings = F)$total
+    if(dls) attr(df[["DLS_Raw"]],"alpha") <- psych::alpha(df[,DLS_items],max=100,warnings = F)$total
     if(fearaf) attr(df[["FearAf_Raw"]],"alpha") <- psych::alpha(df[,FearAf_items],max=100,warnings = F)$total
     if(fearsoma) attr(df[["FearSoma_Raw"]],"alpha") <- psych::alpha(df[,FearSoma_items],max=100,warnings = F)$total
     if(friend) attr(df[["Friend_Raw"]],"alpha") <- psych::alpha(df[,Friend_items],max=100,warnings = F)$total
