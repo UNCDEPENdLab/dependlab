@@ -87,7 +87,7 @@ summarize_nmap_s2_self_report <- function(...) {
 
   self_report_complete <- self_report_complete |> dplyr::mutate(
     # count of complete items
-    iip_complete            = 100 - rowSums(is.na(self_report_complete[,   6: 95])),
+    iip_complete            =  90 - rowSums(is.na(self_report_complete[,   6: 95])),
     ctq_complete            =  28 - rowSums(is.na(self_report_complete[,  96:123])),
     panas_complete          =  20 - rowSums(is.na(self_report_complete[, 124:143])),
     pid_complete            = 100 - rowSums(is.na(self_report_complete[, 144:243])),
@@ -153,7 +153,7 @@ summarize_nmap_s2_self_report <- function(...) {
     emotb_apathy_missing    = rowSums(is.na(self_report_complete[, 845:851])),
     total_missing           = rowSums(is.na(self_report_complete[,   6:851])),
     # calculate % complete
-    iip_percent            = 1 - rowSums(is.na(self_report_complete[,   6: 95])) / 100,
+    iip_percent            = 1 - rowSums(is.na(self_report_complete[,   6: 95])) /  90,
     ctq_percent            = 1 - rowSums(is.na(self_report_complete[,  96:123])) /  28,
     panas_percent          = 1 - rowSums(is.na(self_report_complete[, 124:143])) /  20,
     pid_percent            = 1 - rowSums(is.na(self_report_complete[, 144:243])) / 100,
