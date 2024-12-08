@@ -74,7 +74,7 @@ summarize_nmap_s5_self_report <- function(...) {
       -c(Q322, Q323, Q328, Q329_1, Q329_2, Q655_1, Q655_2, matches("_TEXT")) # remove attention checks and text fields
     ) |>
     dplyr::arrange(id) |>
-    dplyr::select(RecordedDate, id, 40:596)
+    dplyr::select(RecordedDate, id, 40:581, Q338)
 
 
   # calculate # complete, # missing, and % completion per measure and totals per ID
@@ -93,9 +93,9 @@ summarize_nmap_s5_self_report <- function(...) {
     paibor_complete         =  24 - rowSums(is.na(self_report[, 507:530])),
     minispin_complete       =   3 - rowSums(is.na(self_report[, 531:533])),
     emotb_percstrs_complete =  10 - rowSums(is.na(self_report[, 534:543])),
-    promis_alc_complete     =   8 - rowSums(is.na(self_report[, 544:551])),
-    promis_ssu_complete     =   8 - rowSums(is.na(self_report[, 552:559])),
-    total_complete          = 557 - rowSums(is.na(self_report[,   3:559])),
+    promis_alc_complete     =   1 - rowSums(is.na(self_report[, 544:544])),
+    promis_ssu_complete     =   1 - rowSums(is.na(self_report[, 545:545])),
+    total_complete          = 543 - rowSums(is.na(self_report[,   3:545])),
     # count of missing items
     iip_missing             = rowSums(is.na(self_report[,   3: 92])),
     pid_missing             = rowSums(is.na(self_report[,  93:192])),
@@ -110,9 +110,9 @@ summarize_nmap_s5_self_report <- function(...) {
     paibor_missing          = rowSums(is.na(self_report[, 507:530])),
     minispin_missing        = rowSums(is.na(self_report[, 531:533])),
     emotb_percstrs_missing  = rowSums(is.na(self_report[, 534:543])),
-    promis_alc_missing      = rowSums(is.na(self_report[, 544:551])),
-    promis_ssu_missing      = rowSums(is.na(self_report[, 552:559])),
-    total_missing           = rowSums(is.na(self_report[,   3:559])),
+    promis_alc_missing      = rowSums(is.na(self_report[, 544:544])),
+    promis_ssu_missing      = rowSums(is.na(self_report[, 545:545])),
+    total_missing           = rowSums(is.na(self_report[,   3:545])),
     # calculate % complete
     iip_percent             = 1 - rowSums(is.na(self_report[,   3: 92])) /  90,
     pid_percent             = 1 - rowSums(is.na(self_report[,  93:192])) / 100,
@@ -127,11 +127,11 @@ summarize_nmap_s5_self_report <- function(...) {
     paibor_percent          = 1 - rowSums(is.na(self_report[, 507:530])) /  24,
     minispin_percent        = 1 - rowSums(is.na(self_report[, 531:533])) /   3,
     emotb_percstrs_percent  = 1 - rowSums(is.na(self_report[, 534:543])) /  10,
-    promis_alc_percent      = 1 - rowSums(is.na(self_report[, 544:551])) /   8,
-    promis_ssu_percent      = 1 - rowSums(is.na(self_report[, 552:559])) /   8,
-    total_percent           = 1 - rowSums(is.na(self_report[,   3:559])) / 557
+    promis_alc_percent      = 1 - rowSums(is.na(self_report[, 544:544])) /   1,
+    promis_ssu_percent      = 1 - rowSums(is.na(self_report[, 545:545])) /   1,
+    total_percent           = 1 - rowSums(is.na(self_report[,   3:545])) / 543
   ) |>
-    dplyr::select(id, 560:607)
+    dplyr::select(id, 546:593)
 
   return(self_report_complete)
 
