@@ -14,7 +14,7 @@
 #' @export
 #' @author Zach Vig
 
-import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE) {
+import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE, alphas_to_csv = FALSE) {
 
   self_report_data <- import_neuromap_self_reports(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
                                                    scales = "all", include_id = TRUE, include_dem = FALSE, path = path,
@@ -42,6 +42,27 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
     return(df)
   }
 
+  get_alphas <- function(scores_obj) {
+
+    df <- data.frame(matrix(data=numeric(), ncol = 10))
+    names(df) <- c("scale", "raw_alpha", "std.alpha", "G6(smc)", "average_r", "S/N", "ase", "mean", "sd", "median_r")
+
+    n <- length(scores_obj)
+    for (i in 1:n) {
+      m <- length(scores_obj[[i]])
+      for (j in 1:m) {
+        alpha <- attr(scores_obj[[i]][[j]], "alpha")
+        if (!is.null(alpha)) {
+          row <- cbind(scale = names(scores_obj[[i]])[j], alpha)
+          df <- rbind(df, row)
+        }
+      }
+    }
+
+    return(df)
+
+  }
+
   if(split_output){ #if true, splits output into a two tiered list of scores- and item- level data
 
     scored_self_report_data <- list()
@@ -50,6 +71,10 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
     scored_self_report_data[["scores"]]$ASR <- NULL #removes ASR since it only has raw data
 
     scored_self_report_data[["items"]] <- self_report_data
+
+    if(alphas_to_csv) {
+      write.csv(get_alphas(scored_self_report_data[["scores"]]), file = paste0(path,"/alphas_ALL_neuromap_self_reports", ifelse(file_date, timestamp, ""), ".csv"), row.names = FALSE)
+    }
 
   } else {
 
