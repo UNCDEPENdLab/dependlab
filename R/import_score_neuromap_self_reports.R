@@ -14,15 +14,19 @@
 #' @export
 #' @author Zach Vig
 
-import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE) {
+import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE) {
 
   self_report_data <- import_neuromap_self_reports(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
                                                    scales = "all", include_id = TRUE, include_dem = FALSE, path = path,
                                                    file_suffix = "_neuromap_self_reports", file_date = file_date, add_to_envr = TRUE)
 
-  score_all <- function(df, drop_items=logical()) {
+  score_all <- function(df, drop_items=logical(), path, file_date, scored_to_csv) {
 
     names <- names(df)
+
+    if(file_date){
+      timestamp <- gsub(":","_",format(Sys.time(), "_%d_%b_%I_%M_%p"))
+    }
 
     for(name in names){ #cycles through every scale that has a pre-defined scoring function in the dependlab package
 
@@ -30,6 +34,7 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
 
       if(exists(func, where='package:dependlab', mode='function')) {
         df[[name]] <- do.call(func,list(df=df[[name]],drop_items=drop_items))
+        if (scored_to_csv) write.csv(df[[name]], file = paste0(path,"/scored_", name, "_neuromap_self_reports", ifelse(file_date, timestamp, ""), ".csv"), row.names = FALSE)
       }
 
     }
@@ -41,14 +46,14 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
 
     scored_self_report_data <- list()
 
-    scored_self_report_data[["scores"]] <- score_all(self_report_data, drop_items = T)
+    scored_self_report_data[["scores"]] <- score_all(self_report_data, drop_items = T, path, file_date, scored_to_csv)
     scored_self_report_data[["scores"]]$ASR <- NULL #removes ASR since it only has raw data
 
     scored_self_report_data[["items"]] <- self_report_data
 
   } else {
 
-    scored_self_report_data <- score_all(self_report_data, drop_items = F)
+    scored_self_report_data <- score_all(self_report_data, drop_items = F, path, file_date, scored_to_csv)
 
   }
 
