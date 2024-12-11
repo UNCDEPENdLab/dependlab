@@ -80,6 +80,10 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
 
     scored_self_report_data <- score_all(self_report_data, drop_items = F, path, file_date, scored_to_csv)
 
+    if(alphas_to_csv) {
+      write.csv(get_alphas(scored_self_report_data), file = paste0(path,"/alphas_ALL_neuromap_self_reports", ifelse(file_date, timestamp, ""), ".csv"), row.names = FALSE)
+    }
+
   }
 
   return(scored_self_report_data)
