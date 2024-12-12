@@ -7,7 +7,9 @@
 import_score_neuromap_self_reports(
   split_output = TRUE,
   path = paste0(getwd(), "/neuromap_self_reports_repo"),
-  file_date = FALSE
+  file_date = FALSE,
+  scored_to_csv = TRUE,
+  alphas_to_csv = FALSE
 )
 }
 \arguments{
