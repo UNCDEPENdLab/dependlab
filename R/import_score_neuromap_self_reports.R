@@ -63,6 +63,10 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
 
   }
 
+  if(file_date){
+    timestamp <- gsub(":","_",format(Sys.time(), "_%d_%b_%I_%M_%p"))
+  }
+
   if(split_output){ #if true, splits output into a two tiered list of scores- and item- level data
 
     scored_self_report_data <- list()
