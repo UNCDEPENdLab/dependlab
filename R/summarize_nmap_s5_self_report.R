@@ -67,71 +67,71 @@ summarize_nmap_s5_self_report <- function(...) {
   # import all self report data from Qualtrics
   self_report <- suppressMessages(qualtRics::fetch_survey(surveyID = "SV_1ZkInh40pHM6w3Y", verbose = TRUE, breakout_sets = FALSE))
 
-  self_report <- self_report |>
-    dplyr::rename(id = Intro_ID) |>
-    dplyr::mutate(id = as.numeric(id)) |>
+  self_report <- self_report |> 
+    dplyr::rename(id = Intro_ID, date = Intro_Date) |> 
+    dplyr::mutate(id = as.numeric(id), date = as.Date(date, format = "%m/%d/%Y")) |> 
     dplyr::select(
       -c(Q322, Q323, Q328, Q329_1, Q329_2, Q655_1, Q655_2, matches("_TEXT")) # remove attention checks and text fields
-    ) |>
-    dplyr::arrange(id) |>
-    dplyr::select(RecordedDate, id, 40:581, Q338)
+    ) |> 
+    dplyr::arrange(id) |> 
+    dplyr::select(RecordedDate, id, 40:581, Q338, date)
 
 
-  # calculate # complete, # missing, and % completion per measure and totals per ID
-  self_report_complete <- self_report |> dplyr::mutate(
-    # count of complete items
-    iip_complete            =  90 - rowSums(is.na(self_report[,   3: 92])),
-    pid_complete            = 100 - rowSums(is.na(self_report[,  93:192])),
-    asr_complete            = 134 - rowSums(is.na(self_report[, 193:326])),
-    bpq_complete            =  80 - rowSums(is.na(self_report[, 327:406])),
-    fs_complete             =   8 - rowSums(is.na(self_report[, 407:414])),
-    bfi_complete            =  60 - rowSums(is.na(self_report[, 415:474])),
-    emotb_emosup_complete   =   8 - rowSums(is.na(self_report[, 475:482])),
-    emotb_friend_complete   =   8 - rowSums(is.na(self_report[, 483:490])),
-    emotb_perchost_complete =   8 - rowSums(is.na(self_report[, 491:498])),
-    emotb_percrej_complete  =   8 - rowSums(is.na(self_report[, 499:506])),
-    paibor_complete         =  24 - rowSums(is.na(self_report[, 507:530])),
-    minispin_complete       =   3 - rowSums(is.na(self_report[, 531:533])),
-    emotb_percstrs_complete =  10 - rowSums(is.na(self_report[, 534:543])),
-    promis_alc_complete     =   1 - rowSums(is.na(self_report[, 544:544])),
-    promis_ssu_complete     =   1 - rowSums(is.na(self_report[, 545:545])),
-    total_complete          = 543 - rowSums(is.na(self_report[,   3:545])),
-    # count of missing items
-    iip_missing             = rowSums(is.na(self_report[,   3: 92])),
-    pid_missing             = rowSums(is.na(self_report[,  93:192])),
-    asr_missing             = rowSums(is.na(self_report[, 193:326])),
-    bpq_missing             = rowSums(is.na(self_report[, 327:406])),
-    fs_missing              = rowSums(is.na(self_report[, 407:414])),
-    bfi_missing             = rowSums(is.na(self_report[, 415:474])),
-    emotb_emosup_missing    = rowSums(is.na(self_report[, 475:482])),
-    emotb_friend_missing    = rowSums(is.na(self_report[, 483:490])),
-    emotb_perchost_missing  = rowSums(is.na(self_report[, 491:498])),
-    emotb_percrej_missing   = rowSums(is.na(self_report[, 499:506])),
-    paibor_missing          = rowSums(is.na(self_report[, 507:530])),
-    minispin_missing        = rowSums(is.na(self_report[, 531:533])),
-    emotb_percstrs_missing  = rowSums(is.na(self_report[, 534:543])),
-    promis_alc_missing      = rowSums(is.na(self_report[, 544:544])),
-    promis_ssu_missing      = rowSums(is.na(self_report[, 545:545])),
-    total_missing           = rowSums(is.na(self_report[,   3:545])),
-    # calculate % complete
-    iip_percent             = 1 - rowSums(is.na(self_report[,   3: 92])) /  90,
-    pid_percent             = 1 - rowSums(is.na(self_report[,  93:192])) / 100,
-    asr_percent             = 1 - rowSums(is.na(self_report[, 193:326])) / 134,
-    bpq_percent             = 1 - rowSums(is.na(self_report[, 327:406])) /  80,
-    fs_percent              = 1 - rowSums(is.na(self_report[, 407:414])) /   8,
-    bfi_percent             = 1 - rowSums(is.na(self_report[, 415:474])) /  60,
-    emotb_emosup_percent    = 1 - rowSums(is.na(self_report[, 475:482])) /   8,
-    emotb_friend_percent    = 1 - rowSums(is.na(self_report[, 483:490])) /   8,
-    emotb_perchost_percent  = 1 - rowSums(is.na(self_report[, 491:498])) /   8,
-    emotb_percrej_percent   = 1 - rowSums(is.na(self_report[, 499:506])) /   8,
-    paibor_percent          = 1 - rowSums(is.na(self_report[, 507:530])) /  24,
-    minispin_percent        = 1 - rowSums(is.na(self_report[, 531:533])) /   3,
-    emotb_percstrs_percent  = 1 - rowSums(is.na(self_report[, 534:543])) /  10,
-    promis_alc_percent      = 1 - rowSums(is.na(self_report[, 544:544])) /   1,
-    promis_ssu_percent      = 1 - rowSums(is.na(self_report[, 545:545])) /   1,
-    total_percent           = 1 - rowSums(is.na(self_report[,   3:545])) / 543
+# calculate # complete, # missing, and % completion per measure and totals per ID
+self_report_complete <- self_report |> dplyr::mutate(
+  # count of complete items
+  iip_complete            =  90 - rowSums(is.na(self_report[,   3: 92])),
+  pid_complete            = 100 - rowSums(is.na(self_report[,  93:192])),
+  asr_complete            = 134 - rowSums(is.na(self_report[, 193:326])),
+  bpq_complete            =  80 - rowSums(is.na(self_report[, 327:406])),
+  fs_complete             =   8 - rowSums(is.na(self_report[, 407:414])),
+  bfi_complete            =  60 - rowSums(is.na(self_report[, 415:474])),
+  emotb_emosup_complete   =   8 - rowSums(is.na(self_report[, 475:482])),
+  emotb_friend_complete   =   8 - rowSums(is.na(self_report[, 483:490])),
+  emotb_perchost_complete =   8 - rowSums(is.na(self_report[, 491:498])),
+  emotb_percrej_complete  =   8 - rowSums(is.na(self_report[, 499:506])),
+  paibor_complete         =  24 - rowSums(is.na(self_report[, 507:530])),
+  minispin_complete       =   3 - rowSums(is.na(self_report[, 531:533])),
+  emotb_percstrs_complete =  10 - rowSums(is.na(self_report[, 534:543])),
+  promis_alc_complete     =   1 - rowSums(is.na(self_report[, 544:544])),
+  promis_ssu_complete     =   1 - rowSums(is.na(self_report[, 545:545])),
+  total_complete          = 543 - rowSums(is.na(self_report[,   3:545])),
+  # count of missing items
+  iip_missing             = rowSums(is.na(self_report[,   3: 92])),
+  pid_missing             = rowSums(is.na(self_report[,  93:192])),
+  asr_missing             = rowSums(is.na(self_report[, 193:326])),
+  bpq_missing             = rowSums(is.na(self_report[, 327:406])),
+  fs_missing              = rowSums(is.na(self_report[, 407:414])),
+  bfi_missing             = rowSums(is.na(self_report[, 415:474])),
+  emotb_emosup_missing    = rowSums(is.na(self_report[, 475:482])),
+  emotb_friend_missing    = rowSums(is.na(self_report[, 483:490])),
+  emotb_perchost_missing  = rowSums(is.na(self_report[, 491:498])),
+  emotb_percrej_missing   = rowSums(is.na(self_report[, 499:506])),
+  paibor_missing          = rowSums(is.na(self_report[, 507:530])),
+  minispin_missing        = rowSums(is.na(self_report[, 531:533])),
+  emotb_percstrs_missing  = rowSums(is.na(self_report[, 534:543])),
+  promis_alc_missing      = rowSums(is.na(self_report[, 544:544])),
+  promis_ssu_missing      = rowSums(is.na(self_report[, 545:545])),
+  total_missing           = rowSums(is.na(self_report[,   3:545])),
+  # calculate % complete
+  iip_percent             = 1 - rowSums(is.na(self_report[,   3: 92])) /  90,
+  pid_percent             = 1 - rowSums(is.na(self_report[,  93:192])) / 100,
+  asr_percent             = 1 - rowSums(is.na(self_report[, 193:326])) / 134,
+  bpq_percent             = 1 - rowSums(is.na(self_report[, 327:406])) /  80,
+  fs_percent              = 1 - rowSums(is.na(self_report[, 407:414])) /   8,
+  bfi_percent             = 1 - rowSums(is.na(self_report[, 415:474])) /  60,
+  emotb_emosup_percent    = 1 - rowSums(is.na(self_report[, 475:482])) /   8,
+  emotb_friend_percent    = 1 - rowSums(is.na(self_report[, 483:490])) /   8,
+  emotb_perchost_percent  = 1 - rowSums(is.na(self_report[, 491:498])) /   8,
+  emotb_percrej_percent   = 1 - rowSums(is.na(self_report[, 499:506])) /   8,
+  paibor_percent          = 1 - rowSums(is.na(self_report[, 507:530])) /  24,
+  minispin_percent        = 1 - rowSums(is.na(self_report[, 531:533])) /   3,
+  emotb_percstrs_percent  = 1 - rowSums(is.na(self_report[, 534:543])) /  10,
+  promis_alc_percent      = 1 - rowSums(is.na(self_report[, 544:544])) /   1,
+  promis_ssu_percent      = 1 - rowSums(is.na(self_report[, 545:545])) /   1,
+  total_percent           = 1 - rowSums(is.na(self_report[,   3:545])) / 543
   ) |>
-    dplyr::select(id, 546:593)
+  dplyr::select(id, date, 546:594)
 
   return(self_report_complete)
 
