@@ -13,6 +13,8 @@
 #'
 #' @export
 #' @author Zach Vig
+# CV and RV's asks from Michael adding score and alpha information for each subsale/scale as needed
+### so adding another function that just has the ability to pull in seperate subscales scales
 
 import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE, alphas_to_csv = FALSE) {
 
