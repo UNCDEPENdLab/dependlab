@@ -44,6 +44,7 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
                                          file_suffix = "", file_date = FALSE, add_to_envr = FALSE){
 # browser()
   #function info
+  ## CV ask: can we add this as a list that the user gives or the all scales option
   if(info){
     message("Current version extracts the following scales: \n 'iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb' \n Version 0.0.5 -- upd. December 11, 2024")
     scales_to_score<<-c('iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb')
