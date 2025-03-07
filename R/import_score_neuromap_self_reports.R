@@ -3,23 +3,35 @@
 #' This is a comprehensive function for importing, scoring, and storing NeuroMAP self report data to be used in a data analysis pipeline.
 #' It uses the `import_neuromap_self_reports` and applicable `score_` functions from the dependlab package.
 #'
-#' @param split_output if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively. Default: /code{TRUE}
+#' @param split_output if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively.
+#'                      Otherwise, outputs scores and items in same dataframe, per scale. Default: /code{TRUE}
 #' @param path string containing path to house csv data exports. Creates a new directory if it doesn't already exist.
 #'          Default creates a new folder called "neuromap_self_reports_repo" in the working directory.
 #' @param file_date Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
 #'   Default is \code{FALSE}.
+#' @param scored_to_csv Logical. If \code{TRUE}, saves scored data to csv.
+#' @param alphas Logical. If \code{TRUE}, saves (summary) alpha data to csv.
+#' @param bypass_menu Logical. If \code{FALSE}, bypasses scale choice menu and imports all data (for testing, etc.)
 #'
 #' Note: the embedded `import_neuromap_self_reports` exports new csvs into the data repo with a date/time stamp every time the function is run
 #'
 #' @export
 #' @author Zach Vig
-# CV and RV's asks from Michael adding score and alpha information for each subsale/scale as needed
-### so adding another function that just has the ability to pull in seperate subscales scales
+#'
+#' @importFrom coda multi.menu
 
-import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE, alphas_to_csv = FALSE) {
+import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste0(getwd(),"/neuromap_self_reports_repo"), file_date = FALSE, scored_to_csv = TRUE, alphas_to_csv = FALSE, bypass_menu = FALSE) {
+
+
+  choices <- c('iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb', 'all'); scales_to_score <- 14
+
+  if (isFALSE(bypass_menu)) {
+    scales_to_score <- coda::multi.menu(choices, title = "Self-Reports to Import/Score. Choose 'all' (option 14) to import all scales")
+    if(any(scales_to_score == 0)) stop("No scales selected. Quitting import.")
+  }
 
   self_report_data <- import_neuromap_self_reports(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
-                                                   scales = "all", include_id = TRUE, include_dem = FALSE, path = path,
+                                                   scales = choices[scales_to_score], include_id = TRUE, include_dem = FALSE, path = path,
                                                    file_suffix = "_neuromap_self_reports", file_date = file_date, add_to_envr = TRUE)
 
   score_all <- function(df, drop_items=logical(), path, file_date, scored_to_csv) {
@@ -53,7 +65,7 @@ import_score_neuromap_self_reports <- function(split_output = TRUE, path = paste
     for (i in 1:n) {
       m <- length(scores_obj[[i]])
       for (j in 1:m) {
-        alpha <- attr(scores_obj[[i]][[j]], "alpha")
+        alpha <- attr(scores_obj[[i]][[j]], "alpha")$total
         if (!is.null(alpha)) {
           row <- cbind(scale = names(scores_obj[[i]])[j], alpha)
           df <- rbind(df, row)

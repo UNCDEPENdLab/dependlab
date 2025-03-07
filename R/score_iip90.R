@@ -126,22 +126,22 @@ score_iip90 <- function(df, item_prefix="IIP_", max_impute=0.2, drop_items=FALSE
 
   #compute alphas
   if(add_alphas) {
-    attr(df$IIP_pa,"alpha") <- psych::alpha(df[,pa_items],max=100,warnings = F)$total
-    attr(df$IIP_bc,"alpha") <- psych::alpha(df[,bc_items],max=100,warnings = F)$total
-    attr(df$IIP_de,"alpha") <- psych::alpha(df[,de_items],max=100,warnings = F)$total
-    attr(df$IIP_fg,"alpha") <- psych::alpha(df[,fg_items],max=100,warnings = F)$total
-    attr(df$IIP_hi,"alpha") <- psych::alpha(df[,hi_items],max=100,warnings = F)$total
-    attr(df$IIP_jk,"alpha") <- psych::alpha(df[,jk_items],max=100,warnings = F)$total
-    attr(df$IIP_lm,"alpha") <- psych::alpha(df[,lm_items],max=100,warnings = F)$total
-    attr(df$IIP_no,"alpha") <- psych::alpha(df[,no_items],max=100,warnings = F)$total
-    attr(df$IIP_bpd,"alpha") <- psych::alpha(df[,bpd_items],max=100,warnings = F)$total
-    attr(df$IIP_sensitivity_pd1,"alpha") <- psych::alpha(df[,sensitivity_pd1_items],max=100,warnings = F)$total
-    attr(df$IIP_ambivalence_pd2,"alpha") <- psych::alpha(df[,ambivalence_pd2_items],max=100,warnings = F)$total
-    attr(df$IIP_aggression_pd3,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)$total
-    attr(df$IIP_approval_c1,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)$total
-    attr(df$IIP_lacksocial_c2,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)$total
-    attr(df$IIP_c,"alpha") <- psych::alpha(df[,c_scales],max=100,warnings = F)$total
-    attr(df$IIP_pd,"alpha") <- psych::alpha(df[,pd_scales],max=100,warnings = F)$total
+    attr(df$IIP_pa,"alpha") <- psych::alpha(df[,pa_items],max=100,warnings = F)
+    attr(df$IIP_bc,"alpha") <- psych::alpha(df[,bc_items],max=100,warnings = F)
+    attr(df$IIP_de,"alpha") <- psych::alpha(df[,de_items],max=100,warnings = F)
+    attr(df$IIP_fg,"alpha") <- psych::alpha(df[,fg_items],max=100,warnings = F)
+    attr(df$IIP_hi,"alpha") <- psych::alpha(df[,hi_items],max=100,warnings = F)
+    attr(df$IIP_jk,"alpha") <- psych::alpha(df[,jk_items],max=100,warnings = F)
+    attr(df$IIP_lm,"alpha") <- psych::alpha(df[,lm_items],max=100,warnings = F)
+    attr(df$IIP_no,"alpha") <- psych::alpha(df[,no_items],max=100,warnings = F)
+    attr(df$IIP_bpd,"alpha") <- psych::alpha(df[,bpd_items],max=100,warnings = F)
+    attr(df$IIP_sensitivity_pd1,"alpha") <- psych::alpha(df[,sensitivity_pd1_items],max=100,warnings = F)
+    attr(df$IIP_ambivalence_pd2,"alpha") <- psych::alpha(df[,ambivalence_pd2_items],max=100,warnings = F)
+    attr(df$IIP_aggression_pd3,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_approval_c1,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_lacksocial_c2,"alpha") <- psych::alpha(df[,aggression_pd3_items],max=100,warnings = F)
+    attr(df$IIP_c,"alpha") <- psych::alpha(df[,c_scales],max=100,warnings = F)
+    attr(df$IIP_pd,"alpha") <- psych::alpha(df[,pd_scales],max=100,warnings = F)
   }
 
   #drop octants and item-level data
