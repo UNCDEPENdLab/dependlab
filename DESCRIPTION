@@ -1,8 +1,8 @@
 Package: dependlab
 Type: Package
 Title: Useful functions for the UNC Chapel Hill DEPENd Lab (Director: Michael Hallquist)
-Version: 0.2
-Date: 2024-05-16
+Version: 0.2-1
+Date: 2025-04-08
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
@@ -25,8 +25,12 @@ Imports:
     forecast,
     fs,
     ggplot2,
+    glue,
+    Hmisc,
     janitor,
+    JuliaCall,
     lme4,
+    MASS,
     oro.nifti,
     orthopolynom,
     psych,
@@ -34,12 +38,10 @@ Imports:
     qualtRics,
     signal,
     tibble,
-    usethis,
-    Hmisc,
     tidyr,
+    usethis,
     reshape2,
     scales,
-    MASS,
     R.matlab,
     RNifti,
     doParallel,

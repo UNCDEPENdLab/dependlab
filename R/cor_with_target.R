@@ -69,7 +69,13 @@ cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, par
 
     #reorder by correlation size if requested
     if (orderbyr == TRUE) {
-      corr_df <- corr_df %>% dplyr::arrange(desc(r))
+      if (!is.null(absrmin)) {
+        # arrange by absolute correlation since that is of interest
+        corr_df <- corr_df %>% dplyr::arrange(desc(abs(r)))
+      } else {
+        corr_df <- corr_df %>% dplyr::arrange(desc(r))
+      }
+
     }
 
     return(corr_df)
