@@ -19,6 +19,7 @@
 #'   methods are available (e.g. methods(class="merMod"))
 #' @importFrom JuliaCall julia_setup julia_command julia_assign julia_eval
 #' @importFrom glue glue
+#' @export
 jlmer <- function(formula=NULL, data=NULL, REML=TRUE, JULIA_HOME=NULL) {
   julia <- julia_setup(JULIA_HOME=JULIA_HOME)
   julia_command("using MixedModels, RCall, JellyMe4")
