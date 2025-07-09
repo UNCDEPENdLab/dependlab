@@ -14,7 +14,7 @@
 #' @author Zach Vig
 #'
 #'
-#' @importFrom cli cli_alert_danger cli_alert_info
+#' @importFrom cli cli_alert_danger cli_alert_info cli_process_done cli_process_start
 #' @importFrom magrittr %>%
 #' @importFrom tidyr separate gather
 #' @importFrom dplyr mutate transmute select arrange filter bind_rows
@@ -35,6 +35,10 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
       "i" = "Use 'qualtrics_api_credentials()' to configure.")
     )
   }
+
+  cli::cli_process_start(
+    msg = "Downloading Qualtrics data"
+    )
 
   # validates survey name
   all_surveys <- qualtRics::all_surveys()
@@ -92,6 +96,10 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
     }
   }
 
+  cli::cli_process_done(
+    msg_done = "Qualtrics data downloaded"
+    )
+
   # function for matching information
   match_med <- function(in_med_name, col = "med_class", is_exact_match = F) {
 
@@ -115,10 +123,6 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
       transmute(id = id, ref_alt_names = gsub("[aeiouy]", "_", alt_names))
 
     for (m in seq_along(in_med_name)) {
-
-      cli::cli_progress_update(
-        .envir = .GlobalEnv
-      )
 
       # check for a match
       match_id <- with(med_names, id[stringr::str_like(in_med_name[m], ref_med_name)])
@@ -165,11 +169,9 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
 
   }
 
-  cli::cli_progress_bar(
-    name = "Matching medication names...",
-    total = nrow(df) * 4,
-    .envir = .GlobalEnv
-  )
+  cli::cli_process_start(
+    msg = "Matching medication names"
+    )
 
   df <- df %>%
     mutate(
@@ -179,10 +181,9 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
       name_flag = match_med(med_raw, is_exact_match = TRUE)
     )
 
-  cli::cli_progress_done(
-    .envir = .GlobalEnv,
-    result = "clear"
-  )
+  cli::cli_process_done(
+    msg_done = "Medication names matched"
+    )
 
   get_dose <- function(in_dose, get_amt = TRUE) {
 
