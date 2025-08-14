@@ -42,10 +42,11 @@
 import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_name = "NeuroMAP S2 - Self Report",
                                          scales = "all", include_id = TRUE, include_dem = FALSE, path = getwd(),
                                          file_suffix = "", file_date = FALSE, add_to_envr = FALSE){
-
+# browser()
   #function info
+  ## CV ask: can we add this as a list that the user gives or the all scales option
   if(info){
-    message("Current version extracts the following scales: \n 'iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb' \n Version 0.0.4 -- upd. June 26, 2023")
+    message("Current version extracts the following scales: \n 'iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb' \n Version 0.0.5 -- upd. December 11, 2024")
     scales_to_score<<-c('iip90','ctq','panas','pid5','asr','bpq','fs','dusi','isc','upps','bfi','cts','emotb')
     return(invisible(NULL))
   }
@@ -65,7 +66,7 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
 
   #import all self report data from Qualtrics
   survey_info <- all_surveys %>% filter(name == survey_name)
-  self_report_data <- suppressMessages(fetch_survey(survey_info$id, force_request=TRUE, convert=FALSE, label=FALSE, verbose = FALSE))
+  self_report_data <- suppressMessages(fetch_survey(survey_info$id, convert=FALSE, label=FALSE, verbose = FALSE))
 
   #self-report data stats
   if(stats){
@@ -126,9 +127,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some IIP90 scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(iip90, file = paste0(path,"/IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(iip90, file = paste0(path,"/raw_IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_IIP90",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "IIP90"
     }
   }
@@ -144,9 +145,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some CTQ scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(ctq, file = paste0(path,"/CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(ctq, file = paste0(path,"/raw_CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_CTQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "CTQ"
     }
   }
@@ -162,9 +163,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some PANAS scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(panas, file = paste0(path,"/PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(panas, file = paste0(path,"/raw_PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_PANAS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "PANAS"
     }
   }
@@ -183,16 +184,16 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some PID5 scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(pid5, file = paste0(path,"/PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(pid5, file = paste0(path,"/raw_PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_PID5",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "PID5"
     }
   }
 
   #ASR -- Adult Self Report [Ages 18-59] (126 items)
   if("asr" %in% scales | "all" %in% scales) {
-    asr <- self_report_data %>% select(starts_with(c("ASR_","Q8.2","Q8.3","Q8.4"))) %>% rename(ASR_124=Q8.2) %>% rename(ASR_125=Q8.3) %>% rename(ASR_126=Q8.4)
+    asr <- self_report_data %>% select(starts_with(c("ASR_")))#,"Q8.2","Q8.3","Q8.4"))) %>% rename(ASR_124=Q8.2) %>% rename(ASR_125=Q8.3) %>% rename(ASR_126=Q8.4)
     if(include_dem){ asr <- bind_cols(dem,asr) }
     if(include_id){ asr <- bind_cols(ids,asr) }
 
@@ -201,9 +202,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some ASR scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(asr, file = paste0(path,"/ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(asr, file = paste0(path,"/raw_ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_ASR",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "ASR"
     }
   }
@@ -219,9 +220,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some BPQ scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(bpq, file = paste0(path,"/BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(bpq, file = paste0(path,"/raw_BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_BPQ",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "BPQ"
     }
   }
@@ -237,9 +238,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some FS scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(fs, file = paste0(path,"/FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(fs, file = paste0(path,"/raw_FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_FS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "FS"
     }
   }
@@ -255,9 +256,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some DUSI scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(dusi, file = paste0(path,"/DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(dusi, file = paste0(path,"/raw_DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_DUSI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "DUSI"
     }
   }
@@ -273,9 +274,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some ISC scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(isc, file = paste0(path,"/ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(isc, file = paste0(path,"/raw_ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_ISC",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "ISC"
     }
   }
@@ -296,9 +297,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some UPPS scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(upps, file = paste0(path,"/UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(upps, file = paste0(path,"/raw_UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_UPPS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "UPPS"
     }
   }
@@ -314,9 +315,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some BFI scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(bfi, file = paste0(path,"/BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(bfi, file = paste0(path,"/raw_BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_BFI",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "BFI"
     }
   }
@@ -332,9 +333,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some CTS scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(cts, file = paste0(path,"/CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(cts, file = paste0(path,"/raw_CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_CTS",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "CTS"
     }
   }
@@ -350,9 +351,9 @@ import_neuromap_self_reports <- function(info = FALSE, stats = FALSE, survey_nam
       warning("Some NIH-EMOTB scores are outside the expected range. \n The recoding scheme may have been altered in Qualtrics.")
     }
 
-    write.csv(emotb, file = paste0(path,"/EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
+    write.csv(emotb, file = paste0(path,"/raw_EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"), row.names=FALSE)
     if(add_to_envr){
-      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
+      data.list[[length(data.list)+1]] <- read.csv(paste0(path,"/raw_EMOTB",file_suffix,ifelse(file_date, timestamp, ""),".csv"))
       names(data.list)[[length(data.list)]] <- "EMOTB"
     }
   }

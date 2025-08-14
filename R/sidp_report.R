@@ -35,6 +35,8 @@ sidp_report <- function(id){
   target_id <- id
   this_subject_summary <- sidp_all[["summary"]] %>% dplyr::filter(id == target_id)
 
+  stopifnot("More than one SIDP document detected. Make sure the correct form is the only one on qualtrics website." =
+              nrow(this_subject_summary) == 1)
 
 
   pds <- c("bordl", "avoid", "narci", "antso", "obcmp", "histr", "parnd", "depen", "szoid", "stypl")

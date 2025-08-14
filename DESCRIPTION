@@ -1,43 +1,53 @@
 Package: dependlab
 Type: Package
 Title: Useful functions for the UNC Chapel Hill DEPENd Lab (Director: Michael Hallquist)
-Version: 0.1.5
-Date: 2019-05-18
+Version: 0.2-1
+Date: 2025-04-08
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: This packages contains handy functions developed by the DEPENd lab.
-  At the moment, the largest contribution is build_design_matrix, which provides
-  tools for building fMRI design matrices and examining their structure.
 License: GPL-3
 Encoding: UTF-8
 LazyLoad: yes
 LazyData: yes
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
+Depends:
+    R (>= 3.5.0),
+    methods
 Imports:
     cabinets,
     car,
     data.table,
     dplyr,
+    flextable,
     fmri,
     forecast,
+    fs,
     ggplot2,
+    glue,
+    Hmisc,
+    janitor,
+    JuliaCall,
     lme4,
+    MASS,
     oro.nifti,
     orthopolynom,
+    psych,
+    purrr,
+    qualtRics,
     signal,
-    Hmisc,
+    tibble,
     tidyr,
+    usethis,
     reshape2,
     scales,
-    MASS,
     R.matlab,
     RNifti,
     doParallel,
     foreach,
     matlabr,
     iterators,
-    flextable,
     bbmle,
     checkmate,
     Microsoft365R,

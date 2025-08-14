@@ -1,6 +1,6 @@
 #' @title Useful functions for the UNC Chapel Hill DEPENd Lab (Director: Michael Hallquist)
-#' @docType package
-#' @name dependlab
+#' @name dependlab-package
+#' @aliases dependlab
 #'
 #' @description This package provides handy R functions for common tasks in the lab including
 #'   obtaining predictions from multilevel models, computing targeted correlations, or building
@@ -29,4 +29,4 @@
 #' @import lme4
 #' @importFrom utils packageDescription
 #' @importFrom Rcpp sourceCpp
-NULL
+"_PACKAGE"

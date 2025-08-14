@@ -24,6 +24,7 @@
 #' @author Michael Hallquist, Zach Vig
 #'
 #' @importFrom dplyr select mutate
+#' @importFrom psych alpha
 #'
 score_pid5 <- function(df, item_prefix="PID_", max_impute=0.2, drop_items=FALSE,
                        min_value=0, max_value=3, bad_items=NULL, add_alphas=TRUE) {
@@ -178,36 +179,36 @@ score_pid5 <- function(df, item_prefix="PID_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$PID_anh,"alpha") <- psych::alpha(df[,anh_items],max=100,warnings = F)$total
-    attr(df$PID_anx,"alpha") <- psych::alpha(df[,anx_items],max=100,warnings = F)$total
-    attr(df$PID_attn,"alpha") <- psych::alpha(df[,attn_items],max=100,warnings = F)$total
-    attr(df$PID_callous,"alpha") <- psych::alpha(df[,callous_items],max=100,warnings = F)$total
-    attr(df$PID_deceit,"alpha") <- psych::alpha(df[,deceit_items],max=100,warnings = F)$total
-    attr(df$PID_depres,"alpha") <- psych::alpha(df[,depres_items],max=100,warnings = F)$total
-    attr(df$PID_distr,"alpha") <- psych::alpha(df[,distr_items],max=100,warnings = F)$total
-    attr(df$PID_ecc,"alpha") <- psych::alpha(df[,ecc_items],max=100,warnings = F)$total
-    attr(df$PID_emo_lab,"alpha") <- psych::alpha(df[,emo_lab_items],max=100,warnings = F)$total
-    attr(df$PID_grnd,"alpha") <- psych::alpha(df[,grnd_items],max=100,warnings = F)$total
-    attr(df$PID_host,"alpha") <- psych::alpha(df[,host_items],max=100,warnings = F)$total
-    attr(df$PID_impuls,"alpha") <- psych::alpha(df[,impuls_items],max=100,warnings = F)$total
-    attr(df$PID_int_avd,"alpha") <- psych::alpha(df[,int_avd_items],max=100,warnings = F)$total
-    attr(df$PID_irr,"alpha") <- psych::alpha(df[,irr_items],max=100,warnings = F)$total
-    attr(df$PID_man,"alpha") <- psych::alpha(df[,man_items],max=100,warnings = F)$total
-    attr(df$PID_perc_dysreg,"alpha") <- psych::alpha(df[,perc_dysreg_items],max=100,warnings = F)$total
-    attr(df$PID_persev,"alpha") <- psych::alpha(df[,persev_items],max=100,warnings = F)$total
-    attr(df$PID_rest_aff,"alpha") <- psych::alpha(df[,rest_aff_items],max=100,warnings = F)$total
-    attr(df$PID_perf,"alpha") <- psych::alpha(df[,perf_items],max=100,warnings = F)$total
-    attr(df$PID_rt,"alpha") <- psych::alpha(df[,rt_items],max=100,warnings = F)$total
-    attr(df$PID_sep_insec,"alpha") <- psych::alpha(df[,sep_insec_items],max=100,warnings = F)$total
-    attr(df$PID_sub,"alpha") <- psych::alpha(df[,sub_items],max=100,warnings = F)$total
-    attr(df$PID_sus,"alpha") <- psych::alpha(df[,sus_items],max=100,warnings = F)$total
-    attr(df$PID_unusual,"alpha") <- psych::alpha(df[,unusual_items],max=100,warnings = F)$total
-    attr(df$PID_wthdrwl,"alpha") <- psych::alpha(df[,wthdrwl_items],max=100,warnings = F)$total
-    attr(df$PID_neg_aff,"alpha") <- psych::alpha(df[,neg_aff_items],max=100,warnings = F)$total
-    attr(df$PID_detach,"alpha") <- psych::alpha(df[,detach_items],max=100,warnings = F)$total
-    attr(df$PID_antag,"alpha") <- psych::alpha(df[,antag_items],max=100,warnings = F)$total
-    attr(df$PID_disinhib,"alpha") <- psych::alpha(df[,disinhib_items],max=100,warnings = F)$total
-    attr(df$PID_psycho,"alpha") <- psych::alpha(df[,psycho_items],max=100,warnings = F)$total
+    attr(df$PID_anh,"alpha") <- psych::alpha(df[,anh_items],max=100,warnings = F)
+    attr(df$PID_anx,"alpha") <- psych::alpha(df[,anx_items],max=100,warnings = F)
+    attr(df$PID_attn,"alpha") <- psych::alpha(df[,attn_items],max=100,warnings = F)
+    attr(df$PID_callous,"alpha") <- psych::alpha(df[,callous_items],max=100,warnings = F)
+    attr(df$PID_deceit,"alpha") <- psych::alpha(df[,deceit_items],max=100,warnings = F)
+    attr(df$PID_depres,"alpha") <- psych::alpha(df[,depres_items],max=100,warnings = F)
+    attr(df$PID_distr,"alpha") <- psych::alpha(df[,distr_items],max=100,warnings = F)
+    attr(df$PID_ecc,"alpha") <- psych::alpha(df[,ecc_items],max=100,warnings = F)
+    attr(df$PID_emo_lab,"alpha") <- psych::alpha(df[,emo_lab_items],max=100,warnings = F)
+    attr(df$PID_grnd,"alpha") <- psych::alpha(df[,grnd_items],max=100,warnings = F)
+    attr(df$PID_host,"alpha") <- psych::alpha(df[,host_items],max=100,warnings = F)
+    attr(df$PID_impuls,"alpha") <- psych::alpha(df[,impuls_items],max=100,warnings = F)
+    attr(df$PID_int_avd,"alpha") <- psych::alpha(df[,int_avd_items],max=100,warnings = F)
+    attr(df$PID_irr,"alpha") <- psych::alpha(df[,irr_items],max=100,warnings = F)
+    attr(df$PID_man,"alpha") <- psych::alpha(df[,man_items],max=100,warnings = F)
+    attr(df$PID_perc_dysreg,"alpha") <- psych::alpha(df[,perc_dysreg_items],max=100,warnings = F)
+    attr(df$PID_persev,"alpha") <- psych::alpha(df[,persev_items],max=100,warnings = F)
+    attr(df$PID_rest_aff,"alpha") <- psych::alpha(df[,rest_aff_items],max=100,warnings = F)
+    attr(df$PID_perf,"alpha") <- psych::alpha(df[,perf_items],max=100,warnings = F)
+    attr(df$PID_rt,"alpha") <- psych::alpha(df[,rt_items],max=100,warnings = F)
+    attr(df$PID_sep_insec,"alpha") <- psych::alpha(df[,sep_insec_items],max=100,warnings = F)
+    attr(df$PID_sub,"alpha") <- psych::alpha(df[,sub_items],max=100,warnings = F)
+    attr(df$PID_sus,"alpha") <- psych::alpha(df[,sus_items],max=100,warnings = F)
+    attr(df$PID_unusual,"alpha") <- psych::alpha(df[,unusual_items],max=100,warnings = F)
+    attr(df$PID_wthdrwl,"alpha") <- psych::alpha(df[,wthdrwl_items],max=100,warnings = F)
+    attr(df$PID_neg_aff,"alpha") <- psych::alpha(df[,neg_aff_items],max=100,warnings = F)
+    attr(df$PID_detach,"alpha") <- psych::alpha(df[,detach_items],max=100,warnings = F)
+    attr(df$PID_antag,"alpha") <- psych::alpha(df[,antag_items],max=100,warnings = F)
+    attr(df$PID_disinhib,"alpha") <- psych::alpha(df[,disinhib_items],max=100,warnings = F)
+    attr(df$PID_psycho,"alpha") <- psych::alpha(df[,psycho_items],max=100,warnings = F)
   }
 
   #drop item-level data

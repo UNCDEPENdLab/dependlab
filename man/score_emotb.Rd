@@ -12,9 +12,9 @@ score_emotb(
   keep_reverse_codes = FALSE,
   add_alphas = TRUE,
   item_prefix = c("TB_PercStrs_", "TB_Self_", "TB_MP_", "TB_Sad_", "TB_GLS_",
-    "TB_PosAf_", "TB_AngAf_", "TB_AngPA_", "TB_AngHost_", "TB_EmoSup_", "TB_FearAf_",
-    "TB_FearSoma_", "TB_Friend_", "TB_InstrSup_", "TB_Lone_", "TB_PercHost_",
-    "TB_PercRej_", "TB_Apathy_")
+    "TB_PosAf_", "TB_AngAf_", "TB_AngPA_", "TB_AngHost_", "TB_EmoSup_", "TB_DLS_",
+    "TB_FearAf_", "TB_FearSoma_", "TB_Friend_", "TB_InstrSup_", "TB_Lone_",
+    "TB_PercHost_", "TB_PercRej_", "TB_Apathy_")
 )
 }
 \arguments{

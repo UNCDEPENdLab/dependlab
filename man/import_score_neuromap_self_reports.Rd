@@ -7,19 +7,29 @@
 import_score_neuromap_self_reports(
   split_output = TRUE,
   path = paste0(getwd(), "/neuromap_self_reports_repo"),
-  file_date = FALSE
+  file_date = FALSE,
+  scored_to_csv = TRUE,
+  alphas_to_csv = FALSE,
+  bypass_menu = FALSE
 )
 }
 \arguments{
-\item{split_output}{if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively. Default: /code{TRUE}}
+\item{split_output}{if true, outputs a list object with "scores" and "items" containing score- and item- level data, respectively.
+Otherwise, outputs scores and items in same dataframe, per scale. Default: /code{TRUE}}
 
 \item{path}{string containing path to house csv data exports. Creates a new directory if it doesn't already exist.
 Default creates a new folder called "neuromap_self_reports_repo" in the working directory.}
 
 \item{file_date}{Logical. If \code{TRUE}, appends a timestamp with the format "_%b_%d_%I_%M_%p" to the output file names.
-  Default is \code{FALSE}.
+Default is \code{FALSE}.}
+
+\item{scored_to_csv}{Logical. If \code{TRUE}, saves scored data to csv.}
+
+\item{bypass_menu}{Logical. If \code{FALSE}, bypasses scale choice menu and imports all data (for testing, etc.)
 
 Note: the embedded `import_neuromap_self_reports` exports new csvs into the data repo with a date/time stamp every time the function is run}
+
+\item{alphas}{Logical. If \code{TRUE}, saves (summary) alpha data to csv.}
 }
 \description{
 This is a comprehensive function for importing, scoring, and storing NeuroMAP self report data to be used in a data analysis pipeline.

@@ -158,7 +158,7 @@ local_job_status <- function(job_ids=NULL, user=NULL,
     ustring <- paste("-u", paste(user, collapse=","))
   } else { ustring <- "" }
 
-  res <- suppressWarnings(system2("ps", args=paste(jstring, ustring, "-o", ps_format), stdou=TRUE)) #intern=TRUE)
+  res <- suppressWarnings(system2("ps", args=paste(jstring, ustring, "-o", ps_format), stdout=TRUE)) #intern=TRUE)
   #header <- gregexpr("\\b", res[1], perl=T)
 
   #print(res)

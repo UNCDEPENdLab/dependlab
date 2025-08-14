@@ -22,8 +22,9 @@
 cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, partial=NULL, absrmin=NULL, digits=3, prewhiten=FALSE, orderbyr=FALSE) {
 
   if (!is.null(omit)) {
-    dnames <- which(names(df) %in% omit)
-    df <- df[,-1*dnames]
+    dnames <- setdiff(names(df), omit)
+    if (length(dnames) == 0L) stop("There are no remaining columns after applying the requested omit.")
+    df <- df[,dnames,drop=FALSE]
   }
 
   if (is.null(withvars)) {
@@ -42,11 +43,11 @@ cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, par
       if (prewhiten) {
         r <- residuals(lm(df[,tv] ~ df[,wv]))
         a <- auto.arima(r)
-        x <- Arima(df[,wv], model=a)$residuals
-        y <- Arima(df[,tv], model=a)$residuals
+        x <- Arima(df[[wv]], model=a)$residuals
+        y <- Arima(df[[tv]], model=a)$residuals
       } else {
-        x <- df[,wv]
-        y <- df[,tv]
+        x <- df[[wv]] # use list syntax to ensure that we get back a vector (tibbles don't have drop=TRUE by default)
+        y <- df[[tv]]
       }
 
       tryCatch(rc <- Hmisc::rcorr(x, y), error=function(e) { print(e); browser() } )
@@ -68,7 +69,13 @@ cor_with_target <- function(df, omit=NULL, target, withvars=NULL, pmin=NULL, par
 
     #reorder by correlation size if requested
     if (orderbyr == TRUE) {
-      corr_df <- corr_df %>% dplyr::arrange(desc(r))
+      if (!is.null(absrmin)) {
+        # arrange by absolute correlation since that is of interest
+        corr_df <- corr_df %>% dplyr::arrange(desc(abs(r)))
+      } else {
+        corr_df <- corr_df %>% dplyr::arrange(desc(r))
+      }
+
     }
 
     return(corr_df)

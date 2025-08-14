@@ -100,13 +100,13 @@ score_ctq <- function(df, item_prefix="CTQ_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$CTQ_emo_abuse, "alpha") <- psych::alpha(df[,emo_abuse_items],max=100,warnings = F)$total
-    attr(df$CTQ_phys_abuse, "alpha") <- psych::alpha(df[,phys_abuse_items],max=100,warnings = F)$total
-    attr(df$CTQ_sex_abuse, "alpha") <- psych::alpha(df[,sex_abuse_items],max=100,warnings = F)$total
-    attr(df$CTQ_emo_neglect, "alpha") <- psych::alpha(df[,emo_neglect_items],max=100,warnings = F)$total
-    attr(df$CTQ_phys_neglect, "alpha") <- psych::alpha(df[,phys_neglect_items],max=100,warnings = F)$total
-    attr(df$CTQ_total, "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)$total
-    attr(df$CTQ_denial, "alpha") <- psych::alpha(df[,denial_items],max=100,warnings = F)$total
+    attr(df$CTQ_emo_abuse, "alpha") <- psych::alpha(df[,emo_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_phys_abuse, "alpha") <- psych::alpha(df[,phys_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_sex_abuse, "alpha") <- psych::alpha(df[,sex_abuse_items],max=100,warnings = F)
+    attr(df$CTQ_emo_neglect, "alpha") <- psych::alpha(df[,emo_neglect_items],max=100,warnings = F)
+    attr(df$CTQ_phys_neglect, "alpha") <- psych::alpha(df[,phys_neglect_items],max=100,warnings = F)
+    attr(df$CTQ_total, "alpha") <- psych::alpha(df[,total_items],max=100,warnings = F)
+    attr(df$CTQ_denial, "alpha") <- psych::alpha(df[,denial_items],max=100,warnings = F)
   }
 
   #drop reverse codes and item-level data

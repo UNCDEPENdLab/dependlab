@@ -148,26 +148,26 @@ score_bfi <- function(df, item_prefix="BFI_", max_impute=0.2, drop_items=FALSE,
 
   #compute alphas
   if (add_alphas) {
-    attr(df$BFI_soci,"alpha") <- psych::alpha(df[,soci_items],max=100,warnings = F)$total
-    attr(df$BFI_assrt,"alpha") <- psych::alpha(df[,assrt_items],max=100,warnings = F)$total
-    attr(df$BFI_enrgy,"alpha") <- psych::alpha(df[,enrgy_items],max=100,warnings = F)$total
-    attr(df$BFI_comp,"alpha") <- psych::alpha(df[,comp_items],max=100,warnings = F)$total
-    attr(df$BFI_respect,"alpha") <- psych::alpha(df[,respect_items],max=100,warnings = F)$total
-    attr(df$BFI_trust,"alpha") <- psych::alpha(df[,trust_items],max=100,warnings = F)$total
-    attr(df$BFI_org,"alpha") <- psych::alpha(df[,org_items],max=100,warnings = F)$total
-    attr(df$BFI_prod,"alpha") <- psych::alpha(df[,prod_items],max=100,warnings = F)$total
-    attr(df$BFI_respon,"alpha") <- psych::alpha(df[,respon_items],max=100,warnings = F)$total
-    attr(df$BFI_anx,"alpha") <- psych::alpha(df[,anx_items],max=100,warnings = F)$total
-    attr(df$BFI_dep,"alpha") <- psych::alpha(df[,dep_items],max=100,warnings = F)$total
-    attr(df$BFI_emo_vol,"alpha") <- psych::alpha(df[,emo_vol_items],max=100,warnings = F)$total
-    attr(df$BFI_int_cur,"alpha") <- psych::alpha(df[,int_cur_items],max=100,warnings = F)$total
-    attr(df$BFI_aes_sens,"alpha") <- psych::alpha(df[,aes_sens_items],max=100,warnings = F)$total
-    attr(df$BFI_creat_imag,"alpha") <- psych::alpha(df[,creat_imag_items],max=100,warnings = F)$total
-    attr(df$BFI_extra,"alpha") <- psych::alpha(df[,extra_items],max=100,warnings = F)$total
-    attr(df$BFI_agree,"alpha") <- psych::alpha(df[,agree_items],max=100,warnings = F)$total
-    attr(df$BFI_cons,"alpha") <- psych::alpha(df[,cons_items],max=100,warnings = F)$total
-    attr(df$BFI_neg_emo,"alpha") <- psych::alpha(df[,neg_emo_items],max=100,warnings = F)$total
-    attr(df$BFI_open_mind,"alpha") <- psych::alpha(df[,open_mind_items],max=100,warnings = F)$total
+    attr(df$BFI_soci,"alpha") <- psych::alpha(df[,soci_items],max=100,warnings = F)
+    attr(df$BFI_assrt,"alpha") <- psych::alpha(df[,assrt_items],max=100,warnings = F)
+    attr(df$BFI_enrgy,"alpha") <- psych::alpha(df[,enrgy_items],max=100,warnings = F)
+    attr(df$BFI_comp,"alpha") <- psych::alpha(df[,comp_items],max=100,warnings = F)
+    attr(df$BFI_respect,"alpha") <- psych::alpha(df[,respect_items],max=100,warnings = F)
+    attr(df$BFI_trust,"alpha") <- psych::alpha(df[,trust_items],max=100,warnings = F)
+    attr(df$BFI_org,"alpha") <- psych::alpha(df[,org_items],max=100,warnings = F)
+    attr(df$BFI_prod,"alpha") <- psych::alpha(df[,prod_items],max=100,warnings = F)
+    attr(df$BFI_respon,"alpha") <- psych::alpha(df[,respon_items],max=100,warnings = F)
+    attr(df$BFI_anx,"alpha") <- psych::alpha(df[,anx_items],max=100,warnings = F)
+    attr(df$BFI_dep,"alpha") <- psych::alpha(df[,dep_items],max=100,warnings = F)
+    attr(df$BFI_emo_vol,"alpha") <- psych::alpha(df[,emo_vol_items],max=100,warnings = F)
+    attr(df$BFI_int_cur,"alpha") <- psych::alpha(df[,int_cur_items],max=100,warnings = F)
+    attr(df$BFI_aes_sens,"alpha") <- psych::alpha(df[,aes_sens_items],max=100,warnings = F)
+    attr(df$BFI_creat_imag,"alpha") <- psych::alpha(df[,creat_imag_items],max=100,warnings = F)
+    attr(df$BFI_extra,"alpha") <- psych::alpha(df[,extra_items],max=100,warnings = F)
+    attr(df$BFI_agree,"alpha") <- psych::alpha(df[,agree_items],max=100,warnings = F)
+    attr(df$BFI_cons,"alpha") <- psych::alpha(df[,cons_items],max=100,warnings = F)
+    attr(df$BFI_neg_emo,"alpha") <- psych::alpha(df[,neg_emo_items],max=100,warnings = F)
+    attr(df$BFI_open_mind,"alpha") <- psych::alpha(df[,open_mind_items],max=100,warnings = F)
   }
 
   #drop reverse codes and item-level data

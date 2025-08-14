@@ -68,9 +68,7 @@
 #' @importFrom parallel mcmapply
 #'
 #' @export
-
 gmcmapply <- function(mvars, FUN, SIMPLIFY = TRUE, mc.cores = 1, ...){
-  require(parallel)
 
   FUN <- match.fun(FUN)
   funArgs <- formals(FUN)[which(names(formals(FUN)) != "...")] # allow for default args to carry over from FUN.
