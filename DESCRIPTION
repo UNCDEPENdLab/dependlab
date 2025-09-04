@@ -18,6 +18,7 @@ Depends:
 Imports:
     cabinets,
     car,
+    coda,
     data.table,
     dplyr,
     flextable,
