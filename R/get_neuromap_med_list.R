@@ -100,73 +100,56 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
     msg_done = "Qualtrics data downloaded"
     )
 
-  # function for matching information
-  match_med <- function(in_med_name, col = "med_class", is_exact_match = F) {
+  # reference tables for med matching
+  med_names <- med_info %>%
+    select(med_name, id) %>%
+    transmute(id = id, ref_med_name = gsub("[aeiouy]", "_", med_name))
+  nmax <- max(stringr::str_count(med_info$alt_names, "\\,"), na.rm = TRUE) + 1
+  alt_med_names <- med_info %>%
+    select(alt_names, id) %>%
+    mutate(alt_names = gsub("\\, ", "\\,", alt_names)) %>%
+    separate(alt_names, into = paste0("alt", 1:nmax), sep = "\\,", fill = "right") %>%
+    gather("alt", "alt_names", - id) %>%
+    select(id, alt_names) %>%
+    na.omit() %>%
+    arrange(id) %>%
+    transmute(id = id, ref_alt_names = gsub("[aeiouy]", "_", alt_names))
 
-    out <- c()
+  # function for matching information
+  match_med <- function(in_med_name, col = "med_class", flag = FALSE) {
 
     this_col <- med_info %>% select(all_of(col), id)
 
-    med_names <- med_info %>%
-      select(med_name, id) %>%
-      transmute(id = id, ref_med_name = gsub("[aeiouy]", "_", med_name))
-
-    nmax <- max(stringr::str_count(med_info$alt_names, "\\,"), na.rm = TRUE) + 1
-    alt_med_names <- med_info %>%
-      select(alt_names, id) %>%
-      mutate(alt_names = gsub("\\, ", "\\,", alt_names)) %>%
-      separate(alt_names, into = paste0("alt", 1:nmax), sep = "\\,", fill = "right") %>%
-      gather("alt", "alt_names", - id) %>%
-      select(id, alt_names) %>%
-      na.omit() %>%
-      arrange(id) %>%
-      transmute(id = id, ref_alt_names = gsub("[aeiouy]", "_", alt_names))
-
-    for (m in seq_along(in_med_name)) {
-
-      # check for a match
-      match_id <- with(med_names, id[stringr::str_like(in_med_name[m], ref_med_name)])
-
-      # if no match, check alternative names
-      if (length(match_id) == 0) {
-        s_match_id <- with(alt_med_names, id[stringr::str_like(in_med_name[m], ref_alt_names)])
-
-        if (length(s_match_id) > 0) {
-          if (isTRUE(is_exact_match)) {
-            out[m] <- FALSE
-          } else {
-            i <- which(this_col$id == s_match_id)
-            out[m] <- as.character(this_col[i, 1])
-          }
-        } else {
-          if (isTRUE(is_exact_match)) {
-            out[m] <- TRUE
-            next
-          } else {
-            # if no alternative names work, try breaking up the original into separate words
-            words <- c(stringr::str_extract_all(in_med_name[m], "\\w+", simplify = TRUE))
-            check <- sapply(words, function(w) any(stringr::str_like(w, med_names$ref_med_name)))
-            if (any(check)) {
-              j <- min(which(check))
-              match_id <- with(med_names, id[stringr::str_like(words[j], ref_med_name)])
-            } else {
-              out[m] <- NA
-              next
-            }
-          }
-        }
+    out <- sapply(seq_along(in_med_name), function(m){
+      # exact match
+      exact_match_id <- med_names %>%
+        filter(stringr::str_like(in_med_name[m], ref_med_name)) %>%
+        pull(id)
+      if (length(exact_match_id) > 0) {
+        med <- ifelse(flag, FALSE, this_col %>%
+                         filter(id == exact_match_id) %>% pull(col))
+        return(med)
       }
-
-      if (isTRUE(is_exact_match)) {
-        out[m] <- FALSE
+      # alternative match
+      alt_match_id <- alt_med_names %>%
+        filter(stringr::str_like(in_med_name[m], ref_alt_names)) %>%
+        pull(id)
+      if (length(alt_match_id) > 0) {
+        med <- ifelse(flag, TRUE, this_col %>%
+                        filter(id == alt_match_id) %>% pull(col))
+        return(med)
+      }
+      # last try -- break up original into separate words
+      words <- c(stringr::str_extract_all(in_med_name[m], "\\w+", simplify = TRUE))
+      words <- words[nzchar(words)]
+      if (length(words) > 1) {
+        med <- match_med(words, col = col, flag = flag)
+        return(med[1])
       } else {
-        i <- which(this_col$id == match_id)
-        out[m] <- as.character(this_col[i, 1])
+        return(NA)
       }
-    }
-
+    })
     return(out)
-
   }
 
   cli::cli_process_start(
@@ -178,7 +161,7 @@ get_neuromap_med_list <- function(med_info_path = "Studies/NeuroMAP/Data/Clinica
       med_name = match_med(med_raw, col = "med_name"),
       med_class = match_med(med_raw, col = "med_class"),
       med_psych = match_med(med_raw, col = "med_psych"),
-      name_flag = match_med(med_raw, is_exact_match = TRUE)
+      name_flag = match_med(med_raw, flag = TRUE)
     )
 
   cli::cli_process_done(
